@@ -3,7 +3,6 @@ package com.amg.rubik;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
@@ -45,13 +44,23 @@ public class RubiksCube {
     class Rotation {
         Axis mAxis;
         Direction mDirection;
-        int mFaceIndex;
+
+        /**
+         * To support simultaneous rotating of multiple faces in higher order cubes
+        * */
+        int mStartFace;
+        int mFaceCount;
     }
 
+    private int DIMENSION = 3;
     private GLSurfaceView mGlView = null;
 
-    public RubiksCube(Context context) {
+    public RubiksCube(Context context, int size) {
         mGlView = new RubikGLSurfaceView(context);
+        /*
+        TODO: remove this hard coding once generic cubes are implemented.
+        * */
+        DIMENSION = 3; //size
         cube();
     }
 
@@ -63,16 +72,9 @@ public class RubiksCube {
     ArrayList<Square> mLeftSquares;
     ArrayList<Square> mRightSquares;
 
-    ArrayList<Piece> mFrontFace;
-    ArrayList<Piece> mBackFace;
-    ArrayList<Piece> mTopFace;
-    ArrayList<Piece> mLeftFace;
-    ArrayList<Piece> mRightFace;
-    ArrayList<Piece> mBottomFace;
-
-    ArrayList<Piece> mYZcenter;
-    ArrayList<Piece> mXYcenter;
-    ArrayList<Piece> mZXcenter;
+    ArrayList<ArrayList<Piece>> mXaxisFaceList;
+    ArrayList<ArrayList<Piece>> mYaxisFaceList;
+    ArrayList<ArrayList<Piece>> mZaxisFaceList;
 
     private void cube()
     {
@@ -85,16 +87,11 @@ public class RubiksCube {
         mRightSquares = new ArrayList<>();
         createAllSquares();
 
-        mFrontFace = new ArrayList<>();
-        mTopFace = new ArrayList<>();
-        mLeftFace = new ArrayList<>();
-        mRightFace = new ArrayList<>();
-        mBottomFace = new ArrayList<>();
-        mBackFace = new ArrayList<>();
-        mXYcenter = new ArrayList<>();
-        mZXcenter = new ArrayList<>();
-        mYZcenter = new ArrayList<>();
-        createFaces();
+        mXaxisFaceList = new ArrayList<>(DIMENSION);
+        mYaxisFaceList = new ArrayList<>(DIMENSION);
+        mZaxisFaceList = new ArrayList<>(DIMENSION);
+
+        createFaces3x3();
     }
 
     private void createAllSquares()
@@ -107,8 +104,31 @@ public class RubiksCube {
         createBottomSquares(Square.YELLOW);
     }
 
-    private void createFaces()
-    {
+    /**
+     * Create pieces from squares and store them in faces
+     * TODO: This should be generic (instead of being 3x3 specific)
+     * */
+    private void createFaces3x3() {
+        ArrayList<Piece> frontFace;
+        ArrayList<Piece> backFace;
+        ArrayList<Piece> topFace;
+        ArrayList<Piece> leftFace;
+        ArrayList<Piece> rightFace;
+        ArrayList<Piece> bottomFace;
+        ArrayList<Piece> centerYZ;
+        ArrayList<Piece> centerXY;
+        ArrayList<Piece> centerZX;
+
+        frontFace = new ArrayList<>();
+        topFace = new ArrayList<>();
+        leftFace = new ArrayList<>();
+        rightFace = new ArrayList<>();
+        bottomFace = new ArrayList<>();
+        backFace = new ArrayList<>();
+        centerXY = new ArrayList<>();
+        centerZX = new ArrayList<>();
+        centerYZ = new ArrayList<>();
+
         Piece frontTop_0 = new Piece(Piece.PieceType.CORNER);
         frontTop_0.addSquare(mFrontSquares.get(0));
         frontTop_0.addSquare(mLeftSquares.get(2));
@@ -147,15 +167,15 @@ public class RubiksCube {
         frontBottom_2.addSquare(mRightSquares.get(6));
         frontBottom_2.addSquare(mBottomSquares.get(2));
 
-        mFrontFace.add(frontTop_0);
-        mFrontFace.add(frontTop_1);
-        mFrontFace.add(frontTop_2);
-        mFrontFace.add(frontMid_0);
-        mFrontFace.add(frontMid_1);
-        mFrontFace.add(frontMid_2);
-        mFrontFace.add(frontBottom_0);
-        mFrontFace.add(frontBottom_1);
-        mFrontFace.add(frontBottom_2);
+        frontFace.add(frontTop_0);
+        frontFace.add(frontTop_1);
+        frontFace.add(frontTop_2);
+        frontFace.add(frontMid_0);
+        frontFace.add(frontMid_1);
+        frontFace.add(frontMid_2);
+        frontFace.add(frontBottom_0);
+        frontFace.add(frontBottom_1);
+        frontFace.add(frontBottom_2);
 
         Piece rightTop_0 = frontTop_2;
         Piece rightTop_1 = new Piece(Piece.PieceType.EDGE);
@@ -183,15 +203,15 @@ public class RubiksCube {
         rightBottom_2.addSquare(mBottomSquares.get(8));
         rightBottom_2.addSquare(mBackSquares.get(6));
 
-        mRightFace.add(rightTop_0);
-        mRightFace.add(rightTop_1);
-        mRightFace.add(rightTop_2);
-        mRightFace.add(rightMid_0);
-        mRightFace.add(rightMid_1);
-        mRightFace.add(rightMid_2);
-        mRightFace.add(rightBottom_0);
-        mRightFace.add(rightBottom_1);
-        mRightFace.add(rightBottom_2);
+        rightFace.add(rightTop_0);
+        rightFace.add(rightTop_1);
+        rightFace.add(rightTop_2);
+        rightFace.add(rightMid_0);
+        rightFace.add(rightMid_1);
+        rightFace.add(rightMid_2);
+        rightFace.add(rightBottom_0);
+        rightFace.add(rightBottom_1);
+        rightFace.add(rightBottom_2);
 
         Piece leftTop_0 = new Piece(Piece.PieceType.CORNER);
         leftTop_0.addSquare(mLeftSquares.get(0));
@@ -222,15 +242,15 @@ public class RubiksCube {
 
         Piece leftBottom_2 = frontBottom_0;
 
-        mLeftFace.add(leftTop_0);
-        mLeftFace.add(leftTop_1);
-        mLeftFace.add(leftTop_2);
-        mLeftFace.add(leftMid_0);
-        mLeftFace.add(leftMid_1);
-        mLeftFace.add(leftMid_2);
-        mLeftFace.add(leftBottom_0);
-        mLeftFace.add(leftBottom_1);
-        mLeftFace.add(leftBottom_2);
+        leftFace.add(leftTop_0);
+        leftFace.add(leftTop_1);
+        leftFace.add(leftTop_2);
+        leftFace.add(leftMid_0);
+        leftFace.add(leftMid_1);
+        leftFace.add(leftMid_2);
+        leftFace.add(leftBottom_0);
+        leftFace.add(leftBottom_1);
+        leftFace.add(leftBottom_2);
 
         Piece topFar_0 = leftTop_0;
         Piece topFar_1 = new Piece(Piece.PieceType.EDGE);
@@ -244,15 +264,15 @@ public class RubiksCube {
         Piece topNear_1 = frontTop_1;
         Piece topNear_2 = frontTop_2;
 
-        mTopFace.add(topFar_0);
-        mTopFace.add(topFar_1);
-        mTopFace.add(topFar_2);
-        mTopFace.add(topMid_0);
-        mTopFace.add(topMid_1);
-        mTopFace.add(topMid_2);
-        mTopFace.add(topNear_0);
-        mTopFace.add(topNear_1);
-        mTopFace.add(topNear_2);
+        topFace.add(topFar_0);
+        topFace.add(topFar_1);
+        topFace.add(topFar_2);
+        topFace.add(topMid_0);
+        topFace.add(topMid_1);
+        topFace.add(topMid_2);
+        topFace.add(topNear_0);
+        topFace.add(topNear_1);
+        topFace.add(topNear_2);
 
         Piece bottomNear_0 = frontBottom_0;
         Piece bottomNear_1 = frontBottom_1;
@@ -267,15 +287,15 @@ public class RubiksCube {
         bottomFar_1.addSquare(mBackSquares.get(7));
         Piece bottomFar_2 = rightBottom_2;
 
-        mBottomFace.add(bottomNear_0);
-        mBottomFace.add(bottomNear_1);
-        mBottomFace.add(bottomNear_2);
-        mBottomFace.add(bottomFar_0);
-        mBottomFace.add(bottomFar_1);
-        mBottomFace.add(bottomFar_2);
-        mBottomFace.add(bottomMid_0);
-        mBottomFace.add(bottomMid_1);
-        mBottomFace.add(bottomMid_2);
+        bottomFace.add(bottomNear_0);
+        bottomFace.add(bottomNear_1);
+        bottomFace.add(bottomNear_2);
+        bottomFace.add(bottomFar_0);
+        bottomFace.add(bottomFar_1);
+        bottomFace.add(bottomFar_2);
+        bottomFace.add(bottomMid_0);
+        bottomFace.add(bottomMid_1);
+        bottomFace.add(bottomMid_2);
 
         Piece backTop_0 = rightTop_2;
         Piece backTop_1 = topFar_1;
@@ -287,42 +307,54 @@ public class RubiksCube {
         Piece backBottom_1 = bottomFar_1;
         Piece backBottom_2 = bottomFar_0;
 
-        mBackFace.add(backTop_0);
-        mBackFace.add(backTop_1);
-        mBackFace.add(backTop_2);
-        mBackFace.add(backMid_0);
-        mBackFace.add(backMid_1);
-        mBackFace.add(backMid_2);
-        mBackFace.add(backBottom_0);
-        mBackFace.add(backBottom_1);
-        mBackFace.add(backBottom_2);
+        backFace.add(backTop_0);
+        backFace.add(backTop_1);
+        backFace.add(backTop_2);
+        backFace.add(backMid_0);
+        backFace.add(backMid_1);
+        backFace.add(backMid_2);
+        backFace.add(backBottom_0);
+        backFace.add(backBottom_1);
+        backFace.add(backBottom_2);
 
-        mYZcenter.add(frontMid_1);
-        mYZcenter.add(frontBottom_1);
-        mYZcenter.add(bottomMid_1);
-        mYZcenter.add(bottomFar_1);
-        mYZcenter.add(backMid_1);
-        mYZcenter.add(backTop_1);
-        mYZcenter.add(topMid_1);
-        mYZcenter.add(topNear_1);
+        centerYZ.add(frontMid_1);
+        centerYZ.add(frontBottom_1);
+        centerYZ.add(bottomMid_1);
+        centerYZ.add(bottomFar_1);
+        centerYZ.add(backMid_1);
+        centerYZ.add(backTop_1);
+        centerYZ.add(topMid_1);
+        centerYZ.add(topNear_1);
 
-        mXYcenter.add(topMid_0);
-        mXYcenter.add(topMid_1);
-        mXYcenter.add(topMid_2);
-        mXYcenter.add(rightMid_1);
-        mXYcenter.add(rightBottom_1);
-        mXYcenter.add(bottomMid_1);
-        mXYcenter.add(bottomMid_0);
-        mXYcenter.add(leftMid_1);
+        centerXY.add(topMid_0);
+        centerXY.add(topMid_1);
+        centerXY.add(topMid_2);
+        centerXY.add(rightMid_1);
+        centerXY.add(rightBottom_1);
+        centerXY.add(bottomMid_1);
+        centerXY.add(bottomMid_0);
+        centerXY.add(leftMid_1);
 
-        mZXcenter.add(frontMid_0);
-        mZXcenter.add(frontMid_1);
-        mZXcenter.add(frontMid_2);
-        mZXcenter.add(rightMid_1);
-        mZXcenter.add(rightMid_2);
-        mZXcenter.add(backMid_1);
-        mZXcenter.add(backMid_2);
-        mZXcenter.add(leftMid_1);
+        centerZX.add(frontMid_0);
+        centerZX.add(frontMid_1);
+        centerZX.add(frontMid_2);
+        centerZX.add(rightMid_1);
+        centerZX.add(rightMid_2);
+        centerZX.add(backMid_1);
+        centerZX.add(backMid_2);
+        centerZX.add(leftMid_1);
+
+        mXaxisFaceList.add(leftFace);
+        mXaxisFaceList.add(centerYZ);
+        mXaxisFaceList.add(rightFace);
+
+        mZaxisFaceList.add(backFace);
+        mZaxisFaceList.add(centerXY);
+        mZaxisFaceList.add(frontFace);
+
+        mYaxisFaceList.add(bottomFace);
+        mYaxisFaceList.add(centerZX);
+        mYaxisFaceList.add(topFace);
     }
 
     /**
@@ -333,9 +365,9 @@ public class RubiksCube {
      * */
     private void createLeftSquares(int color)
     {
-        float startX = 0 - SQ_SIZE * 1.5f - GAP * 2;
-        float startY = (SQ_SIZE + GAP) * 1.5f;
-        float startZ = 0 - (SQ_SIZE + GAP) * 1.5f;
+        float startX = 0 - SQ_SIZE * (DIMENSION/2.0f) - GAP * (DIMENSION - 1);
+        float startY = (SQ_SIZE + GAP) * (DIMENSION/2.0f);
+        float startZ = 0 - (SQ_SIZE + GAP) * (DIMENSION/2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
@@ -344,13 +376,13 @@ public class RubiksCube {
                   startX,  startY, startZ + SQ_SIZE
             };
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < DIMENSION; i++) {
             vertices[1] = startY - i * (SQ_SIZE + GAP);
             vertices[4] = vertices[1] - SQ_SIZE;
             vertices[7] = vertices[1] - SQ_SIZE;
             vertices[10] = vertices[1];
 
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < DIMENSION; j++) {
                 vertices[2] = startZ + j * (SQ_SIZE + GAP);
                 vertices[5] = vertices[2];
                 vertices[8] = vertices[2] + SQ_SIZE;
@@ -370,9 +402,9 @@ public class RubiksCube {
      * */
     private void createRightSquares(int color)
     {
-        float startX = SQ_SIZE * 1.5f + GAP * 2;
-        float startY = (SQ_SIZE + GAP) * 1.5f;
-        float startZ = (SQ_SIZE + GAP) * 1.5f;
+        float startX = SQ_SIZE * (DIMENSION/2.0f) + GAP * (DIMENSION-1);
+        float startY = (SQ_SIZE + GAP) * (DIMENSION/2.0f);
+        float startZ = (SQ_SIZE + GAP) * (DIMENSION/2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
@@ -381,13 +413,13 @@ public class RubiksCube {
                   startX,  startY, startZ - SQ_SIZE
             };
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < DIMENSION; i++) {
             vertices[1] = startY - i * (SQ_SIZE + GAP);
             vertices[4] = vertices[1] - SQ_SIZE;
             vertices[7] = vertices[1] - SQ_SIZE;
             vertices[10] = vertices[1];
 
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < DIMENSION; j++) {
                 vertices[2] = startZ - j * (SQ_SIZE + GAP);
                 vertices[5] = vertices[2];
                 vertices[8] = vertices[2] - SQ_SIZE;
@@ -407,9 +439,9 @@ public class RubiksCube {
      * */
     private void createTopSquares(int color)
     {
-        float startX = - (SQ_SIZE + GAP) * 1.5f;
-        float startY = (SQ_SIZE + GAP) * 1.5f;
-        float startZ = - (SQ_SIZE + GAP) * 1.5f;
+        float startX = - (SQ_SIZE + GAP) * (DIMENSION/2.0f);
+        float startY = (SQ_SIZE + GAP) * (DIMENSION/2.0f);
+        float startZ = - (SQ_SIZE + GAP) * (DIMENSION/2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
@@ -418,13 +450,13 @@ public class RubiksCube {
                   startX + SQ_SIZE,  startY, startZ
             };
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < DIMENSION; i++) {
             vertices[2] = startZ + i * (SQ_SIZE + GAP);
             vertices[5] = vertices[2] + SQ_SIZE;
             vertices[8] = vertices[2] + SQ_SIZE;
             vertices[11] = vertices[2];
 
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < DIMENSION; j++) {
                 vertices[0] = startX + j * (SQ_SIZE + GAP);
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] + SQ_SIZE;
@@ -444,9 +476,9 @@ public class RubiksCube {
      * */
     private void createBottomSquares(int color)
     {
-        float startX = - (SQ_SIZE + GAP) * 1.5f;
-        float startY = - (SQ_SIZE + GAP) * 1.5f;
-        float startZ = (SQ_SIZE + GAP) * 1.5f;
+        float startX = - (SQ_SIZE + GAP) * (DIMENSION/2.0f);
+        float startY = - (SQ_SIZE + GAP) * (DIMENSION/2.0f);
+        float startZ = (SQ_SIZE + GAP) * (DIMENSION/2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
@@ -455,13 +487,13 @@ public class RubiksCube {
                   startX + SQ_SIZE,  startY, startZ
             };
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < DIMENSION; i++) {
             vertices[2] = startZ - i * (SQ_SIZE + GAP);
             vertices[5] = vertices[2] - SQ_SIZE;
             vertices[8] = vertices[2] - SQ_SIZE;
             vertices[11] = vertices[2];
 
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < DIMENSION; j++) {
                 vertices[0] = startX + j * (SQ_SIZE + GAP);
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] + SQ_SIZE;
@@ -481,9 +513,9 @@ public class RubiksCube {
      * */
     private void createFrontSquares(int color)
     {
-        float startX = 0 - (SQ_SIZE + GAP) * 1.5f;
-        float startY = (SQ_SIZE + GAP) * 1.5f;
-        float startZ = (SQ_SIZE + GAP) * 1.5f;
+        float startX = 0 - (SQ_SIZE + GAP) * (DIMENSION/2.0f);
+        float startY = (SQ_SIZE + GAP) * (DIMENSION/2.0f);
+        float startZ = (SQ_SIZE + GAP) * (DIMENSION/2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
@@ -492,13 +524,13 @@ public class RubiksCube {
                   startX + SQ_SIZE,  startY, startZ
             };
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < DIMENSION; i++) {
             vertices[1] = startY - i * (SQ_SIZE + GAP);
             vertices[4] = vertices[1] - SQ_SIZE;
             vertices[7] = vertices[1] - SQ_SIZE;
             vertices[10] = vertices[1];
 
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < DIMENSION; j++) {
                 vertices[0] = startX + j * (SQ_SIZE + GAP);
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] + SQ_SIZE;
@@ -518,9 +550,9 @@ public class RubiksCube {
      * */
     private void createBackSquares(int color)
     {
-        float startX = (SQ_SIZE + GAP) * 1.5f;
-        float startY = (SQ_SIZE + GAP) * 1.5f;
-        float startZ = - (SQ_SIZE + GAP) * 1.5f;
+        float startX = (SQ_SIZE + GAP) * (DIMENSION/2.0f);
+        float startY = (SQ_SIZE + GAP) * (DIMENSION/2.0f);
+        float startZ = - (SQ_SIZE + GAP) * (DIMENSION/2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
@@ -529,13 +561,13 @@ public class RubiksCube {
                   startX - SQ_SIZE,  startY, startZ
             };
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < DIMENSION; i++) {
             vertices[1] = startY - i * (SQ_SIZE + GAP);
             vertices[4] = vertices[1] - SQ_SIZE;
             vertices[7] = vertices[1] - SQ_SIZE;
             vertices[10] = vertices[1];
 
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < DIMENSION; j++) {
                 vertices[0] = startX - j * (SQ_SIZE + GAP);
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] - SQ_SIZE;
@@ -573,19 +605,17 @@ public class RubiksCube {
         // for the matrix multiplication product to be correct.
         Matrix.multiplyMM(scratch, 0, mvpMatrix, 0, rotationMatrix, 0);
 
-        for (Piece p: mBottomFace) {
+        for (Piece p: mYaxisFaceList.get(0)) {
             for (Square sq : p.mSquares) {
                 sq.draw(mvpMatrix);
             }
         }
-
-        for (Piece p: mZXcenter) {
+        for (Piece p: mYaxisFaceList.get(1)) {
             for (Square sq : p.mSquares) {
                 sq.draw(mvpMatrix);
             }
         }
-
-        for (Piece p: mTopFace) {
+        for (Piece p: mYaxisFaceList.get(2)) {
             for (Square sq : p.mSquares) {
                 sq.draw(scratch);
             }
