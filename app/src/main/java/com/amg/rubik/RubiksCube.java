@@ -31,6 +31,23 @@ public class RubiksCube {
     static final float SQ_SIZE = 0.15f;
     static final float GAP = 0.005f;
 
+    enum Axis {
+        X_AXIS,
+        Y_AXIS,
+        Z_AXIS
+    };
+
+    enum Direction {
+        CLOCKWISE,
+        COUNTER_CLOCKWISE
+    }
+
+    class Rotation {
+        Axis mAxis;
+        Direction mDirection;
+        int mFaceIndex;
+    }
+
     private GLSurfaceView mGlView = null;
 
     public RubiksCube(Context context) {
@@ -542,7 +559,9 @@ public class RubiksCube {
         mGlView.onPause();
     }
 
-    private void draw(float[] mvpMatrix) {
+    protected void draw(float[] mvpMatrix) {
+        Square.startDrawing();
+
         float[] scratch = new float[16];
         float[] rotationMatrix = new float[16];
         long time = SystemClock.uptimeMillis() % 4000L;
@@ -571,6 +590,8 @@ public class RubiksCube {
                 sq.draw(scratch);
             }
         }
+
+        Square.finishDrawing();
     }
 
     class RubikGLSurfaceView extends GLSurfaceView {
@@ -579,24 +600,8 @@ public class RubiksCube {
             super(context);
             setEGLContextClientVersion(2);
             setPreserveEGLContextOnPause(true);
-            setRenderer(new RubikRenderer());
+            setRenderer(new RubikRenderer(RubiksCube.this));
         }
 
-    }
-
-    class RubikRenderer extends GLRenderer {
-
-        @Override
-        public void onCreate(int width, int height, boolean contextLost) {
-            GLES20.glClearColor(0f, 0f, 0f, 1f);
-        }
-
-        @Override
-        public void onDrawFrame(boolean firstDraw) {
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT
-                    | GLES20.GL_DEPTH_BUFFER_BIT);
-
-            RubiksCube.this.draw(mMVPMatrix);
-        }
     }
 }
