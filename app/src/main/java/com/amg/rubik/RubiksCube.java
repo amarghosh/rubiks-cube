@@ -63,6 +63,16 @@ public class RubiksCube {
     private ArrayList<ArrayList<Piece>> mZaxisFaceList;
 
     private Rotation mRotation;
+    private int mCurrentIndex = 0;
+
+    private Rotation[] algo = new Rotation[4];
+
+    void populateAlgo() {
+        algo[0] = new Rotation(X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
+        algo[1] = new Rotation(Y_AXIS, Direction.CLOCKWISE, 0);
+        algo[2] = new Rotation(X_AXIS, Direction.CLOCKWISE, 2);
+        algo[3] = new Rotation(Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
+    }
 
     public RubiksCube(Context context, int size) {
         /*
@@ -70,7 +80,8 @@ public class RubiksCube {
         * */
         DIMENSION = 3; //size
         cube();
-        mRotation = new Rotation();
+        populateAlgo();
+        mRotation = algo[0].duplicate();
         mGlView = new RubikGLSurfaceView(context);
         mRotation.status = true;
     }
@@ -123,6 +134,11 @@ public class RubiksCube {
         }
     }
 
+    /**
+     * So far we changed only the orientation of the pieces. This function updates
+     * the colors of squares according to the Rotation in progress.
+     * TODO: Add proper comments.
+     * */
     void finishRotation() {
         int face = mRotation.startFace;
         ArrayList<Square> faceSquares = null;
@@ -174,20 +190,21 @@ public class RubiksCube {
         }
         rotateColors(squareList, mRotation.direction);
 
-        if (true) {
-            if (face == DIMENSION - 1) {
-                // Rotated a face that is on the positive edge of the
-                // corresponding axis: front, top or right.
-                // As squares are stored in clockwise order, rotation is straightforward.
-                rotateFaceColors(faceSquares, mRotation.direction);
-            } else if (face == 0) {
-                rotateFaceColors(faceSquares,
-                        mRotation.direction == Direction.CLOCKWISE ?
-                                Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE);
-            }
+        if (face == DIMENSION - 1) {
+            // Rotate a face that is on the positive edge of the
+            // corresponding axis (front, top or right).
+            // As squares are stored in clockwise order, rotation is straightforward.
+            rotateFaceColors(faceSquares, mRotation.direction);
+        } else if (face == 0) {
+            rotateFaceColors(faceSquares,
+                    mRotation.direction == Direction.CLOCKWISE ?
+                            Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE);
         }
+
         mRotation.reset();
-        rotateRandom();
+        mCurrentIndex = (mCurrentIndex + 1) % algo.length;
+        mRotation = algo[mCurrentIndex].duplicate();
+        mRotation.status = true;
     }
 
     void rotateFaceColors(ArrayList<Square> squares, Direction direction) {
@@ -867,6 +884,19 @@ public class RubiksCube {
         Rotation() {
             reset();
         }
+
+        Rotation(int axis, Direction dir, int face) {
+            reset();
+            this.axis = axis;
+            this.direction = dir;
+            this.startFace = face;
+            this.angle = 0;
+        }
+
+        Rotation duplicate() {
+            return new Rotation(axis, direction, startFace);
+        }
+
         void reset() {
             status = false;
             axis = X_AXIS;
