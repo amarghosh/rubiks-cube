@@ -1,11 +1,13 @@
 package com.amg.rubik;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.os.SystemClock;
+import android.util.Log;
 
 /**
  *
@@ -27,54 +29,218 @@ import android.os.SystemClock;
 
 public class RubiksCube {
 
-    static final float SQ_SIZE = 0.15f;
-    static final float GAP = 0.005f;
+    // We don't support skewed cubes yet.
+    private static final int CUBE_SIDES = 4;
 
-    enum Axis {
-        X_AXIS,
-        Y_AXIS,
-        Z_AXIS
-    };
+    public static final int X_AXIS = 0;
+    public static final int Y_AXIS = 1;
+    public static final int Z_AXIS = 2;
 
-    enum Direction {
+    public enum Direction {
         CLOCKWISE,
         COUNTER_CLOCKWISE
     }
 
-    class Rotation {
-        Axis mAxis;
-        Direction mDirection;
+    private static final String tag = "rubik-cube";
 
-        /**
-         * To support simultaneous rotating of multiple faces in higher order cubes
-        * */
-        int mStartFace;
-        int mFaceCount;
-    }
+    private static final float SQ_SIZE = 0.15f;
+    private static final float GAP = 0.005f;
+    private static final float ANGLE_DELTA = 1f;
 
     private int DIMENSION = 3;
     private GLSurfaceView mGlView = null;
 
+    private ArrayList<Square> mAllSquares;
+    private ArrayList<Square> mFrontSquares;
+    private ArrayList<Square> mBackSquares;
+    private ArrayList<Square> mTopSquares;
+    private ArrayList<Square> mBottomSquares;
+    private ArrayList<Square> mLeftSquares;
+    private ArrayList<Square> mRightSquares;
+
+    private ArrayList<ArrayList<Piece>> mXaxisFaceList;
+    private ArrayList<ArrayList<Piece>> mYaxisFaceList;
+    private ArrayList<ArrayList<Piece>> mZaxisFaceList;
+
+    private Rotation mRotation;
+
     public RubiksCube(Context context, int size) {
-        mGlView = new RubikGLSurfaceView(context);
         /*
         TODO: remove this hard coding once generic cubes are implemented.
         * */
         DIMENSION = 3; //size
         cube();
+        mRotation = new Rotation();
+        mGlView = new RubikGLSurfaceView(context);
+        mRotation.status = true;
     }
 
-    ArrayList<Square> mAllSquares;
-    ArrayList<Square> mFrontSquares;
-    ArrayList<Square> mBackSquares;
-    ArrayList<Square> mTopSquares;
-    ArrayList<Square> mBottomSquares;
-    ArrayList<Square> mLeftSquares;
-    ArrayList<Square> mRightSquares;
+    public GLSurfaceView getView() {
+        return mGlView;
+    }
 
-    ArrayList<ArrayList<Piece>> mXaxisFaceList;
-    ArrayList<ArrayList<Piece>> mYaxisFaceList;
-    ArrayList<ArrayList<Piece>> mZaxisFaceList;
+    public void onResume() {
+        mGlView.onResume();
+    }
+
+    public void onPause() {
+        mGlView.onPause();
+    }
+
+    void rotateColors(ArrayList<ArrayList<Square>> squareList, Direction dir) {
+        ArrayList<ArrayList<Square>> workingCopy;
+        ArrayList<Integer> tempColors = new ArrayList<>(DIMENSION);
+        ArrayList<Square> dst;
+        ArrayList<Square> src;
+
+        if (dir == Direction.COUNTER_CLOCKWISE) {
+            // input is in clockwise order
+            workingCopy = squareList;
+        } else {
+            // reverse and rotate
+            workingCopy = new ArrayList<>(DIMENSION);
+            for (int i = 0; i < CUBE_SIDES; i++) {
+                workingCopy.add(squareList.get(CUBE_SIDES - 1 - i));
+            }
+        }
+
+        src = workingCopy.get(0);
+        for (int i = 0; i < DIMENSION; i++) {
+            tempColors.add(src.get(i).mColor);
+        }
+
+        for (int i = 0; i < CUBE_SIDES - 1; i++) {
+            dst = workingCopy.get(i);
+            src = workingCopy.get(i + 1);
+            for (int j = 0; j < DIMENSION; j++) {
+                dst.get(j).mColor = src.get(j).mColor;
+            }
+        }
+
+        dst = workingCopy.get(CUBE_SIDES-1);
+        for (int i = 0; i < DIMENSION; i++) {
+            dst.get(i).mColor = tempColors.get(i);
+        }
+    }
+
+    void finishRotation() {
+        int face = mRotation.startFace;
+        ArrayList<Square> faceSquares = null;
+        ArrayList<ArrayList<Square>> squareList = new ArrayList<>(CUBE_SIDES);
+        for (int i = 0; i < CUBE_SIDES; i++) {
+            squareList.add(new ArrayList<Square>(DIMENSION));
+        }
+
+        switch (mRotation.axis) {
+            case X_AXIS:
+                for (int i = 0; i < DIMENSION; i++) {
+                    squareList.get(0).add(mFrontSquares.get(DIMENSION * i + face));
+                    squareList.get(1).add(mTopSquares.get(DIMENSION * i + face));
+                    squareList.get(2).add(mBackSquares.get((DIMENSION - 1 - i) * DIMENSION + (DIMENSION - 1 - face)));
+                    squareList.get(3).add(mBottomSquares.get(DIMENSION * i + face));
+                }
+                if (face == 0) {
+                    faceSquares = mLeftSquares;
+                } else if (face == DIMENSION - 1) {
+                    faceSquares = mRightSquares;
+                }
+                break;
+            case Y_AXIS:
+                for (int i = 0; i < DIMENSION; i++) {
+                    squareList.get(0).add(mFrontSquares.get((DIMENSION - 1 - face) * DIMENSION + i));
+                    squareList.get(1).add(mLeftSquares.get((DIMENSION - 1 - face) * DIMENSION + i));
+                    squareList.get(2).add(mBackSquares.get((DIMENSION - 1 - face) * DIMENSION + i));
+                    squareList.get(3).add(mRightSquares.get((DIMENSION - 1 - face) * DIMENSION + i));
+                }
+                if (face == 0) {
+                    faceSquares = mBottomSquares;
+                } else if (face == DIMENSION - 1) {
+                    faceSquares = mTopSquares;
+                }
+                break;
+            case Z_AXIS:
+                for (int i = 0; i < DIMENSION; i++) {
+                    squareList.get(0).add(mTopSquares.get(DIMENSION * face + i));
+                    squareList.get(1).add(mRightSquares.get(DIMENSION * i + DIMENSION - 1 - face));
+                    squareList.get(2).add(mBottomSquares.get(DIMENSION * (DIMENSION - 1 - face) + DIMENSION - 1 - i));
+                    squareList.get(3).add(mLeftSquares.get(DIMENSION * (DIMENSION - 1 - i) + face));
+                }
+                if (face == 0) {
+                    faceSquares = mBackSquares;
+                } else if (face == DIMENSION - 1) {
+                    faceSquares = mFrontSquares;
+                }
+                break;
+        }
+        rotateColors(squareList, mRotation.direction);
+
+        if (true) {
+            if (face == DIMENSION - 1) {
+                // Rotated a face that is on the positive edge of the
+                // corresponding axis: front, top or right.
+                // As squares are stored in clockwise order, rotation is straightforward.
+                rotateFaceColors(faceSquares, mRotation.direction);
+            } else if (face == 0) {
+                rotateFaceColors(faceSquares,
+                        mRotation.direction == Direction.CLOCKWISE ?
+                                Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE);
+            }
+        }
+        mRotation.reset();
+        rotateRandom();
+    }
+
+    void rotateFaceColors(ArrayList<Square> squares, Direction direction) {
+        ArrayList<Integer> tempColors = new ArrayList<>(DIMENSION);
+        if (direction == Direction.COUNTER_CLOCKWISE) {
+            for (int i = 0; i < DIMENSION - 1; i++) {
+                tempColors.add(squares.get(i).mColor);
+                squares.get(i).mColor = squares.get(i * DIMENSION + DIMENSION - 1).mColor;
+            }
+
+            for (int i = 0; i < DIMENSION - 1; i++) {
+                squares.get(i * DIMENSION + DIMENSION - 1).mColor =
+                        squares.get(DIMENSION * DIMENSION - 1 - i).mColor;
+            }
+
+            for (int i = 0; i < DIMENSION - 1; i++) {
+                squares.get(DIMENSION * DIMENSION - 1 - i).mColor =
+                        squares.get(DIMENSION * (DIMENSION - 1 - i)).mColor;
+            }
+
+            for (int i = 0; i < DIMENSION - 1; i++) {
+                squares.get(DIMENSION * (DIMENSION - 1 - i)).mColor =
+                        tempColors.get(i);
+            }
+        } else {
+            for (int i = 0; i < DIMENSION - 1; i++) {
+                tempColors.add(squares.get(i).mColor);
+                squares.get(i).mColor = squares.get(DIMENSION * (DIMENSION - 1 - i)).mColor;
+            }
+            for (int i = 0; i < DIMENSION - 1; i++) {
+                squares.get(DIMENSION * (DIMENSION - 1 - i)).mColor =
+                        squares.get(DIMENSION * DIMENSION - 1 - i).mColor;
+            }
+            for (int i = 0; i < DIMENSION - 1; i++) {
+                squares.get(DIMENSION * DIMENSION - 1 - i).mColor =
+                        squares.get(i * DIMENSION + DIMENSION - 1).mColor;
+            }
+            for (int i = 0; i < DIMENSION - 1; i++) {
+                squares.get(i * DIMENSION + DIMENSION - 1).mColor =
+                        tempColors.get(i);
+            }
+        }
+    }
+
+    void rotateRandom() {
+        Random random = new Random();
+        mRotation.setAxis(Math.abs(random.nextInt(3)));
+        mRotation.direction = random.nextBoolean() ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+        mRotation.setStartFace(Math.abs(random.nextInt(DIMENSION)));
+        mRotation.status = true;
+        Log.w(tag, "Next Rotation on axis " + mRotation.axis +
+                " starting at face " + mRotation.startFace);
+    }
 
     private void cube()
     {
@@ -90,8 +256,10 @@ public class RubiksCube {
         mXaxisFaceList = new ArrayList<>(DIMENSION);
         mYaxisFaceList = new ArrayList<>(DIMENSION);
         mZaxisFaceList = new ArrayList<>(DIMENSION);
-
         createFaces3x3();
+    }
+
+    private void createFaces() {
     }
 
     private void createAllSquares()
@@ -579,46 +747,84 @@ public class RubiksCube {
         }
     }
 
-    public GLSurfaceView getView() {
-        return mGlView;
-    }
-
-    public void onResume() {
-        mGlView.onResume();
-    }
-
-    public void onPause() {
-        mGlView.onPause();
+    private void drawCube(float[] matrix) {
+        for (Square sq: mAllSquares) {
+            sq.draw(matrix);
+        }
     }
 
     protected void draw(float[] mvpMatrix) {
+
         Square.startDrawing();
+
+        if (!mRotation.status) {
+            drawCube(mvpMatrix);
+            Square.finishDrawing();
+            return;
+        }
+
+        ArrayList<ArrayList<Piece>> faceList = null;
 
         float[] scratch = new float[16];
         float[] rotationMatrix = new float[16];
-        long time = SystemClock.uptimeMillis() % 4000L;
-        float angle = 0.090f * ((int) time);
-        Matrix.setRotateM(rotationMatrix, 0, angle, 0, 1, 0);
+        float angle = mRotation.angle;
+        float angleX = 0;
+        float angleY = 0;
+        float angleZ = 0;
 
-        // Combine the rotation matrix with the projection and camera view
-        // Note that the mMVPMatrix factor *must be first* in order
-        // for the matrix multiplication product to be correct.
+        switch (mRotation.axis) {
+            case X_AXIS:
+                angleX = 1;
+                faceList = mXaxisFaceList;
+                break;
+            case Y_AXIS:
+                angleY = 1;
+                faceList = mYaxisFaceList;
+                break;
+            case Z_AXIS:
+                angleZ = 1;
+                faceList = mZaxisFaceList;
+                break;
+            default:
+                throw new RuntimeException("What is " + mRotation.axis);
+        }
+
+        Matrix.setRotateM(rotationMatrix, 0, angle, angleX, angleY, angleZ);
         Matrix.multiplyMM(scratch, 0, mvpMatrix, 0, rotationMatrix, 0);
 
-        for (Piece p: mYaxisFaceList.get(0)) {
-            for (Square sq : p.mSquares) {
-                sq.draw(mvpMatrix);
+        for (int i = 0; i < mRotation.startFace; i++) {
+            ArrayList<Piece> pieces = faceList.get(i);
+            for (Piece piece: pieces) {
+                for (Square square: piece.mSquares) {
+                    square.draw(mvpMatrix);
+                }
             }
         }
-        for (Piece p: mYaxisFaceList.get(1)) {
-            for (Square sq : p.mSquares) {
-                sq.draw(mvpMatrix);
+
+        for (int i = 0; i < mRotation.faceCount; i++) {
+            ArrayList<Piece> pieces = faceList.get(mRotation.startFace + i);
+            for (Piece piece: pieces) {
+                for (Square square: piece.mSquares) {
+                    square.draw(scratch);
+                }
             }
         }
-        for (Piece p: mYaxisFaceList.get(2)) {
-            for (Square sq : p.mSquares) {
-                sq.draw(scratch);
+
+        for (int i = mRotation.startFace + mRotation.faceCount; i < DIMENSION; i++) {
+            ArrayList<Piece> pieces = faceList.get(i);
+            for (Piece piece: pieces) {
+                for (Square square: piece.mSquares) {
+                    square.draw(mvpMatrix);
+                }
             }
+        }
+
+        if (Math.abs(mRotation.angle) > 89.9f) {
+            finishRotation();
+        } else if (mRotation.direction == Direction.CLOCKWISE) {
+            mRotation.angle -= ANGLE_DELTA;
+        } else {
+            mRotation.angle += ANGLE_DELTA;
         }
 
         Square.finishDrawing();
@@ -632,6 +838,44 @@ public class RubiksCube {
             setPreserveEGLContextOnPause(true);
             setRenderer(new RubikRenderer(RubiksCube.this));
         }
+    }
+
+    class Rotation {
+        boolean status;
+        int axis;
+
+        public void setAxis(int axis) {
+            if (axis < X_AXIS || axis > Z_AXIS) {
+                throw new InvalidParameterException("Axis " + axis);
+            }
+            this.axis = axis;
+        }
+
+        public void setStartFace(int startFace) {
+            this.startFace = startFace;
+        }
+
+        Direction direction;
+
+        /**
+         * To support simultaneous rotating of multiple faces in higher order cubes
+         * */
+        int startFace;
+        int faceCount;
+        float angle;
+
+        Rotation() {
+            reset();
+        }
+        void reset() {
+            status = false;
+            axis = X_AXIS;
+            direction = Direction.COUNTER_CLOCKWISE;
+            startFace = 2;
+            faceCount = 1;
+            angle = 0;
+        }
 
     }
 }
+

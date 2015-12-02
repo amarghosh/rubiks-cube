@@ -70,7 +70,7 @@ public abstract class GLRenderer implements Renderer {
     public void onDrawFrame(GL10 arg0) {
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0,
-                3, 3, 3f, // eye
+                2, 2, 3f, // eye
                 0f, 0f, 0f, // center
                 0f, 1.0f, 0f // up
             );

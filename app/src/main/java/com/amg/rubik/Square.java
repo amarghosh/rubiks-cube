@@ -40,7 +40,9 @@ public class Square {
         colors[WHITE] = white;
     }
 
-    private int mColor = WHITE;
+    protected int mColor = WHITE;
+
+
 
     // Our vertex buffer.
     private FloatBuffer vertexBuffer;
