@@ -17,5 +17,8 @@ This is an android app for playing with Rubiks cube. It uses OpenGL for drawing 
     - App figures out the solution and shows it to him
     - Wishlist: Capture the cube's colors using the camera
   - Bigger cubes like rubik's revenge etc
-    - Currently, the code is not written with this in mind
+    - The code is written to support bigger cubes, but needs more testing
+    - And I am not familiar with cubes bigger than 4x4 in real life
+  - How about skewed puzzles like 3x3x2 etc?
+    - Current code does not support them
 

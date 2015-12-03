@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
 			return;
 		}
 		
-		mCube = new RubiksCube(this, 3);
+		mCube = new RubiksCube(this, 5);
 		ViewGroup view = (ViewGroup)findViewById(R.id.container);
 		view.addView(mCube.getView());
 	}
