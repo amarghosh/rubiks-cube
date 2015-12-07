@@ -21,4 +21,5 @@ This is an android app for playing with Rubiks cube. It uses OpenGL for drawing 
     - And I am not familiar with cubes bigger than 4x4 in real life
   - How about skewed puzzles like 3x3x2 etc?
     - Current code does not support them
+  - The icon is taken from Wikipedia
 

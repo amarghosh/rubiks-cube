@@ -25,18 +25,18 @@ public class MainActivity extends Activity {
 			Log.w(tag, "mCube is not null in init");
 			return;
 		}
-		
-		mCube = new RubiksCube(this, 5);
+
+		mCube = new RubiksCube(this, 3);
 		ViewGroup view = (ViewGroup)findViewById(R.id.container);
 		view.addView(mCube.getView());
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 		mCube.onResume();
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
