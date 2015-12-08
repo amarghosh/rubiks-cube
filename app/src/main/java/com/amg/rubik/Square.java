@@ -89,7 +89,7 @@ public class Square {
      * */
     public static void startDrawing()
     {
-        PROGRAM = ShaderCache.getProgram();
+        PROGRAM = ShaderCache.getInstance().getProgram();
         GLES20.glUseProgram(PROGRAM);
         POS_HANDLE = GLES20.glGetAttribLocation(PROGRAM, "vPosition");
         GLES20.glEnableVertexAttribArray(POS_HANDLE);
