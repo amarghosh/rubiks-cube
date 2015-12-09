@@ -5,43 +5,48 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 
 public class MainActivity extends Activity {
 
-	private static final String tag = "rubik-main";
+    private static final String tag = "rubik-main";
 
-	private RubiksCube mCube = null;
+    private RubiksCube mCube = null;
+    private RubikGLSurfaceView mRubikView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-		initializeRubikView();
+        initializeRubikView();
     }
 
-	private void initializeRubikView() {
-		if (mCube != null) {
-			Log.w(tag, "mCube is not null in init");
-			return;
-		}
+    private void initializeRubikView() {
+        if (mCube != null) {
+            Log.w(tag, "mCube is not null in init");
+            return;
+        }
 
-		mCube = new RubiksCube(this, 3);
-		ViewGroup view = (ViewGroup)findViewById(R.id.container);
-		view.addView(mCube.getView());
-	}
+        ViewGroup view = (ViewGroup)findViewById(R.id.container);
+        mRubikView = new RubikGLSurfaceView(this);
+        mCube = new RubiksCube(3);
+        mRubikView.setCube(mCube);
+        view.addView(mRubikView);
+    }
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		mCube.onResume();
-	}
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mRubikView.onResume();
+    }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		mCube.onPause();
-	}
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mRubikView.onPause();
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -57,7 +62,7 @@ public class MainActivity extends Activity {
         automatically handle clicks on the Home/Up button, so long
         as you specify a parent activity in AndroidManifest.xml.
         */
-		int id = item.getItemId();
+        int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.author) {

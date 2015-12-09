@@ -4,8 +4,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import android.content.Context;
-import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -29,6 +27,8 @@ import android.util.Log;
 
 public class RubiksCube {
 
+    private static final String tag = "rubik-cube";
+
     // We don't support skewed cubes yet.
     private static final int CUBE_SIDES = 4;
 
@@ -41,14 +41,14 @@ public class RubiksCube {
         COUNTER_CLOCKWISE
     }
 
-    private static final String tag = "rubik-cube";
 
     private static final float SQ_SIZE = 0.15f;
     private static final float GAP = 0.005f;
+
+    // Default value for incrementing angle during rotation
     private static final float ANGLE_DELTA = 2f;
 
     private int mSize = 3;
-    private GLSurfaceView mGlView = null;
 
     private ArrayList<Square> mAllSquares;
     private ArrayList<Square> mFrontSquares;
@@ -65,46 +65,48 @@ public class RubiksCube {
     private Rotation mRotation;
     private int mCurrentIndex = 0;
 
-    private int rotateMode = ROT_RANDOM;
-    private static final int ROT_RANDOM = 0;
-    private static final int ROT_REPEAT = 1;
-    private static final int ROT_ALGO = 2;
 
-    private Rotation[] algo = new Rotation[4];
-
-    void populateAlgo() {
-        algo[0] = new Rotation(X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
-        algo[1] = new Rotation(Y_AXIS, Direction.CLOCKWISE, 0);
-        algo[2] = new Rotation(X_AXIS, Direction.CLOCKWISE, 2);
-        algo[3] = new Rotation(Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
+    enum RotateMode {
+        NONE,
+        RANDOM,
+        ALGORITHM,
+        REPEAT
     }
 
-    public RubiksCube(Context context, int size) {
+    private RotateMode rotateMode = RotateMode.NONE;
+
+    private Rotation[] currentAlgo = new Rotation[4];
+
+    void populateAlgo() {
+        currentAlgo[0] = new Rotation(X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
+        currentAlgo[1] = new Rotation(Y_AXIS, Direction.CLOCKWISE, 0);
+        currentAlgo[2] = new Rotation(X_AXIS, Direction.CLOCKWISE, 2);
+        currentAlgo[3] = new Rotation(Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
+    }
+
+    public RubiksCube(int size) {
         mSize = size;
         cube();
         populateAlgo();
-        if (rotateMode == ROT_ALGO) {
-            mRotation = algo[0].duplicate();
+        if (rotateMode == RotateMode.ALGORITHM) {
+            mRotation = currentAlgo[0].duplicate();
         } else {
             mRotation = new Rotation();
         }
-        mGlView = new RubikGLSurfaceView(context);
+    }
+
+    public void randomize() {
+        rotateMode = RotateMode.RANDOM;
         mRotation.status = true;
     }
 
-    public GLSurfaceView getView() {
-        return mGlView;
+    public void stopRandomize() {
+        rotateMode = RotateMode.NONE;
+        mRotation.reset();
+        finishRotation();
     }
 
-    public void onResume() {
-        mGlView.onResume();
-    }
-
-    public void onPause() {
-        mGlView.onPause();
-    }
-
-    void rotateColors(ArrayList<ArrayList<Square>> squareList, Direction dir) {
+    private void rotateColors(ArrayList<ArrayList<Square>> squareList, Direction dir) {
         ArrayList<ArrayList<Square>> workingCopy;
         ArrayList<Integer> tempColors = new ArrayList<>(mSize);
         ArrayList<Square> dst;
@@ -221,19 +223,22 @@ public class RubiksCube {
         }
 
         switch (rotateMode) {
-            case ROT_ALGO:
-                mCurrentIndex = (mCurrentIndex + 1) % algo.length;
-                mRotation = algo[mCurrentIndex].duplicate();
+            case ALGORITHM:
+                mCurrentIndex = (mCurrentIndex + 1) % currentAlgo.length;
+                mRotation = currentAlgo[mCurrentIndex].duplicate();
                 mRotation.status = true;
                 break;
 
-            case ROT_REPEAT:
+            case REPEAT:
                 repeatRotation();
                 break;
 
-            case ROT_RANDOM:
-            default:
+            case RANDOM:
                 rotateRandom();
+                break;
+
+            default:
+                mRotation.reset();
                 break;
         }
     }
@@ -301,11 +306,19 @@ public class RubiksCube {
         mRotation.setAxis(Math.abs(random.nextInt(3)));
         mRotation.direction = random.nextBoolean() ?
                 Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
-        mRotation.setStartFace(Math.abs(random.nextInt(mSize)));
+
+        // Do not rotate the center piece in case of odd cubes
+        if (mSize % 2 == 1) {
+            int startFace = Math.abs(random.nextInt(mSize - 1));
+            if (startFace >= mSize / 2) {
+                startFace++;
+            }
+            mRotation.setStartFace(startFace);
+        } else {
+            mRotation.setStartFace(Math.abs(random.nextInt(mSize)));
+        }
+        Log.w(tag, "Next rotation " + mRotation);
         mRotation.status = true;
-        Log.w(tag, "Next Rotation on axis " + mRotation.axis +
-                " starting at face " + mRotation.startFace +
-                " facecount " + mRotation.faceCount);
     }
 
     private void cube()
@@ -783,7 +796,8 @@ public class RubiksCube {
 
         Square.startDrawing();
 
-        if (!mRotation.status) {
+        if (rotateMode == RotateMode.NONE ||
+                mRotation.status == false) {
             drawCube(mvpMatrix);
             Square.finishDrawing();
             return;
@@ -847,39 +861,16 @@ public class RubiksCube {
 
         if (Math.abs(mRotation.angle) > 89.9f) {
             finishRotation();
-        } else if (mRotation.direction == Direction.CLOCKWISE) {
-            mRotation.angle -= ANGLE_DELTA;
         } else {
-            mRotation.angle += ANGLE_DELTA;
+            mRotation.increment();
         }
 
         Square.finishDrawing();
     }
 
-    class RubikGLSurfaceView extends GLSurfaceView {
-
-        RubikGLSurfaceView(Context context) {
-            super(context);
-            setEGLContextClientVersion(2);
-            setPreserveEGLContextOnPause(true);
-            setRenderer(new RubikRenderer(RubiksCube.this));
-        }
-    }
-
     class Rotation {
         boolean status;
         int axis;
-
-        public void setAxis(int axis) {
-            if (axis < X_AXIS || axis > Z_AXIS) {
-                throw new InvalidParameterException("Axis " + axis);
-            }
-            this.axis = axis;
-        }
-
-        public void setStartFace(int startFace) {
-            this.startFace = startFace;
-        }
 
         Direction direction;
 
@@ -889,6 +880,7 @@ public class RubiksCube {
         int startFace;
         int faceCount;
         float angle;
+        float angleDelta = ANGLE_DELTA;
 
         Rotation() {
             reset();
@@ -915,5 +907,47 @@ public class RubiksCube {
             angle = 0;
         }
 
+        @Override
+        public String toString() {
+            String axes = "XYZ";
+            return "Axis " + axes.charAt(axis) +
+                    ", direction " + direction +
+                    ", face " + startFace;
+        }
+
+        public void setAxis(int axis) {
+            if (axis < X_AXIS || axis > Z_AXIS) {
+                throw new InvalidParameterException("Axis " + axis);
+            }
+            this.axis = axis;
+        }
+
+        public void setAngleDelta(float angleDelta) {
+            if (angleDelta > 90) {
+                throw new InvalidParameterException("Delta should be less than 90: " + angleDelta);
+            }
+            this.angleDelta = angleDelta;
+        }
+
+        public void setStartFace(int startFace) {
+            if (startFace >= mSize) {
+                throw new InvalidParameterException("StartFace " + startFace);
+            }
+            this.startFace = startFace;
+        }
+
+        void increment() {
+            if (direction == Direction.CLOCKWISE) {
+                angle -= angleDelta;
+                if (angle < -90) {
+                    angle = -90;
+                }
+            } else {
+                angle += angleDelta;
+                if (angle > 90) {
+                    angle = 90;
+                }
+            }
+        }
     }
 }

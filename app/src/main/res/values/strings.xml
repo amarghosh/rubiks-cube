@@ -2,4 +2,6 @@
     <string name="app_name">Rubiks Cube</string>
     <string name="action_settings">Settings</string>
     <string name="author">amarghosh</string>
+    <string name="randomize">randomize</string>
+    <string name="solve">solve</string>
 </resources>

@@ -97,8 +97,7 @@ public class Square {
         MAT_HANDLE = GLES20.glGetUniformLocation(PROGRAM, "uMVPMatrix");
     }
 
-    public static void finishDrawing()
-    {
+    public static void finishDrawing() {
         GLES20.glDisableVertexAttribArray(POS_HANDLE);
     }
 
