@@ -41,14 +41,20 @@ public class RubiksCube {
         COUNTER_CLOCKWISE
     }
 
+    private static final float SQUARE_SIZE_2 = 0.4f;
+    private static final float SQUARE_SIZE_3 = 0.3f;
+    private static final float SQUARE_SIZE_6 = 0.2f;
+    private static final float SQUARE_SIZE_N = 0.1f;
 
-    private static final float SQ_SIZE = 0.15f;
     private static final float GAP = 0.005f;
 
     // Default value for incrementing angle during rotation
-    private static final float ANGLE_DELTA = 2f;
+    private static final float ANGLE_DELTA_NORMAL = 2f;
+    private static final float ANGLE_DELTA_FAST = 5f;
 
     private int mSize = 3;
+
+    private float squareSize;
 
     private ArrayList<Square> mAllSquares;
     private ArrayList<Square> mFrontSquares;
@@ -62,9 +68,18 @@ public class RubiksCube {
     private ArrayList<ArrayList<Piece>> mYaxisFaceList;
     private ArrayList<ArrayList<Piece>> mZaxisFaceList;
 
-    private Rotation mRotation;
-    private int mCurrentIndex = 0;
+    public enum CubeState {
+        IDLE,
+        RANDOMIZE,
+        SOLVING
+    }
 
+    private CubeListener mListener = null;
+
+    protected CubeState mState = CubeState.IDLE;
+
+    protected Rotation mRotation;
+    private int mCurrentIndex = 0;
 
     enum RotateMode {
         NONE,
@@ -77,15 +92,19 @@ public class RubiksCube {
 
     private Rotation[] currentAlgo = new Rotation[4];
 
-    void populateAlgo() {
-        currentAlgo[0] = new Rotation(X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
-        currentAlgo[1] = new Rotation(Y_AXIS, Direction.CLOCKWISE, 0);
-        currentAlgo[2] = new Rotation(X_AXIS, Direction.CLOCKWISE, 2);
-        currentAlgo[3] = new Rotation(Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
-    }
-
     public RubiksCube(int size) {
+        if (size <= 0) throw new AssertionError();
         mSize = size;
+        if (mSize <= 2) {
+            squareSize = SQUARE_SIZE_2;
+        } else if (mSize == 3) {
+            squareSize = SQUARE_SIZE_3;
+        } else if (mSize <= 6) {
+            squareSize = SQUARE_SIZE_6;
+        } else {
+            squareSize = SQUARE_SIZE_N;
+        }
+
         cube();
         populateAlgo();
         if (rotateMode == RotateMode.ALGORITHM) {
@@ -95,16 +114,57 @@ public class RubiksCube {
         }
     }
 
+    public CubeState getState() {
+        return mState;
+    }
+
     public void randomize() {
+        if (mState != CubeState.IDLE) {
+            Log.e(tag, "invalid state for randomize " + mState);
+            return;
+        }
         rotateMode = RotateMode.RANDOM;
+        mState = CubeState.RANDOMIZE;
+        mRotation.setAngleDelta(ANGLE_DELTA_FAST);
         mRotation.status = true;
     }
 
     public void stopRandomize() {
+        if (mState != CubeState.RANDOMIZE) {
+            Log.e(tag, "No randomize in progress " + mState);
+            return;
+        }
         rotateMode = RotateMode.NONE;
-        mRotation.reset();
         finishRotation();
+        mRotation.reset();
+        mRotation.setAngleDelta(ANGLE_DELTA_NORMAL);
+        mState = CubeState.IDLE;
     }
+
+    protected void sendMessage(String str) {
+        if (mListener != null) {
+            mListener.handleCubeMessage(str);
+        }
+        Log.w("CUBE-MSG: ", str);
+    }
+
+    public int solve() {
+        sendMessage("solving is available only for 3x3 cubes at the moment");
+        return -1;
+    }
+
+    public void setListener(CubeListener listener) {
+        mListener = listener;
+    }
+
+    // Dummy function to test the usage of algorithms
+    private void populateAlgo() {
+        currentAlgo[0] = new Rotation(X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
+        currentAlgo[1] = new Rotation(Y_AXIS, Direction.CLOCKWISE, 0);
+        currentAlgo[2] = new Rotation(X_AXIS, Direction.CLOCKWISE, 2);
+        currentAlgo[3] = new Rotation(Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
+    }
+
 
     private void rotateColors(ArrayList<ArrayList<Square>> squareList, Direction dir) {
         ArrayList<ArrayList<Square>> workingCopy;
@@ -308,7 +368,7 @@ public class RubiksCube {
                 Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
 
         // Do not rotate the center piece in case of odd cubes
-        if (mSize % 2 == 1) {
+        if (mSize != 1 && mSize % 2 == 1) {
             int startFace = Math.abs(random.nextInt(mSize - 1));
             if (startFace >= mSize / 2) {
                 startFace++;
@@ -317,7 +377,6 @@ public class RubiksCube {
         } else {
             mRotation.setStartFace(Math.abs(random.nextInt(mSize)));
         }
-        Log.w(tag, "Next rotation " + mRotation);
         mRotation.status = true;
     }
 
@@ -572,28 +631,28 @@ public class RubiksCube {
      * */
     private void createLeftSquares(int color)
     {
-        float startX = 0 - SQ_SIZE * (mSize / 2.0f) - GAP * (mSize - 1);
-        float startY = (SQ_SIZE + GAP) * (mSize / 2.0f);
-        float startZ = 0 - (SQ_SIZE + GAP) * (mSize / 2.0f);
+        float startX = 0 - squareSize * (mSize / 2.0f) - GAP * (mSize - 1);
+        float startY = (squareSize + GAP) * (mSize / 2.0f);
+        float startZ = 0 - (squareSize + GAP) * (mSize / 2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
-                  startX,  startY - SQ_SIZE, startZ,
-                  startX,  startY - SQ_SIZE, startZ + SQ_SIZE,
-                  startX,  startY, startZ + SQ_SIZE
+                  startX,  startY - squareSize, startZ,
+                  startX,  startY - squareSize, startZ + squareSize,
+                  startX,  startY, startZ + squareSize
             };
 
         for (int i = 0; i < mSize; i++) {
-            vertices[1] = startY - i * (SQ_SIZE + GAP);
-            vertices[4] = vertices[1] - SQ_SIZE;
-            vertices[7] = vertices[1] - SQ_SIZE;
+            vertices[1] = startY - i * (squareSize + GAP);
+            vertices[4] = vertices[1] - squareSize;
+            vertices[7] = vertices[1] - squareSize;
             vertices[10] = vertices[1];
 
             for (int j = 0; j < mSize; j++) {
-                vertices[2] = startZ + j * (SQ_SIZE + GAP);
+                vertices[2] = startZ + j * (squareSize + GAP);
                 vertices[5] = vertices[2];
-                vertices[8] = vertices[2] + SQ_SIZE;
-                vertices[11] = vertices[2] + SQ_SIZE;
+                vertices[8] = vertices[2] + squareSize;
+                vertices[11] = vertices[2] + squareSize;
                 Square sq = new Square(vertices, color);
                 mAllSquares.add(sq);
                 mLeftSquares.add(sq);
@@ -609,28 +668,28 @@ public class RubiksCube {
      * */
     private void createRightSquares(int color)
     {
-        float startX = SQ_SIZE * (mSize / 2.0f) + GAP * (mSize -1);
-        float startY = (SQ_SIZE + GAP) * (mSize / 2.0f);
-        float startZ = (SQ_SIZE + GAP) * (mSize / 2.0f);
+        float startX = squareSize * (mSize / 2.0f) + GAP * (mSize -1);
+        float startY = (squareSize + GAP) * (mSize / 2.0f);
+        float startZ = (squareSize + GAP) * (mSize / 2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
-                  startX,  startY - SQ_SIZE, startZ,
-                  startX,  startY - SQ_SIZE, startZ - SQ_SIZE,
-                  startX,  startY, startZ - SQ_SIZE
+                  startX,  startY - squareSize, startZ,
+                  startX,  startY - squareSize, startZ - squareSize,
+                  startX,  startY, startZ - squareSize
             };
 
         for (int i = 0; i < mSize; i++) {
-            vertices[1] = startY - i * (SQ_SIZE + GAP);
-            vertices[4] = vertices[1] - SQ_SIZE;
-            vertices[7] = vertices[1] - SQ_SIZE;
+            vertices[1] = startY - i * (squareSize + GAP);
+            vertices[4] = vertices[1] - squareSize;
+            vertices[7] = vertices[1] - squareSize;
             vertices[10] = vertices[1];
 
             for (int j = 0; j < mSize; j++) {
-                vertices[2] = startZ - j * (SQ_SIZE + GAP);
+                vertices[2] = startZ - j * (squareSize + GAP);
                 vertices[5] = vertices[2];
-                vertices[8] = vertices[2] - SQ_SIZE;
-                vertices[11] = vertices[2] - SQ_SIZE;
+                vertices[8] = vertices[2] - squareSize;
+                vertices[11] = vertices[2] - squareSize;
                 Square sq = new Square(vertices, color);
                 mAllSquares.add(sq);
                 mRightSquares.add(sq);
@@ -646,28 +705,28 @@ public class RubiksCube {
      * */
     private void createTopSquares(int color)
     {
-        float startX = - (SQ_SIZE + GAP) * (mSize / 2.0f);
-        float startY = (SQ_SIZE + GAP) * (mSize / 2.0f);
-        float startZ = - (SQ_SIZE + GAP) * (mSize / 2.0f);
+        float startX = - (squareSize + GAP) * (mSize / 2.0f);
+        float startY = (squareSize + GAP) * (mSize / 2.0f);
+        float startZ = - (squareSize + GAP) * (mSize / 2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
-                  startX,  startY, startZ + SQ_SIZE,
-                  startX + SQ_SIZE,  startY, startZ + SQ_SIZE,
-                  startX + SQ_SIZE,  startY, startZ
+                  startX,  startY, startZ + squareSize,
+                  startX + squareSize,  startY, startZ + squareSize,
+                  startX + squareSize,  startY, startZ
             };
 
         for (int i = 0; i < mSize; i++) {
-            vertices[2] = startZ + i * (SQ_SIZE + GAP);
-            vertices[5] = vertices[2] + SQ_SIZE;
-            vertices[8] = vertices[2] + SQ_SIZE;
+            vertices[2] = startZ + i * (squareSize + GAP);
+            vertices[5] = vertices[2] + squareSize;
+            vertices[8] = vertices[2] + squareSize;
             vertices[11] = vertices[2];
 
             for (int j = 0; j < mSize; j++) {
-                vertices[0] = startX + j * (SQ_SIZE + GAP);
+                vertices[0] = startX + j * (squareSize + GAP);
                 vertices[3] = vertices[0];
-                vertices[6] = vertices[0] + SQ_SIZE;
-                vertices[9] = vertices[0] + SQ_SIZE;
+                vertices[6] = vertices[0] + squareSize;
+                vertices[9] = vertices[0] + squareSize;
                 Square sq = new Square(vertices, color);
                 mAllSquares.add(sq);
                 mTopSquares.add(sq);
@@ -683,28 +742,28 @@ public class RubiksCube {
      * */
     private void createBottomSquares(int color)
     {
-        float startX = - (SQ_SIZE + GAP) * (mSize / 2.0f);
-        float startY = - (SQ_SIZE + GAP) * (mSize / 2.0f);
-        float startZ = (SQ_SIZE + GAP) * (mSize / 2.0f);
+        float startX = - (squareSize + GAP) * (mSize / 2.0f);
+        float startY = - (squareSize + GAP) * (mSize / 2.0f);
+        float startZ = (squareSize + GAP) * (mSize / 2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
-                  startX,  startY, startZ - SQ_SIZE,
-                  startX + SQ_SIZE,  startY, startZ - SQ_SIZE,
-                  startX + SQ_SIZE,  startY, startZ
+                  startX,  startY, startZ - squareSize,
+                  startX + squareSize,  startY, startZ - squareSize,
+                  startX + squareSize,  startY, startZ
             };
 
         for (int i = 0; i < mSize; i++) {
-            vertices[2] = startZ - i * (SQ_SIZE + GAP);
-            vertices[5] = vertices[2] - SQ_SIZE;
-            vertices[8] = vertices[2] - SQ_SIZE;
+            vertices[2] = startZ - i * (squareSize + GAP);
+            vertices[5] = vertices[2] - squareSize;
+            vertices[8] = vertices[2] - squareSize;
             vertices[11] = vertices[2];
 
             for (int j = 0; j < mSize; j++) {
-                vertices[0] = startX + j * (SQ_SIZE + GAP);
+                vertices[0] = startX + j * (squareSize + GAP);
                 vertices[3] = vertices[0];
-                vertices[6] = vertices[0] + SQ_SIZE;
-                vertices[9] = vertices[0] + SQ_SIZE;
+                vertices[6] = vertices[0] + squareSize;
+                vertices[9] = vertices[0] + squareSize;
                 Square sq = new Square(vertices, color);
                 mAllSquares.add(sq);
                 mBottomSquares.add(sq);
@@ -720,28 +779,28 @@ public class RubiksCube {
      * */
     private void createFrontSquares(int color)
     {
-        float startX = 0 - (SQ_SIZE + GAP) * (mSize / 2.0f);
-        float startY = (SQ_SIZE + GAP) * (mSize / 2.0f);
-        float startZ = (SQ_SIZE + GAP) * (mSize / 2.0f);
+        float startX = 0 - (squareSize + GAP) * (mSize / 2.0f);
+        float startY = (squareSize + GAP) * (mSize / 2.0f);
+        float startZ = (squareSize + GAP) * (mSize / 2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
-                  startX,  startY - SQ_SIZE, startZ,
-                  startX + SQ_SIZE,  startY - SQ_SIZE, startZ,
-                  startX + SQ_SIZE,  startY, startZ
+                  startX,  startY - squareSize, startZ,
+                  startX + squareSize,  startY - squareSize, startZ,
+                  startX + squareSize,  startY, startZ
             };
 
         for (int i = 0; i < mSize; i++) {
-            vertices[1] = startY - i * (SQ_SIZE + GAP);
-            vertices[4] = vertices[1] - SQ_SIZE;
-            vertices[7] = vertices[1] - SQ_SIZE;
+            vertices[1] = startY - i * (squareSize + GAP);
+            vertices[4] = vertices[1] - squareSize;
+            vertices[7] = vertices[1] - squareSize;
             vertices[10] = vertices[1];
 
             for (int j = 0; j < mSize; j++) {
-                vertices[0] = startX + j * (SQ_SIZE + GAP);
+                vertices[0] = startX + j * (squareSize + GAP);
                 vertices[3] = vertices[0];
-                vertices[6] = vertices[0] + SQ_SIZE;
-                vertices[9] = vertices[0] + SQ_SIZE;
+                vertices[6] = vertices[0] + squareSize;
+                vertices[9] = vertices[0] + squareSize;
                 Square sq = new Square(vertices, color);
                 mAllSquares.add(sq);
                 mFrontSquares.add(sq);
@@ -757,28 +816,28 @@ public class RubiksCube {
      * */
     private void createBackSquares(int color)
     {
-        float startX = (SQ_SIZE + GAP) * (mSize / 2.0f);
-        float startY = (SQ_SIZE + GAP) * (mSize / 2.0f);
-        float startZ = - (SQ_SIZE + GAP) * (mSize / 2.0f);
+        float startX = (squareSize + GAP) * (mSize / 2.0f);
+        float startY = (squareSize + GAP) * (mSize / 2.0f);
+        float startZ = - (squareSize + GAP) * (mSize / 2.0f);
 
         float vertices[] = {
                   startX,  startY, startZ,
-                  startX,  startY - SQ_SIZE, startZ,
-                  startX - SQ_SIZE,  startY - SQ_SIZE, startZ,
-                  startX - SQ_SIZE,  startY, startZ
+                  startX,  startY - squareSize, startZ,
+                  startX - squareSize,  startY - squareSize, startZ,
+                  startX - squareSize,  startY, startZ
             };
 
         for (int i = 0; i < mSize; i++) {
-            vertices[1] = startY - i * (SQ_SIZE + GAP);
-            vertices[4] = vertices[1] - SQ_SIZE;
-            vertices[7] = vertices[1] - SQ_SIZE;
+            vertices[1] = startY - i * (squareSize + GAP);
+            vertices[4] = vertices[1] - squareSize;
+            vertices[7] = vertices[1] - squareSize;
             vertices[10] = vertices[1];
 
             for (int j = 0; j < mSize; j++) {
-                vertices[0] = startX - j * (SQ_SIZE + GAP);
+                vertices[0] = startX - j * (squareSize + GAP);
                 vertices[3] = vertices[0];
-                vertices[6] = vertices[0] - SQ_SIZE;
-                vertices[9] = vertices[0] - SQ_SIZE;
+                vertices[6] = vertices[0] - squareSize;
+                vertices[9] = vertices[0] - squareSize;
                 Square sq = new Square(vertices, color);
                 mAllSquares.add(sq);
                 mBackSquares.add(sq);
@@ -880,7 +939,7 @@ public class RubiksCube {
         int startFace;
         int faceCount;
         float angle;
-        float angleDelta = ANGLE_DELTA;
+        float angleDelta = ANGLE_DELTA_NORMAL;
 
         Rotation() {
             reset();

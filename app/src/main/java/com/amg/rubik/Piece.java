@@ -1,5 +1,7 @@
 package com.amg.rubik;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 /**
@@ -32,7 +34,8 @@ public class Piece {
         if (mType == PieceType.CENTER && mSquares.size() != 0 ||
                 mType == PieceType.EDGE && mSquares.size() >= 2 ||
                 mType == PieceType.CORNER && mSquares.size() >= 3) {
-            throw new RuntimeException("Too many squares for PieceType " + mType);
+            Log.w("piece", "Too many squares for PieceType " + mType +
+                    ", we have " + mSquares.size());
         }
         mSquares.add(sq);
     }

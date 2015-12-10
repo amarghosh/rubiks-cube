@@ -7,19 +7,32 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity
+        implements View.OnClickListener, CubeListener {
 
     private static final String tag = "rubik-main";
 
     private RubiksCube mCube = null;
     private RubikGLSurfaceView mRubikView = null;
+    private int cubeSize = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.w(tag, "onCreate");
         setContentView(R.layout.activity_main);
         initializeRubikView();
+        initUi();
+    }
+
+    private void initUi() {
+        findViewById(R.id.randomizeButton).setOnClickListener(this);
+        findViewById(R.id.solveButton).setOnClickListener(this);
+        findViewById(R.id.incButton).setOnClickListener(this);
+        findViewById(R.id.decButton).setOnClickListener(this);
     }
 
     private void initializeRubikView() {
@@ -30,7 +43,7 @@ public class MainActivity extends Activity {
 
         ViewGroup view = (ViewGroup)findViewById(R.id.container);
         mRubikView = new RubikGLSurfaceView(this);
-        mCube = new RubiksCube(3);
+        mCube = new RubiksCube3x3x3();
         mRubikView.setCube(mCube);
         view.addView(mRubikView);
     }
@@ -46,7 +59,6 @@ public class MainActivity extends Activity {
         super.onPause();
         mRubikView.onPause();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -70,5 +82,92 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(View view) {
+
+        switch (view.getId()) {
+            case R.id.randomizeButton:
+                randomizeOnclick();
+                break;
+
+            case R.id.solveButton:
+                solve();
+                break;
+
+            case R.id.incButton:
+                changeCubeSize(1);
+                break;
+
+            case R.id.decButton:
+                changeCubeSize(-1);
+                break;
+        }
+    }
+
+    private void createCube() {
+        if (cubeSize == 3) {
+            mCube = new RubiksCube3x3x3();
+        } else {
+            mCube = new RubiksCube(cubeSize);
+        }
+        mCube.setListener(this);
+        mRubikView.setCube(mCube);
+    }
+
+    private void changeCubeSize(int factor) {
+        if (mCube.getState() != RubiksCube.CubeState.IDLE) {
+            Toast.makeText(this, "Cube is in state " + mCube.getState(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (cubeSize == 1 && factor < 0) {
+            return;
+        }
+        cubeSize += factor;
+        createCube();
+        resetButtons();
+        if (cubeSize > 9) {
+            Toast.makeText(this,
+                    "Cube is too big. May not render correctly", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void resetButtons() {
+        Button btn = (Button)findViewById(R.id.randomizeButton);
+        btn.setEnabled(true);
+        btn.setText(R.string.randomize);
+        btn = (Button)findViewById(R.id.solveButton);
+        btn.setEnabled(true);
+        btn.setText(R.string.solve);
+    }
+
+    private void solve() {
+        int solveRet = mCube.solve();
+        if (solveRet == 0) {
+            Button btn = (Button)findViewById(R.id.solveButton);
+            btn.setEnabled(false);
+            btn = (Button)findViewById(R.id.randomizeButton);
+            btn.setEnabled(false);
+        }
+    }
+
+    private void randomizeOnclick() {
+        Button btn = (Button)findViewById(R.id.randomizeButton);
+        if (mCube.getState() == RubiksCube.CubeState.IDLE) {
+            mCube.randomize();
+            btn.setText(R.string.stop);
+            btn = (Button)findViewById(R.id.solveButton);
+            btn.setEnabled(false);
+        } else if (mCube.getState() == RubiksCube.CubeState.RANDOMIZE) {
+            mCube.stopRandomize();
+            btn.setText(R.string.randomize);
+            btn = (Button)findViewById(R.id.solveButton);
+            btn.setEnabled(true);
+        }
+    }
+
+    public void handleCubeMessage(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 }
