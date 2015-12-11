@@ -28,16 +28,25 @@ public class Square {
     static float white[] = { 0.8f, 0.8f, 0.8f, 1.0f };
     static float yellow[] = { 0.8f, 0.8f, 0.2f, 1.0f };
     static float orange[] = { 0.8f, 0.4f, 0.1f, 1.0f };
-    static float[][] colors;
+    static Color[] colors;
+
+    public static class Color {
+        float[] rgba;
+        String name;
+        Color(float[] rgba, String name) {
+            this.rgba = rgba;
+            this.name = name;
+        }
+    }
 
     static {
-        colors = new float[COLOR_COUNT][];
-        colors[YELLOW] = yellow;
-        colors[RED] = red;
-        colors[GREEN] = green;
-        colors[ORANGE] = orange;
-        colors[BLUE] = blue;
-        colors[WHITE] = white;
+        colors = new Color[COLOR_COUNT];
+        colors[YELLOW] = new Color(yellow, "yellow");
+        colors[RED] = new Color(red, "red");
+        colors[GREEN] = new Color(green, "green");
+        colors[ORANGE] = new Color(orange, "orange");
+        colors[BLUE] = new Color(blue, "blue");
+        colors[WHITE] = new Color(white, "white");
     }
 
     protected int mColor = WHITE;
@@ -108,9 +117,17 @@ public class Square {
                 GLES20.GL_FLOAT, false,
                 VERTEX_STRIDE, vertexBuffer);
 
-        GLES20.glUniform4fv(COL_HANDLE, 1, colors[mColor], 0);
+        GLES20.glUniform4fv(COL_HANDLE, 1, colors[mColor].rgba, 0);
         GLES20.glUniformMatrix4fv(MAT_HANDLE, 1, false, mvpMatrix, 0);
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length,
                 GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+    }
+
+    public String colorName() {
+        return colors[mColor].name;
+    }
+
+    public static String getColorName(int index) {
+        return colors[index].name;
     }
 }

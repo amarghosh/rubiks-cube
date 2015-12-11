@@ -1,11 +1,13 @@
 package com.amg.rubik;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Random;
 
 import android.opengl.Matrix;
 import android.util.Log;
+
+import com.amg.rubik.Rotation.Axis;
+import com.amg.rubik.Rotation.Direction;
 
 /**
  *
@@ -27,19 +29,15 @@ import android.util.Log;
 
 public class RubiksCube {
 
-    private static final String tag = "rubik-cube";
+    protected static final String tag = "rubik-cube";
+
+    // Default value for incrementing angle during rotation
+    private static final float ANGLE_DELTA_NORMAL = 2f;
+    private static final float ANGLE_DELTA_FAST = 10f;
+
 
     // We don't support skewed cubes yet.
     private static final int CUBE_SIDES = 4;
-
-    public static final int X_AXIS = 0;
-    public static final int Y_AXIS = 1;
-    public static final int Z_AXIS = 2;
-
-    public enum Direction {
-        CLOCKWISE,
-        COUNTER_CLOCKWISE
-    }
 
     private static final float SQUARE_SIZE_2 = 0.4f;
     private static final float SQUARE_SIZE_3 = 0.3f;
@@ -48,30 +46,27 @@ public class RubiksCube {
 
     private static final float GAP = 0.005f;
 
-    // Default value for incrementing angle during rotation
-    private static final float ANGLE_DELTA_NORMAL = 2f;
-    private static final float ANGLE_DELTA_FAST = 5f;
-
     private int mSize = 3;
 
     private float squareSize;
 
-    private ArrayList<Square> mAllSquares;
-    private ArrayList<Square> mFrontSquares;
-    private ArrayList<Square> mBackSquares;
-    private ArrayList<Square> mTopSquares;
-    private ArrayList<Square> mBottomSquares;
-    private ArrayList<Square> mLeftSquares;
-    private ArrayList<Square> mRightSquares;
+    protected ArrayList<Square> mAllSquares;
+    protected ArrayList<Square> mFrontSquares;
+    protected ArrayList<Square> mBackSquares;
+    protected ArrayList<Square> mTopSquares;
+    protected ArrayList<Square> mBottomSquares;
+    protected ArrayList<Square> mLeftSquares;
+    protected ArrayList<Square> mRightSquares;
 
-    private ArrayList<ArrayList<Piece>> mXaxisFaceList;
-    private ArrayList<ArrayList<Piece>> mYaxisFaceList;
-    private ArrayList<ArrayList<Piece>> mZaxisFaceList;
+    protected ArrayList<ArrayList<Piece>> mXaxisFaceList;
+    protected ArrayList<ArrayList<Piece>> mYaxisFaceList;
+    protected ArrayList<ArrayList<Piece>> mZaxisFaceList;
 
     public enum CubeState {
         IDLE,
         RANDOMIZE,
-        SOLVING
+        SOLVING,
+        TESTING
     }
 
     private CubeListener mListener = null;
@@ -79,7 +74,6 @@ public class RubiksCube {
     protected CubeState mState = CubeState.IDLE;
 
     protected Rotation mRotation;
-    private int mCurrentIndex = 0;
 
     enum RotateMode {
         NONE,
@@ -90,7 +84,8 @@ public class RubiksCube {
 
     private RotateMode rotateMode = RotateMode.NONE;
 
-    private Rotation[] currentAlgo = new Rotation[4];
+    private Algorithm mCurrentAlgo;
+    private int mAlgoIndex = 0;
 
     public RubiksCube(int size) {
         if (size <= 0) throw new AssertionError();
@@ -106,12 +101,17 @@ public class RubiksCube {
         }
 
         cube();
-        populateAlgo();
-        if (rotateMode == RotateMode.ALGORITHM) {
-            mRotation = currentAlgo[0].duplicate();
-        } else {
-            mRotation = new Rotation();
-        }
+        mCurrentAlgo = null;
+        mRotation = new Rotation();
+        // ut();
+    }
+
+    private void ut() {
+        Algorithm algorithm = new Algorithm();
+        algorithm.addStep(new Rotation(Axis.Z_AXIS, Direction.CLOCKWISE, 2));
+        algorithm.addStep(new Rotation(Axis.X_AXIS, Direction.CLOCKWISE, 2));
+        mState = CubeState.TESTING;
+        setAlgo(algorithm);
     }
 
     public CubeState getState() {
@@ -126,7 +126,7 @@ public class RubiksCube {
         rotateMode = RotateMode.RANDOM;
         mState = CubeState.RANDOMIZE;
         mRotation.setAngleDelta(ANGLE_DELTA_FAST);
-        mRotation.status = true;
+        mRotation.start();
     }
 
     public void stopRandomize() {
@@ -142,29 +142,28 @@ public class RubiksCube {
     }
 
     protected void sendMessage(String str) {
-        if (mListener != null) {
-            mListener.handleCubeMessage(str);
+        try {
+            if (mListener != null) {
+                mListener.handleCubeMessage(str);
+            }
+        } catch (Exception e) {
+            // e.printStackTrace();
         }
         Log.w("CUBE-MSG: ", str);
     }
 
     public int solve() {
-        sendMessage("solving is available only for 3x3 cubes at the moment");
+        if (mSize == 1) {
+            sendMessage("Tadaa..!");
+        } else {
+            sendMessage("solving is available only for 3x3 cubes at the moment");
+        }
         return -1;
     }
 
     public void setListener(CubeListener listener) {
         mListener = listener;
     }
-
-    // Dummy function to test the usage of algorithms
-    private void populateAlgo() {
-        currentAlgo[0] = new Rotation(X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
-        currentAlgo[1] = new Rotation(Y_AXIS, Direction.CLOCKWISE, 0);
-        currentAlgo[2] = new Rotation(X_AXIS, Direction.CLOCKWISE, 2);
-        currentAlgo[3] = new Rotation(Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
-    }
-
 
     private void rotateColors(ArrayList<ArrayList<Square>> squareList, Direction dir) {
         ArrayList<ArrayList<Square>> workingCopy;
@@ -207,7 +206,7 @@ public class RubiksCube {
      * the colors of squares according to the Rotation in progress.
      * TODO: Add proper comments.
      * */
-    void finishRotation() {
+    protected void finishRotation() {
         for (int face = mRotation.startFace;
                  face < mRotation.startFace + mRotation.faceCount;
                  face++) {
@@ -284,9 +283,13 @@ public class RubiksCube {
 
         switch (rotateMode) {
             case ALGORITHM:
-                mCurrentIndex = (mCurrentIndex + 1) % currentAlgo.length;
-                mRotation = currentAlgo[mCurrentIndex].duplicate();
-                mRotation.status = true;
+                if (mCurrentAlgo.isDone()) {
+                    mRotation.reset();
+                    updateAlgo();
+                } else {
+                    mRotation = mCurrentAlgo.getNextStep();
+                    mRotation.start();
+                }
                 break;
 
             case REPEAT:
@@ -301,6 +304,12 @@ public class RubiksCube {
                 mRotation.reset();
                 break;
         }
+    }
+
+    void updateAlgo() {
+        rotateMode = RotateMode.NONE;
+        mRotation.reset();
+        mCurrentAlgo = null;
     }
 
     void rotateFaceColors(ArrayList<Square> squares, Direction direction, int size) {
@@ -357,13 +366,15 @@ public class RubiksCube {
 
     void repeatRotation() {
         mRotation.angle = 0;
-        mRotation.status = true;
+        mRotation.start();
     }
 
     void rotateRandom() {
         mRotation.reset();
         Random random = new Random();
-        mRotation.setAxis(Math.abs(random.nextInt(3)));
+        Axis[] axes = new Axis[] {Axis.X_AXIS,
+                Axis.Y_AXIS, Axis.Z_AXIS};
+        mRotation.setAxis(axes[Math.abs(random.nextInt(3))]);
         mRotation.direction = random.nextBoolean() ?
                 Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
 
@@ -377,7 +388,7 @@ public class RubiksCube {
         } else {
             mRotation.setStartFace(Math.abs(random.nextInt(mSize)));
         }
-        mRotation.status = true;
+        mRotation.start();
     }
 
     private void cube()
@@ -856,7 +867,7 @@ public class RubiksCube {
         Square.startDrawing();
 
         if (rotateMode == RotateMode.NONE ||
-                mRotation.status == false) {
+                mRotation.getStatus() == false) {
             drawCube(mvpMatrix);
             Square.finishDrawing();
             return;
@@ -927,86 +938,35 @@ public class RubiksCube {
         Square.finishDrawing();
     }
 
-    class Rotation {
-        boolean status;
-        int axis;
-
-        Direction direction;
-
-        /**
-         * To support simultaneous rotating of multiple faces in higher order cubes
-         * */
-        int startFace;
-        int faceCount;
-        float angle;
-        float angleDelta = ANGLE_DELTA_NORMAL;
-
-        Rotation() {
-            reset();
+    protected boolean checkFace(ArrayList<Square> squares) {
+        int centerColor = squares.get(squares.size()/2).mColor;
+        for (int i = 0; i < squares.size(); i++) {
+            if (squares.get(i).mColor != centerColor)
+                return false;
         }
+        return true;
+    }
 
-        Rotation(int axis, Direction dir, int face) {
-            reset();
-            this.axis = axis;
-            this.direction = dir;
-            this.startFace = face;
-            this.angle = 0;
-        }
+    protected boolean isSolved() {
+        return checkFace(mTopSquares) &&
+                checkFace(mLeftSquares) &&
+                checkFace(mFrontSquares) &&
+                checkFace(mRightSquares) &&
+                checkFace(mBackSquares) &&
+                checkFace(mBottomSquares);
+    }
 
-        Rotation duplicate() {
-            return new Rotation(axis, direction, startFace);
+    protected void setAlgo(Algorithm algo) {
+        if (mCurrentAlgo != null &&
+                mCurrentAlgo.isDone() == false) {
+            throw new IllegalStateException("There is already an algorithm running");
         }
-
-        void reset() {
-            status = false;
-            axis = Z_AXIS;
-            direction = Direction.CLOCKWISE;
-            startFace = mSize - 1;
-            faceCount = 1;
-            angle = 0;
+        if (mState != CubeState.SOLVING && mState != CubeState.TESTING) {
+            throw new IllegalStateException("Invalid state for algos: " + mState);
         }
-
-        @Override
-        public String toString() {
-            String axes = "XYZ";
-            return "Axis " + axes.charAt(axis) +
-                    ", direction " + direction +
-                    ", face " + startFace;
-        }
-
-        public void setAxis(int axis) {
-            if (axis < X_AXIS || axis > Z_AXIS) {
-                throw new InvalidParameterException("Axis " + axis);
-            }
-            this.axis = axis;
-        }
-
-        public void setAngleDelta(float angleDelta) {
-            if (angleDelta > 90) {
-                throw new InvalidParameterException("Delta should be less than 90: " + angleDelta);
-            }
-            this.angleDelta = angleDelta;
-        }
-
-        public void setStartFace(int startFace) {
-            if (startFace >= mSize) {
-                throw new InvalidParameterException("StartFace " + startFace);
-            }
-            this.startFace = startFace;
-        }
-
-        void increment() {
-            if (direction == Direction.CLOCKWISE) {
-                angle -= angleDelta;
-                if (angle < -90) {
-                    angle = -90;
-                }
-            } else {
-                angle += angleDelta;
-                if (angle > 90) {
-                    angle = 90;
-                }
-            }
-        }
+        mCurrentAlgo = algo;
+        mRotation = algo.getNextStep();
+        rotateMode = RotateMode.ALGORITHM;
+        mRotation.start();
     }
 }

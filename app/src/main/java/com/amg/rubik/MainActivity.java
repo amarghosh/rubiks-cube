@@ -1,6 +1,7 @@
 package com.amg.rubik;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -43,8 +44,7 @@ public class MainActivity extends Activity
 
         ViewGroup view = (ViewGroup)findViewById(R.id.container);
         mRubikView = new RubikGLSurfaceView(this);
-        mCube = new RubiksCube3x3x3();
-        mRubikView.setCube(mCube);
+        createCube();
         view.addView(mRubikView);
     }
 
@@ -167,7 +167,16 @@ public class MainActivity extends Activity
         }
     }
 
-    public void handleCubeMessage(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    private Toast currentToast;
+    public void handleCubeMessage(final String msg) {
+        final Context ctx = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (currentToast != null) currentToast.cancel();
+                currentToast = Toast.makeText(ctx, msg, Toast.LENGTH_SHORT);
+                currentToast.show();
+            }
+        });
     }
 }
