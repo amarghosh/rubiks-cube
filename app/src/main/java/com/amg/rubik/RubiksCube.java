@@ -35,9 +35,16 @@ public class RubiksCube {
     private static final float ANGLE_DELTA_NORMAL = 2f;
     private static final float ANGLE_DELTA_FAST = 10f;
 
+    protected static final int FACE_FRONT = 0;
+    protected static final int FACE_RIGHT = 1;
+    protected static final int FACE_BACK = 2;
+    protected static final int FACE_LEFT = 3;
+    protected static final int FACE_TOP = 4;
+    protected static final int FACE_BOTTOM = 5;
 
     // We don't support skewed cubes yet.
     private static final int CUBE_SIDES = 4;
+    private static final int FACE_COUNT = 6;
 
     private static final float SQUARE_SIZE_2 = 0.4f;
     private static final float SQUARE_SIZE_3 = 0.3f;
@@ -57,6 +64,7 @@ public class RubiksCube {
     protected ArrayList<Square> mBottomSquares;
     protected ArrayList<Square> mLeftSquares;
     protected ArrayList<Square> mRightSquares;
+    protected ArrayList<Square>[] mAllFaces;
 
     protected ArrayList<ArrayList<Piece>> mXaxisFaceList;
     protected ArrayList<ArrayList<Piece>> mYaxisFaceList;
@@ -281,6 +289,8 @@ public class RubiksCube {
             }
         }
 
+        updateSquareFaces();
+
         switch (rotateMode) {
             case ALGORITHM:
                 if (mCurrentAlgo.isDone()) {
@@ -400,12 +410,27 @@ public class RubiksCube {
         mBottomSquares = new ArrayList<>();
         mLeftSquares = new ArrayList<>();
         mRightSquares = new ArrayList<>();
+        mAllFaces = new ArrayList[FACE_COUNT];
+        mAllFaces[FACE_FRONT] = mFrontSquares;
+        mAllFaces[FACE_RIGHT] = mRightSquares;
+        mAllFaces[FACE_BACK] = mBackSquares;
+        mAllFaces[FACE_LEFT] = mLeftSquares;
+        mAllFaces[FACE_TOP] = mTopSquares;
+        mAllFaces[FACE_BOTTOM] = mBottomSquares;
         createAllSquares();
 
         mXaxisFaceList = new ArrayList<>(mSize);
         mYaxisFaceList = new ArrayList<>(mSize);
         mZaxisFaceList = new ArrayList<>(mSize);
         createFaces();
+    }
+
+    private void updateSquareFaces() {
+        for (int i = 0; i < FACE_COUNT; i++) {
+            for (Square sq: mAllFaces[i]) {
+                sq.setFace(i);
+            }
+        }
     }
 
     private static Piece.PieceType getPieceType(int row, int col, int totalRows, int totalCols) {

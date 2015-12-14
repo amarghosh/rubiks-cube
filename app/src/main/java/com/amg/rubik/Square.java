@@ -30,6 +30,8 @@ public class Square {
     static float orange[] = { 0.8f, 0.4f, 0.1f, 1.0f };
     static Color[] colors;
 
+    private int face;
+
     public static class Color {
         float[] rgba;
         String name;
@@ -51,8 +53,6 @@ public class Square {
 
     protected int mColor = WHITE;
 
-
-
     // Our vertex buffer.
     private FloatBuffer vertexBuffer;
 
@@ -62,6 +62,14 @@ public class Square {
     private static int POS_HANDLE;
     private static int COL_HANDLE;
     private static int MAT_HANDLE;
+
+    public int getFace() {
+        return face;
+    }
+
+    public void setFace(int face) {
+        this.face = face;
+    }
 
     public Square(float[] vertices, int color) {
         // a float is 4 bytes, therefore we multiply the number if
