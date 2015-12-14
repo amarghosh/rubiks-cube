@@ -2,7 +2,6 @@ package com.amg.rubik;
 
 import android.util.Log;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,20 +23,39 @@ public class RubiksCube3x3x3 extends RubiksCube {
         LastFaceCorners,
         LastFaceCornerAlign
     }
-    private static final int EDGE_BOTTOM_NEAR = 1;
-    private static final int EDGE_BOTTOM_RIGHT = 5;
-    private static final int EDGE_BOTTOM_LEFT = 3;
-    private static final int EDGE_BOTTOM_FAR = 7;
+    private static final int SIZE = 3;
 
+    private static final int INNER = 0;
+    private static final int MIDDLE = 1;
+    private static final int OUTER = 2;
+
+    private static final int FIRST_ROW_LEFT = 0;
+    private static final int FIRST_ROW_CENTER = 1;
+    private static final int FIRST_ROW_RIGHT = 2;
+    private static final int MID_ROW_LEFT = 3;
+    private static final int CENTER = 4;
+    private static final int MID_ROW_RIGHT = 5;
+    private static final int LAST_ROW_LEFT = 6;
+    private static final int LAST_ROW_MIDDLE = 7;
+    private static final int LAST_ROW_RIGHT = 8;
+
+    // Middle row in Y axis starts from mid-front-left and continues anticlockwise
     private static final int EDGE_MIDDLE_FRONT_LEFT = 0;
     private static final int EDGE_MIDDLE_FRONT_RIGHT = 2;
     private static final int EDGE_MIDDLE_RIGHT_BACK = 4;
     private static final int EDGE_MIDDLE_LEFT_BACK = 6;
 
-    private static final int EDGE_TOP_FAR = 1;
-    private static final int EDGE_TOP_NEAR = 7;
-    private static final int EDGE_TOP_LEFT = 3;
-    private static final int EDGE_TOP_RIGHT = 5;
+    // bottom row numbering is similar to front face after a clockwise rotation around X axis
+    private static final int EDGE_BOTTOM_NEAR = FIRST_ROW_CENTER;
+    private static final int EDGE_BOTTOM_RIGHT = MID_ROW_RIGHT;
+    private static final int EDGE_BOTTOM_LEFT = MID_ROW_LEFT;
+    private static final int EDGE_BOTTOM_FAR = LAST_ROW_MIDDLE;
+
+    // top row numbering is similar to front face after a counter clockwise rotation around X axis
+    private static final int EDGE_TOP_FAR = FIRST_ROW_CENTER;
+    private static final int EDGE_TOP_NEAR = LAST_ROW_MIDDLE;
+    private static final int EDGE_TOP_LEFT = MID_ROW_LEFT;
+    private static final int EDGE_TOP_RIGHT = MID_ROW_RIGHT;
 
     private SolveState solveState = SolveState.None;
 
@@ -45,7 +63,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
     private int mBottomColor = 0;
 
     public RubiksCube3x3x3() {
-        super(3);
+        super(SIZE);
     }
 
     @Override
@@ -64,10 +82,10 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
     private void startSolving() {
         solveState = SolveState.FirstFaceCross;
-        mTopColor = mTopSquares.get(4).mColor;
-        mBottomColor = mBottomSquares.get(4).mColor;
-        sendMessage("Top is " + mTopSquares.get(4).colorName() +
-                " and bottom is " + mBottomSquares.get(4).colorName());
+        mTopColor = mTopSquares.get(CENTER).mColor;
+        mBottomColor = mBottomSquares.get(CENTER).mColor;
+        sendMessage("Top is " + mTopSquares.get(CENTER).colorName() +
+                " and bottom is " + mBottomSquares.get(CENTER).colorName());
         firstFaceCross();
     }
 
@@ -76,35 +94,39 @@ public class RubiksCube3x3x3 extends RubiksCube {
                 mBackSquares, mLeftSquares, mRightSquares, mFrontSquares
         };
 
-        for (int i = 7; i > 0; i--) {
+        // TODO: Handle already aligned pieces here
+        for (int i = EDGE_TOP_NEAR; i > 0; i--) {
             if (i % 2 == 0) {
                 continue;
             }
             ArrayList<Square> sideFace = sideFaces[i/2];
             if (mTopSquares.get(i).mColor == mTopColor &&
-                    sideFace.get(1).mColor == sideFace.get(4).mColor) {
+                    sideFace.get(FIRST_ROW_CENTER).mColor == sideFace.get(CENTER).mColor) {
                 continue;
             }
-            if (i != 7) {
-                // Bring the missing edge to face the user
-                Direction dir = (i == 3) ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
-                Algorithm algo = Algorithm.rotateWhole(Axis.Y_AXIS, dir, 3,
-                        i == 1 ? 2 : 1);
+
+            // If the other color in the missing edge is not the front-color, rotate the cube
+            // until it becomes so.
+            if (i != EDGE_TOP_NEAR) {
+                Direction dir = (i == EDGE_TOP_LEFT) ?
+                        Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
+                Algorithm algo = Algorithm.rotateWhole(Axis.Y_AXIS, dir, SIZE,
+                        i == EDGE_TOP_FAR ? 2 : 1);
                 setAlgo(algo);
             } else {
-                fixFirstFaceEdge(mTopColor, sideFace.get(4).mColor);
+                fixFirstFaceEdge(mTopColor, sideFace.get(CENTER).mColor);
             }
             return;
         }
 
-        // We didn't return.. We have the cross
-        sendMessage("Top cross is done..!");
+        sendMessage("Top cross is done, cutting corners now");
+        firstFaceCorners();
     }
 
     private void fixFirstFaceEdge(int topColor, int sideColor) {
         int[] colors = new int[] {topColor, sideColor};
         int row = 0, pos = -1;
-        for (row = 0; row < 3; row++) {
+        for (row = 0; row < SIZE; row++) {
             pos = findPieceOnFace(mYaxisFaceList.get(row), colors);
             if (pos >= 0) {
                 break;
@@ -126,10 +148,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
             firstFaceEdge_fromTopLayer(pos);
         }
     }
-
-    private static final int INNER = 0;
-    private static final int MIDDLE = 1;
-    private static final int OUTER = 2;
 
     private void firstFaceEdge_fromTopLayer(final int pos) {
         sendMessage("Edge piece from top layer");
@@ -196,30 +214,30 @@ public class RubiksCube3x3x3 extends RubiksCube {
             case EDGE_MIDDLE_RIGHT_BACK:
                 assert faceWithTopColor == FACE_RIGHT || faceWithTopColor == FACE_BACK;
                 if (faceWithTopColor == FACE_BACK) {
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 2));
-                    rotations.add(new Rotation(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2));
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.CLOCKWISE, 2));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
+                    rotations.add(new Rotation(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER));
                 } else {
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 2));
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 2));
-                    rotations.add(new Rotation(Axis.Z_AXIS, Direction.COUNTER_CLOCKWISE, 0));
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 2));
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 2));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
+                    rotations.add(new Rotation(Axis.Z_AXIS, Direction.COUNTER_CLOCKWISE, INNER));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
                 }
                 break;
 
             case EDGE_MIDDLE_LEFT_BACK:
                 assert faceWithTopColor == FACE_LEFT || faceWithTopColor == FACE_BACK;
                 if (faceWithTopColor == FACE_BACK) {
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.CLOCKWISE, 2));
-                    rotations.add(new Rotation(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 0));
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 2));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER));
+                    rotations.add(new Rotation(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, INNER));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
                 } else {
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 2));
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 2));
-                    rotations.add(new Rotation(Axis.Z_AXIS, Direction.CLOCKWISE, 0));
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 2));
-                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 2));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
+                    rotations.add(new Rotation(Axis.Z_AXIS, Direction.CLOCKWISE, INNER));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
+                    rotations.add(new Rotation(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
                 }
                 break;
         }
@@ -267,14 +285,15 @@ public class RubiksCube3x3x3 extends RubiksCube {
             algorithm.addStep(new Rotation(Axis.X_AXIS, Direction.CLOCKWISE, INNER));
             algorithm.addStep(new Rotation(Axis.Z_AXIS, Direction.CLOCKWISE, OUTER));
             if (mTopSquares.get(EDGE_TOP_LEFT).mColor == mTopColor &&
-                    mLeftSquares.get(1).mColor == mLeftSquares.get(4).mColor) {
+                    mLeftSquares.get(FIRST_ROW_CENTER).mColor == mLeftSquares.get(CENTER).mColor) {
                 algorithm.addStep(new Rotation(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, INNER));
             }
         } else {
             algorithm.addStep(new Rotation(Axis.X_AXIS, Direction.CLOCKWISE, OUTER));
             algorithm.addStep(new Rotation(Axis.Z_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
             if (mTopSquares.get(EDGE_TOP_RIGHT).mColor == mTopColor &&
-                    mRightSquares.get(1).mColor == mRightSquares.get(4).mColor) {
+                mRightSquares.get(FIRST_ROW_CENTER).mColor == mRightSquares.get(CENTER).mColor) {
+
                 algorithm.addStep(new Rotation(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
             }
         }
@@ -307,6 +326,24 @@ public class RubiksCube3x3x3 extends RubiksCube {
         algo.addStep(rot);
         algo.addStep(rot);
         setAlgo(algo);
+    }
+
+    private boolean isCornerAligned(Piece piece) {
+        for (Square sq: piece.mSquares) {
+            if (sq.mColor != mAllFaces[sq.getFace()].get(CENTER).mColor) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void firstFaceCorners() {
+        int[] cornerIndices = new int[]{
+                LAST_ROW_RIGHT, LAST_ROW_LEFT, FIRST_ROW_LEFT, FIRST_ROW_RIGHT
+        };
+        for (int i = 0; i < cornerIndices.length; i++) {
+            Piece cornerPiece = mYaxisFaceList.get(OUTER).get(cornerIndices[i]);
+        }
     }
 
     private int findPieceOnFace(ArrayList<Piece> face, int[] colors) {
