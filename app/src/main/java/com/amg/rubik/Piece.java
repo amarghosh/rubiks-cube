@@ -29,6 +29,9 @@ public class Piece {
         mSquares.add(center);
     }
 
+    public PieceType getType() {
+        return mType;
+    }
 
     protected void addSquare(Square sq) {
         if (mType == PieceType.CENTER && mSquares.size() != 0 ||
@@ -38,5 +41,32 @@ public class Piece {
                     ", we have " + mSquares.size());
         }
         mSquares.add(sq);
+    }
+
+    public boolean hasColor(int color) {
+        for (Square sq: mSquares) {
+            if (sq.mColor == color) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Square getSquare(int color) {
+        for (Square sq: mSquares) {
+            if (sq.mColor == color) {
+                return sq;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        String s = mSquares.get(0).colorName();
+        for (int i = 1; i < mSquares.size(); i++) {
+            s += "-" + mSquares.get(i).colorName();
+        }
+        return s;
     }
 }

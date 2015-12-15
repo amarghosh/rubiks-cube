@@ -50,7 +50,9 @@ public     class Rotation {
     }
 
     Rotation duplicate() {
-        return new Rotation(axis, direction, startFace, faceCount);
+        Rotation dup = new Rotation(axis, direction, startFace, faceCount);
+        dup.setAngleDelta(angleDelta);
+        return dup;
     }
 
     void reset() {
@@ -67,7 +69,8 @@ public     class Rotation {
         String axes = "XYZ";
         return "Axis " + axes.charAt(axis.ordinal()) +
                 ", direction " + direction +
-                ", face " + startFace;
+                ", face " + startFace +
+                (faceCount > 1 ? " faces " + faceCount : "");
     }
 
     public void setAxis(Axis axis) {

@@ -19,14 +19,39 @@ public class Algorithm {
         reset();
     }
 
+    public Algorithm(ArrayList<Rotation> rotations) {
+        this();
+        for (Rotation rot: rotations) {
+            addStep(rot);
+        }
+    }
+
     private void reset() {
         steps.clear();
         currentPosition = 0;
     }
 
+    public void addStep(Rotation.Axis axis, Rotation.Direction direction, int face, int faceCount) {
+        addStep(new Rotation(axis, direction, face, faceCount));
+    }
+
+    public void addStep(Rotation.Axis axis, Rotation.Direction direction, int face) {
+        addStep(new Rotation(axis, direction, face));
+    }
+
     public void addStep(Rotation rotation) {
         Log.w(tag, rotation.toString());
         steps.add(rotation);
+    }
+
+    public void setAngleDelta(float f) {
+        for (Rotation rot: steps) {
+            rot.setAngleDelta(f);
+        }
+    }
+
+    public void repeatLastStep() {
+        steps.add(steps.get(steps.size() - 1).duplicate());
     }
 
     public boolean isDone() {
@@ -35,6 +60,7 @@ public class Algorithm {
 
     public Rotation getNextStep() {
         if (currentPosition >= steps.size()) {
+            Log.w(tag, "No more steps: " + currentPosition + ", " + steps.size());
             return null;
         }
         return steps.get(currentPosition++).duplicate();

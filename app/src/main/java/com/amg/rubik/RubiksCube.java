@@ -32,8 +32,8 @@ public class RubiksCube {
     protected static final String tag = "rubik-cube";
 
     // Default value for incrementing angle during rotation
-    private static final float ANGLE_DELTA_NORMAL = 2f;
-    private static final float ANGLE_DELTA_FAST = 10f;
+    protected static final float ANGLE_DELTA_NORMAL = 2f;
+    protected static final float ANGLE_DELTA_FAST = 10f;
 
     protected static final int FACE_FRONT = 0;
     protected static final int FACE_RIGHT = 1;
@@ -43,8 +43,8 @@ public class RubiksCube {
     protected static final int FACE_BOTTOM = 5;
 
     // We don't support skewed cubes yet.
-    private static final int CUBE_SIDES = 4;
-    private static final int FACE_COUNT = 6;
+    protected static final int CUBE_SIDES = 4;
+    protected static final int FACE_COUNT = 6;
 
     private static final float SQUARE_SIZE_2 = 0.4f;
     private static final float SQUARE_SIZE_3 = 0.3f;
@@ -111,14 +111,49 @@ public class RubiksCube {
         cube();
         mCurrentAlgo = null;
         mRotation = new Rotation();
-        // ut();
     }
 
     private void ut() {
-        Algorithm algorithm = new Algorithm();
-        algorithm.addStep(new Rotation(Axis.Z_AXIS, Direction.CLOCKWISE, 2));
-        algorithm.addStep(new Rotation(Axis.X_AXIS, Direction.CLOCKWISE, 2));
         mState = CubeState.TESTING;
+        ut_ffcorner_top();
+    }
+
+    private void ut_ffcorner_top() {
+        Algorithm algorithm = new Algorithm();
+        algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
+        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0);
+        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 2);
+        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
+        algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
+        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0);
+        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 2);
+        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0, mSize);
+        algorithm.setAngleDelta(ANGLE_DELTA_FAST);
+        setAlgo(algorithm);
+    }
+
+    private void ut_ffcorner_proper() {
+        Algorithm algorithm = new Algorithm();
+        algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
+        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0);
+        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 2);
+        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
+        algorithm.setAngleDelta(ANGLE_DELTA_FAST);
+        setAlgo(algorithm);
+    }
+
+    private void ut_ffcorner_bottom() {
+        Algorithm algorithm = new Algorithm();
+        algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
+        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0);
+        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 2);
+        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
+        algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
+        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
+        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 2);
+        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
+        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
+        algorithm.setAngleDelta(ANGLE_DELTA_FAST);
         setAlgo(algorithm);
     }
 
