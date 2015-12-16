@@ -6,6 +6,7 @@ import android.util.Log;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import com.amg.rubik.Rotation.Direction;
 import com.amg.rubik.Rotation.Axis;
 
@@ -75,7 +76,19 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
     protected void ut() {
         mState = CubeState.TESTING;
-        ut_middle();
+        ut_topcross();
+    }
+
+    private void ut_topcross() {
+        Algorithm algorithm = new Algorithm();
+        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 0, SIZE);
+        algorithm.repeatLastStep();
+        algorithm.append(lastFaceCrossAlgo(2));
+        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+        algorithm.append(lastFaceCrossAlgo(1));
+        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 0, SIZE);
+        algorithm.repeatLastStep();
+        setAlgo(algorithm);
     }
 
     private void ut_middle() {
@@ -185,7 +198,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         }
 
         sendMessage("Top cross is done, cutting corners now");
-        solveFirstFaceCorners();
+        proceedToNextState();
     }
 
     private void fixFirstFaceEdge(int topColor, int sideColor) {
@@ -411,12 +424,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         return true;
     }
 
-
-    private void solveFirstFaceCorners() {
-        solveState = SolveState.FirstFaceCorners;
-        firstFaceCorners();
-    }
-
     private void firstFaceCorners() {
         int[] corners = new int[]{
                 LAST_ROW_RIGHT, LAST_ROW_LEFT, FIRST_ROW_LEFT, FIRST_ROW_RIGHT
@@ -461,7 +468,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         }
 
         sendMessage("We have a perfect first layer..!");
-        startMiddleLayer();
+        proceedToNextState();
     }
 
     private static int corner2index(int face, int corner) {
@@ -717,7 +724,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
     }
 
     @Override
-    void updateAlgo() {
+    protected void updateAlgo() {
         if (mState != CubeState.SOLVING)
             return;
 
@@ -736,6 +743,18 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
             case LastFaceCross:
                 lastFaceCross();
+                break;
+
+            case LastFaceCrossAlign:
+                lastFaceCrossAlign();
+                break;
+
+            case LastFaceCorners:
+                lastFaceCorners();
+                break;
+
+            case LastFaceCornerAlign:
+                lastFaceCornerAlign();
                 break;
 
             default:
@@ -768,11 +787,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         return rotations;
     }
 
-    private void startMiddleLayer() {
-        solveState = SolveState.MiddleLayer;
-        setAlgo(Algorithm.rotateWhole(Axis.Z_AXIS, Direction.CLOCKWISE, SIZE, 2));
-    }
-
     private void middleLayer() {
         int[] edges = new int[]{
                 LAST_ROW_MIDDLE, MID_ROW_RIGHT, FIRST_ROW_CENTER, MID_ROW_LEFT
@@ -802,6 +816,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         }
 
         sendMessage("Fixed middle layer..!");
+        proceedToNextState();
     }
 
     private void bringUpUnalignedMiddleEdge(int edgeIndex) {
@@ -960,20 +975,161 @@ public class RubiksCube3x3x3 extends RubiksCube {
         return true;
     }
 
-    private void startTopLayer() {
-        solveState = SolveState.LastFaceCross;
-        lastFaceCross();
+    private void lastFaceCross() {
+        int lastFaceColor = mTopSquares.get(CENTER).mColor;
+        int[] edges = new int[]{
+                EDGE_TOP_NEAR, EDGE_TOP_RIGHT, EDGE_TOP_FAR, EDGE_TOP_LEFT
+        };
+        int[] colors = new int[CUBE_SIDES];
+        int yellowCount = 0;
+
+        int front = mTopSquares.get(LAST_ROW_MIDDLE).mColor;
+        int right = mTopSquares.get(MID_ROW_RIGHT).mColor;
+        int back = mTopSquares.get(FIRST_ROW_CENTER).mColor;
+        int left = mTopSquares.get(MID_ROW_LEFT).mColor;
+        Algorithm algo = new Algorithm();
+
+        for (int i = 0; i < edges.length; i++) {
+            Square sq = mTopSquares.get(edges[i]);
+            colors[i] = sq.mColor;
+            if (colors[i] == lastFaceColor) {
+                yellowCount++;
+            } else {
+                Log.w(tag, "colors " + lastFaceColor + " i " + i + " color " + colors[i]);
+            }
+        }
+
+        Log.w(tag, Square.getColorName(lastFaceColor) + " at the top = " + yellowCount);
+
+        if (yellowCount == CUBE_SIDES) {
+            sendMessage("top cross is in place..!");
+            proceedToNextState();
+            return;
+        }
+
+        if (yellowCount != 2) {
+            algo.append(lastFaceCrossAlgo(1));
+            setAlgo(algo);
+            return;
+        }
+
+        // if it is a line
+        if (colors[FACE_FRONT] == colors[FACE_BACK] ||
+                colors[FACE_LEFT] == colors[FACE_RIGHT]) {
+            Log.w(tag, " top is linear ");
+            // if the line is not horizontal, make it so
+            if (colors[FACE_FRONT] == colors[FACE_BACK]) {
+                algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0, SIZE);
+            }
+            algo.append(lastFaceCrossAlgo(1));
+            setAlgo(algo);
+            return;
+        }
+
+        int count = 0;
+        Direction direction = Direction.CLOCKWISE;
+
+        if (colors[FACE_FRONT] == lastFaceColor) {
+            if (colors[FACE_RIGHT] == lastFaceColor) {
+                count = 2;
+            } else if (colors[FACE_LEFT] == lastFaceColor) {
+                count = 1;
+            } else {
+                throw new AssertionError();
+            }
+        } else if (colors[FACE_BACK] == lastFaceColor) {
+            if (colors[FACE_RIGHT] == lastFaceColor) {
+                count = 1;
+                direction = Direction.COUNTER_CLOCKWISE;
+            }
+        }
+
+        Log.w(tag, "count " + count);
+
+        for (int i = 0; i < count; i++) {
+            algo.addStep(Axis.Y_AXIS, direction, OUTER);
+        }
+
+        algo.append(lastFaceCrossAlgo(2));
+        setAlgo(algo);
     }
 
-    private void lastFaceCross() {
-
+    private Algorithm lastFaceCrossAlgo(int count) {
+        if (count < 0 || count > 2) {
+            throw new InvalidParameterException("Invalid count: " + count);
+        }
+        Algorithm algo = new Algorithm();
+        algo.addStep(Axis.Z_AXIS, Direction.CLOCKWISE, OUTER);
+        for (int i = 0; i < count; i++) {
+            algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        }
+        algo.addStep(Axis.Z_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        return algo;
     }
 
     @Override
     protected void setAlgo(Algorithm algo) {
-        if (solveState != SolveState.MiddleLayer) {
+        if (solveState != SolveState.LastFaceCross) {
             algo.setAngleDelta(ANGLE_DELTA_FAST);
         }
         super.setAlgo(algo);
+    }
+
+    private void lastFaceCrossAlign() {
+        proceedToNextState();
+    }
+
+    private void lastFaceCorners() {
+        proceedToNextState();
+    }
+
+    private void lastFaceCornerAlign() {
+        proceedToNextState();
+    }
+
+    private void proceedToNextState() {
+        switch (solveState) {
+            case FirstFaceCross:
+                solveState = SolveState.FirstFaceCorners;
+                firstFaceCorners();
+                break;
+
+            case FirstFaceCorners:
+                solveState = SolveState.MiddleLayer;
+                setAlgo(Algorithm.rotateWhole(Axis.Z_AXIS, Direction.CLOCKWISE, SIZE, 2));
+                break;
+
+            case MiddleLayer:
+                solveState = SolveState.LastFaceCross;
+                lastFaceCross();
+                break;
+
+            case LastFaceCross:
+                solveState = SolveState.LastFaceCrossAlign;
+                lastFaceCrossAlign();
+                break;
+
+            case LastFaceCrossAlign:
+                solveState = SolveState.LastFaceCorners;
+                lastFaceCorners();
+                break;
+
+            case LastFaceCorners:
+                solveState = SolveState.LastFaceCornerAlign;
+                lastFaceCornerAlign();
+                break;
+
+            case LastFaceCornerAlign:
+                solveState = SolveState.None;
+                sendMessage("Tadaa..!");
+                mState = CubeState.IDLE;
+                break;
+
+            default:
+                throw new AssertionError();
+        }
     }
 }
