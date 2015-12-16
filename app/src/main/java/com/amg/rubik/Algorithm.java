@@ -50,6 +50,13 @@ public class Algorithm {
         }
     }
 
+    public void append(Algorithm algo) {
+        if (algo == null) return;
+        for (Rotation rot: algo.steps) {
+            addStep(rot.duplicate());
+        }
+    }
+
     public void repeatLastStep() {
         steps.add(steps.get(steps.size() - 1).duplicate());
     }

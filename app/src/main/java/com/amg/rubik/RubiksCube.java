@@ -113,50 +113,6 @@ public class RubiksCube {
         mRotation = new Rotation();
     }
 
-    private void ut() {
-        mState = CubeState.TESTING;
-        ut_ffcorner_top();
-    }
-
-    private void ut_ffcorner_top() {
-        Algorithm algorithm = new Algorithm();
-        algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
-        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0);
-        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 2);
-        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
-        algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
-        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0);
-        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 2);
-        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0, mSize);
-        algorithm.setAngleDelta(ANGLE_DELTA_FAST);
-        setAlgo(algorithm);
-    }
-
-    private void ut_ffcorner_proper() {
-        Algorithm algorithm = new Algorithm();
-        algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
-        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0);
-        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 2);
-        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
-        algorithm.setAngleDelta(ANGLE_DELTA_FAST);
-        setAlgo(algorithm);
-    }
-
-    private void ut_ffcorner_bottom() {
-        Algorithm algorithm = new Algorithm();
-        algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
-        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0);
-        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 2);
-        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
-        algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, 2);
-        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
-        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 2);
-        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
-        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0);
-        algorithm.setAngleDelta(ANGLE_DELTA_FAST);
-        setAlgo(algorithm);
-    }
-
     public CubeState getState() {
         return mState;
     }
