@@ -17,7 +17,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         None,
         FirstFaceCross,
         FirstFaceCorners,
-        MiddleFace,
+        MiddleLayer,
         LastFaceCross,
         LastFaceCrossAlign,
         LastFaceCorners,
@@ -182,12 +182,11 @@ public class RubiksCube3x3x3 extends RubiksCube {
         }
 
         sendMessage("Top cross is done, cutting corners now");
-        solveState = SolveState.FirstFaceCorners;
-        firstFaceCorners();
+        solveFirstFaceCorners();
     }
 
     private void fixFirstFaceEdge(int topColor, int sideColor) {
-        int[] colors = new int[] {topColor, sideColor};
+        int[] colors = new int[]{topColor, sideColor};
         int row = 0, pos = -1;
         for (row = 0; row < SIZE; row++) {
             pos = findPieceOnFace(mYaxisFaceList.get(row), colors);
@@ -393,16 +392,26 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
     /**
      * Corners
-     * */
+     */
 
     private boolean isCornerAligned(Piece piece) {
         if (piece.mSquares.size() != 3) throw new AssertionError();
         for (Square sq : piece.mSquares) {
             if (sq.mColor != mAllFaces[sq.getFace()].get(CENTER).mColor) {
+                Log.w(tag, piece + " is not aligned: " +
+                    sq.colorName() + " != " +
+                                mAllFaces[sq.getFace()].get(CENTER).colorName()
+                );
                 return false;
             }
         }
         return true;
+    }
+
+
+    private void solveFirstFaceCorners() {
+        solveState = SolveState.FirstFaceCorners;
+        firstFaceCorners();
     }
 
     private void firstFaceCorners() {
@@ -449,7 +458,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         }
 
         sendMessage("We have a perfect first layer..!");
-        solveState = SolveState.MiddleFace;
+        startMiddleLayer();
     }
 
     private static int corner2index(int face, int corner) {
@@ -628,7 +637,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         }
         int sideColorCenterFace = getColorFace(sideColor);
         Log.w(tag, Square.getColorName(sideColor) + " center is at " + sideColorCenterFace +
-            ", face of that color on piece " + sideFace);
+                ", face of that color on piece " + sideFace);
         assert sideColorCenterFace <= FACE_LEFT;
         ArrayList<Rotation> rotations = bringColorToFront(sideColor);
         Log.w(tag, Square.getColorName(sideColor) + " should be at front after " + rotations.size());
@@ -718,6 +727,10 @@ public class RubiksCube3x3x3 extends RubiksCube {
                 firstFaceCorners();
                 break;
 
+            case MiddleLayer:
+                middleLayer();
+                break;
+
             default:
                 mState = CubeState.IDLE;
                 sendMessage("Thats all I can do now");
@@ -746,5 +759,155 @@ public class RubiksCube3x3x3 extends RubiksCube {
             rotations.add(new Rotation(axis, dir, 0, SIZE));
         }
         return rotations;
+    }
+
+    private void startMiddleLayer() {
+        solveState = SolveState.MiddleLayer;
+        setAlgo(Algorithm.rotateWhole(Axis.Z_AXIS, Direction.CLOCKWISE, SIZE, 2));
+    }
+
+    private void middleLayer() {
+        int[] edges = new int[]{
+                LAST_ROW_MIDDLE, MID_ROW_RIGHT, FIRST_ROW_CENTER, MID_ROW_LEFT
+        };
+        for (int i = 0; i < edges.length; i++) {
+            Piece piece = mYaxisFaceList.get(OUTER).get(edges[i]);
+            if (piece.hasColor(mBottomColor)) continue;
+            sendMessage("Found Edge " + piece + " at " + edges[i]);
+            fixMiddleLayer(edges[i]);
+            return;
+        }
+    }
+
+    private Algorithm alignMiddlePiece(int startFace, int destFace) {
+        int delta = Math.abs(startFace - destFace);
+        if (delta == 0) {
+            return null;
+        }
+
+        Direction dir = startFace > destFace ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+        if (delta == 3) {
+            delta = 1;
+            dir = dir == Direction.CLOCKWISE ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
+        }
+
+        Algorithm algo = new Algorithm();
+        for (int i = 0; i < delta; i++) {
+            algo.addStep(Axis.Y_AXIS, dir, OUTER);
+        }
+
+        return algo;
+    }
+
+    private void fixMiddleLayer(int edge) {
+        Piece piece = mYaxisFaceList.get(OUTER).get(edge);
+        Algorithm alignPiece = null;
+        Direction direction;
+        Algorithm algo = new Algorithm();
+        if (piece.getType() != Piece.PieceType.EDGE) throw new AssertionError();
+        int color1 = -1;
+        int color2 = -1;
+        int outerColor = -1;
+        int outerFace = -1;
+        for (Square sq : piece.mSquares) {
+            if (sq.mColor == mBottomColor) {
+                throw new InvalidParameterException("Yellow shouldn't be there");
+            }
+            if (sq.getFace() != FACE_TOP) {
+                outerColor = sq.mColor;
+                outerFace = sq.getFace();
+            }
+            if (color1 == -1) {
+                color1 = sq.mColor;
+            } else if (color2 == -1) {
+                color2 = sq.mColor;
+            }
+        }
+
+        Log.w(tag, "outer face " + outerFace + " outerColor " + outerColor);
+
+        // TODO: Do this in the same cycle and avoid redundant moves
+        if (outerFace == FACE_RIGHT && mRightSquares.get(CENTER).mColor == outerColor) {
+            Log.w(tag, "aligned right");
+            alignPiece = fixMiddleLayerFromRightFace();
+            setAlgo(alignPiece);
+            return;
+        } else if (outerFace == FACE_FRONT && mFrontSquares.get(CENTER).mColor == outerColor) {
+            Log.w(tag, "aligned left");
+            alignPiece = fixMiddleLayerFromFrontFace();
+            setAlgo(alignPiece);
+            return;
+        }
+
+        int face1 = getColorFace(color1);
+        int face2 = getColorFace(color2);
+        int face_delta = 0;
+
+        if (color1 == outerColor) {
+            alignPiece = alignMiddlePiece(outerFace, face1);
+            face_delta = face1 - outerFace;
+        } else {
+            alignPiece = alignMiddlePiece(outerFace, face2);
+            face_delta = face2 - outerFace;
+        }
+
+        int currentCorner = FIRST_ROW_LEFT;
+        if (face1 == FACE_FRONT || face2 == FACE_FRONT) {
+            currentCorner = LAST_ROW_LEFT;
+        }
+        if (face1 == FACE_RIGHT || face2 == FACE_RIGHT) {
+            currentCorner += 2;
+        }
+        int currentCornerIndex = corner2index(FACE_TOP, currentCorner);
+        int desiredCornerIndex = CORNER_INDEX_FRONT_RIGHT;
+
+        if (currentCornerIndex != desiredCornerIndex) {
+            direction = currentCornerIndex == CORNER_INDEX_LEFT_FRONT ?
+                    Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
+            outerFace += direction == Direction.COUNTER_CLOCKWISE ? 1 : -1;
+            algo.addStep(Axis.Y_AXIS, direction, 0, SIZE);
+            if (currentCornerIndex == CORNER_INDEX_BACK_LEFT) {
+                algo.repeatLastStep();
+                outerFace += direction == Direction.COUNTER_CLOCKWISE ? 1 : -1;
+            }
+            outerFace = (outerFace + CUBE_SIDES) % CUBE_SIDES;
+        }
+
+        algo.append(alignPiece);
+        setAlgo(algo);
+    }
+
+    private Algorithm fixMiddleLayerFromFrontFace() {
+        Algorithm algo = new Algorithm();
+        algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+        algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
+        algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        algo.addStep(Axis.Z_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+        algo.addStep(Axis.Z_AXIS, Direction.CLOCKWISE, OUTER);
+        return algo;
+    }
+
+    private Algorithm fixMiddleLayerFromRightFace() {
+        Algorithm algo = new Algorithm();
+        algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        algo.addStep(Axis.Z_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+        algo.addStep(Axis.Z_AXIS, Direction.CLOCKWISE, OUTER);
+        algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+        algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
+        algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        return algo;
+    }
+
+    @Override
+    protected void setAlgo(Algorithm algo) {
+        if (solveState != SolveState.MiddleLayer) {
+            algo.setAngleDelta(ANGLE_DELTA_FAST);
+        }
+        super.setAlgo(algo);
     }
 }
