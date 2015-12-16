@@ -414,6 +414,7 @@ public class RubiksCube {
         mYaxisFaceList = new ArrayList<>(mSize);
         mZaxisFaceList = new ArrayList<>(mSize);
         createFaces();
+        updateSquareFaces();
     }
 
     private void updateSquareFaces() {
