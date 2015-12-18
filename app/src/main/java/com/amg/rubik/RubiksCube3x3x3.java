@@ -1069,23 +1069,310 @@ public class RubiksCube3x3x3 extends RubiksCube {
         return algo;
     }
 
+    private Algorithm lastFaceCrossAlignAlgo(Direction direction) {
+        Algorithm algo = new Algorithm();
+        if (direction == Direction.CLOCKWISE) {
+            algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, INNER);
+            algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, INNER);
+            algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, INNER);
+            algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.repeatLastStep();
+            algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, INNER);
+        } else {
+            algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.repeatLastStep();
+            algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
         }
-        super.setAlgo(algo);
+        return algo;
     }
 
     private void lastFaceCrossAlign() {
-        proceedToNextState();
+
+        /**
+         * Find the difference between the actual position and desired position of each colors
+         * */
+        int[] offsets = new int[]{0, 0, 0, 0};
+        int[] edges = new int[]{
+                LAST_ROW_MIDDLE, MID_ROW_RIGHT, FIRST_ROW_CENTER, MID_ROW_LEFT
+        };
+        String dbg = "offsets:";
+        for (int i = 0; i < edges.length; i++) {
+            Piece piece = mYaxisFaceList.get(OUTER).get(edges[i]);
+            Square sideSquare = null;
+            for (Square sq: piece.mSquares) {
+                if (sq.getFace() == FACE_TOP) {
+                    continue;
+                }
+                sideSquare = sq;
+                break;
+            }
+            if (sideSquare == null) {
+                throw new AssertionError("side square null at " + i + " for piece: " + piece);
+            }
+            int face = getColorFace(sideSquare.mColor);
+            if (face == FACE_TOP || face == FACE_BOTTOM) {
+                throw new AssertionError("color and face mismatch: " +
+                        Square.getColorName(sideSquare.mColor) + ", face: " + face);
+            }
+            offsets[i] = face - i;
+            offsets[i] = (offsets[i] + CUBE_SIDES) % CUBE_SIDES;
+            dbg += " " + offsets[i];
+        }
+        Log.w(tag, dbg);
+
+        /**
+         * If all offsets are equal, we just need to rotate the top layer to align the centers.
+         * If at least one of them is different, we should align it and apply algorithms
+         * */
+        for (int i = 0; i < offsets.length - 1; i++) {
+            if (offsets[i] != offsets[i + 1]) {
+                fixLastFaceCrossAlignment(offsets);
+                return;
+            }
+        }
+
+        if (offsets[0] != 0) {
+            Algorithm algo = new Algorithm();
+            algo.addStep(Axis.Y_AXIS, (offsets[0] == 3) ?
+                    Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE, OUTER);
+            if (Math.abs(offsets[0]) == 2) {
+                algo.repeatLastStep();
+            }
+            setAlgo(algo);
+        } else {
+            // Offsets are all zero; this is the best case scenario
+            sendMessage("top cross is now aligned");
+            proceedToNextState();
+        }
+    }
+
+    private void fixLastFaceCrossAlignment(int[] offsets) {
+        Algorithm algorithm = new Algorithm();
+        Direction direction;
+        int alignedCount = 0;
+        int firstAlignedIndex = -1;
+        for (int i = 0; i < offsets.length; i++) {
+            if (offsets[i] == 0) {
+                alignedCount++;
+                if (firstAlignedIndex == -1)
+                    firstAlignedIndex = i;
+            }
+        }
+
+        Log.w(tag, "Aligned count " + alignedCount);
+
+        /**
+         * If nothing is aligned, rotate the top once and try again.
+         * */
+        if (alignedCount == 0) {
+            algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+            setAlgo(algorithm);
+            return;
+        }
+
+        /**
+         * Two squares are aligned.
+         *
+         * case 1: They are adjacent:
+         *   The other two are in swapped state now.
+         *   Rotate the cube once to misalign the currently aligned one and align
+         *   one of the other two
+         * case 2: They are opposite
+         *   TODO: fix this
+         *   Apply algo and hope for the best
+         * */
+        if (alignedCount == 2) {
+            if (offsets[(firstAlignedIndex + 1) % CUBE_SIDES] == 0 ||
+                    offsets[(firstAlignedIndex - 1 + CUBE_SIDES) % CUBE_SIDES] == 0) {
+                // case: 1
+                algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+                setAlgo(algorithm);
+            } else {
+                // case: 2
+                algorithm.append(lastFaceCrossAlignAlgo(Direction.CLOCKWISE));
+                setAlgo(algorithm);
+            }
+            return;
+        }
+
+        /**
+         * Only one of them is aligned. Turn the cube to bring that color to front and apply
+         * appropriate algorithm
+         * */
+        if (alignedCount == 1) {
+            int color = mAllFaces[firstAlignedIndex].get(CENTER).mColor;
+            if (mAllFaces[firstAlignedIndex].get(FIRST_ROW_CENTER).mColor != color) {
+                throw new AssertionError("color mismatch at " + firstAlignedIndex + ": " +
+                        color + " - " + mAllFaces[firstAlignedIndex].get(FIRST_ROW_CENTER).mColor);
+            }
+            if (firstAlignedIndex != FACE_FRONT) {
+                direction = firstAlignedIndex == FACE_LEFT ? Direction.COUNTER_CLOCKWISE :
+                    Direction.CLOCKWISE;
+                algorithm.addStep(Axis.Y_AXIS, direction, 0, SIZE);
+                if (firstAlignedIndex == FACE_BACK) {
+                    algorithm.repeatLastStep();
+                }
+            }
+            if (offsets[(firstAlignedIndex + 1) % CUBE_SIDES] == 1) {
+                algorithm.append(lastFaceCrossAlignAlgo(Direction.COUNTER_CLOCKWISE));
+            } else {
+                algorithm.append(lastFaceCrossAlignAlgo(Direction.CLOCKWISE));
+            }
+            setAlgo(algorithm);
+        }
     }
 
     private void lastFaceCorners() {
-        proceedToNextState();
+        int[] corners = new int[]{
+                LAST_ROW_RIGHT, FIRST_ROW_RIGHT, FIRST_ROW_LEFT, LAST_ROW_LEFT
+        };
+        int positionedCorners = 0;
+        int firstPositionedCorner = -1;
+        for (int i = 0; i < corners.length; i++) {
+            Piece piece = mYaxisFaceList.get(OUTER).get(corners[i]);
+            if (isCornerPositioned(piece)) {
+                positionedCorners++;
+                if (firstPositionedCorner == -1) {
+                    firstPositionedCorner = corner2index(FACE_TOP, corners[i]);
+                }
+            }
+        }
+
+        Log.w(tag, "positioned corners " + positionedCorners + " first " + firstPositionedCorner);
+
+        if (positionedCorners == CUBE_SIDES) {
+            proceedToNextState();
+            return;
+        }
+
+        Algorithm algorithm = new Algorithm();
+
+        // TODO: this is guess work; needs to be optimized.
+        if (positionedCorners == 0) {
+            algorithm.append(lastFaceCornerPositionAlgo(Direction.CLOCKWISE));
+            setAlgo(algorithm);
+            return;
+        }
+
+        if (positionedCorners != 1) {
+            sendMessage("Something went wrong in top corner positioning");
+            return;
+        }
+
+        if (firstPositionedCorner != FACE_FRONT) {
+            Direction direction = firstPositionedCorner == FACE_LEFT ?
+                    Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
+            algorithm.addStep(Axis.Y_AXIS, direction, 0, SIZE);
+            if (firstPositionedCorner == FACE_BACK) {
+                algorithm.repeatLastStep();
+            }
+        }
+
+        algorithm.append(lastFaceCornerPositionAlgo(Direction.CLOCKWISE));
+        setAlgo(algorithm);
     }
 
+    private Algorithm lastFaceCornerPositionAlgo(Direction direction) {
+        Algorithm algo = new Algorithm();
+        if (direction == Direction.COUNTER_CLOCKWISE) {
+            algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, INNER);
+            algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, INNER);
+            algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+        } else {
+            algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, INNER);
+            algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, INNER);
+            algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+            algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+            algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        }
+        return algo;
+    }
+
+    private boolean isCornerPositioned(Piece piece) {
+        if (piece.getType() != Piece.PieceType.CORNER) throw new AssertionError();
+        int[] faces = new int[3];
+        for (int i = 0; i < 3; i++) {
+            faces[i] = piece.mSquares.get(i).getFace();
+        }
+
+        for (Square sq: piece.mSquares) {
+            boolean found = false;
+            for (int face: faces) {
+                if (sq.mColor == mAllFaces[face].get(CENTER).mColor) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    private boolean checkTopCorners() {
+        int[] corners = new int[]{
+                LAST_ROW_RIGHT, FIRST_ROW_RIGHT, FIRST_ROW_LEFT, LAST_ROW_LEFT
+        };
+        for (int i = 0; i < corners.length; i++) {
+            Piece piece = mYaxisFaceList.get(OUTER).get(corners[i]);
+            if (!isCornerAligned(piece)) {
+                Log.w(tag, piece + " is not aligned");
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+
     private void lastFaceCornerAlign() {
-        proceedToNextState();
+        int lastColor = mTopSquares.get(CENTER).mColor;
+        Algorithm algorithm = new Algorithm();
+        if (mTopSquares.get(LAST_ROW_RIGHT).mColor == lastColor) {
+            if (checkTopCorners()) {
+                proceedToNextState();
+            }
+            else {
+                algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
+                setAlgo(algorithm);
+            }
+        } else {
+            algorithm.append(theFinalAlgorithm());
+            setAlgo(algorithm);
+        }
+    }
+
+    private Algorithm theFinalAlgorithm() {
+        Algorithm algo = new Algorithm();
+        algo.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
+        algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, INNER);
+        algo.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
+        algo.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, INNER);
+        return algo;
     }
 
     private void proceedToNextState() {
+        if (mState != CubeState.SOLVING) {
+            Log.e(tag, "invalid state " + mState);
+            return;
+        }
         switch (solveState) {
             case FirstFaceCross:
                 solveState = SolveState.FirstFaceCorners;
