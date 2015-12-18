@@ -30,7 +30,7 @@ public     class Rotation {
     int startFace;
     int faceCount;
     float angle;
-    float angleDelta = 1f;
+    float angleDelta = 2f;
 
     Rotation() {
         reset();

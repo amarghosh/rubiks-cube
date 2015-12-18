@@ -146,9 +146,9 @@ public class RubiksCube {
                 mListener.handleCubeMessage(str);
             }
         } catch (Exception e) {
-            // e.printStackTrace();
+            Log.e(tag, e.toString());
         }
-        Log.w("CUBE-MSG: ", str);
+        Log.w(tag, str);
     }
 
     public int solve() {
@@ -311,6 +311,9 @@ public class RubiksCube {
         rotateMode = RotateMode.NONE;
         mRotation.reset();
         mCurrentAlgo = null;
+        if (mState == CubeState.TESTING) {
+            mState = CubeState.IDLE;
+        }
     }
 
     void rotateFaceColors(ArrayList<Square> squares, Direction direction, int size) {

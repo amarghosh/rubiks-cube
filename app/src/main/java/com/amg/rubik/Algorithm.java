@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 public class Algorithm {
 
-    private static final String tag = "algo";
+    private static final String tag = "rubik-algo";
 
     private ArrayList<Rotation> steps;
     private int currentPosition;
@@ -58,7 +58,7 @@ public class Algorithm {
     }
 
     public void repeatLastStep() {
-        steps.add(steps.get(steps.size() - 1).duplicate());
+        addStep(steps.get(steps.size() - 1).duplicate());
     }
 
     public boolean isDone() {

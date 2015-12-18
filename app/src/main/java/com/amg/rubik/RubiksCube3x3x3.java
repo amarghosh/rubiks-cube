@@ -1,6 +1,5 @@
 package com.amg.rubik;
 
-import android.graphics.YuvImage;
 import android.util.Log;
 
 import java.security.InvalidParameterException;
@@ -76,17 +75,38 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
     protected void ut() {
         mState = CubeState.TESTING;
-        ut_topcross();
+        ut_final_steps();
+    }
+
+    private void ut_final_steps() {
+        Algorithm algorithm = new Algorithm();
+        algorithm.addStep(Axis.Z_AXIS, Direction.CLOCKWISE, 0, SIZE);
+        algorithm.repeatLastStep();
+        algorithm.append(theFinalAlgorithm());
+        algorithm.addStep(Axis.Z_AXIS, Direction.CLOCKWISE, 0, SIZE);
+        algorithm.repeatLastStep();
+        setAlgo(algorithm);
+    }
+
+    private void ut_topcorner_pos() {
+        Algorithm algorithm = new Algorithm();
+        algorithm.addStep(Axis.Z_AXIS, Direction.CLOCKWISE, 0, SIZE);
+        algorithm.repeatLastStep();
+        algorithm.append(lastFaceCornerPositionAlgo(Direction.COUNTER_CLOCKWISE));
+        algorithm.addStep(Axis.Z_AXIS, Direction.CLOCKWISE, 0, SIZE);
+        algorithm.repeatLastStep();
+        setAlgo(algorithm);
     }
 
     private void ut_topcross() {
         Algorithm algorithm = new Algorithm();
-        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 0, SIZE);
+        algorithm.addStep(Axis.Z_AXIS, Direction.CLOCKWISE, 0, SIZE);
         algorithm.repeatLastStep();
-        algorithm.append(lastFaceCrossAlgo(2));
-        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, OUTER);
-        algorithm.append(lastFaceCrossAlgo(1));
-        algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, 0, SIZE);
+        algorithm.append(lastFaceCrossAlignAlgo(Direction.COUNTER_CLOCKWISE));
+        algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, 0, SIZE);
+        algorithm.append(lastFaceCrossAlignAlgo(Direction.COUNTER_CLOCKWISE));
+        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0, SIZE);
+        algorithm.addStep(Axis.Z_AXIS, Direction.CLOCKWISE, 0, SIZE);
         algorithm.repeatLastStep();
         setAlgo(algorithm);
     }
@@ -147,7 +167,8 @@ public class RubiksCube3x3x3 extends RubiksCube {
     @Override
     public int solve() {
         if (mState == CubeState.TESTING) {
-            mState = CubeState.IDLE;
+            sendMessage("wait please");
+            return -1;
         }
         if (mState != CubeState.IDLE) {
             sendMessage("Invalid state to solve: " + mState);
@@ -410,10 +431,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         setAlgo(algo);
     }
 
-    /**
-     * Corners
-     */
-
     private boolean isCornerAligned(Piece piece) {
         if (piece.mSquares.size() != 3) throw new AssertionError();
         for (Square sq : piece.mSquares) {
@@ -441,7 +458,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
             return;
         }
 
-        Log.w(tag, "No whites in the lower layer. Bring up whites from bottom face");
+        // No whites in the lower layer. Bring up whites from bottom face
 
         for (int i = 0; i < corners.length; i++) {
             Piece cornerPiece = mYaxisFaceList.get(INNER).get(corners[i]);
@@ -456,7 +473,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
             return;
         }
 
-        Log.w(tag, "Look for whites in top layer");
+        // Look for whites in top layer
         for (int i = 0; i < corners.length; i++) {
             Piece cornerPiece = mYaxisFaceList.get(OUTER).get(corners[i]);
             if (isCornerAligned(cornerPiece)) {
@@ -519,7 +536,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         int desiredCornerIndex = CORNER_INDEX_FRONT_RIGHT;
         int currentCornerIndex = corner2index(FACE_TOP, corner);
         int delta = Math.abs(currentCornerIndex - desiredCornerIndex);
-        Log.w(tag, "corners " + currentCornerIndex + ", " + desiredCornerIndex);
 
         if (desiredCornerIndex != currentCornerIndex) {
             /**
@@ -592,7 +608,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         int currentCornerIndex = corner2index(FACE_BOTTOM, corner);
         int desiredCornerIndex = corner2index(FACE_BOTTOM, desiredCorner);
         int delta = Math.abs(currentCornerIndex - desiredCornerIndex);
-        Log.w(tag, "corners " + currentCornerIndex + ", " + desiredCornerIndex);
 
         if (desiredCornerIndex != CORNER_INDEX_FRONT_RIGHT) {
             // Bring the desired corner to front-right
@@ -634,7 +649,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         for (Square sq : piece.mSquares) {
             if (sq.mColor == topColor) {
                 topColorFace = sq.getFace();
-                Log.w(tag, "white faces " + topColorFace);
                 if (topColorFace == FACE_BOTTOM) throw new AssertionError();
                 continue;
             }
@@ -646,18 +660,13 @@ public class RubiksCube3x3x3 extends RubiksCube {
             }
         }
         int sideColorCenterFace = getColorFace(sideColor);
-        Log.w(tag, Square.getColorName(sideColor) + " center is at " + sideColorCenterFace +
-                ", face of that color on piece " + sideFace);
-        assert sideColorCenterFace <= FACE_LEFT;
+        if (sideColorCenterFace > FACE_LEFT) throw new AssertionError();
         ArrayList<Rotation> rotations = bringColorToFront(sideColor);
-        Log.w(tag, Square.getColorName(sideColor) + " should be at front after " + rotations.size());
 
         int count = Math.abs(sideColorCenterFace - sideFace);
         Direction direction;
         direction = sideColorCenterFace > sideFace ?
                 Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
-
-        Log.w(tag, "count " + count + " direction " + direction);
 
         if (count == 3) {
             count = 1;
@@ -671,8 +680,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
         topColorFace -= sideFace;
         topColorFace = (topColorFace + CUBE_SIDES) % CUBE_SIDES;
-
-        Log.w(tag, "white should now be at face " + topColorFace);
 
         if (topColorFace == FACE_RIGHT) {
             rotations.add(new Rotation(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER));
@@ -725,6 +732,8 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
     @Override
     protected void updateAlgo() {
+        super.updateAlgo();
+
         if (mState != CubeState.SOLVING)
             return;
 
@@ -799,7 +808,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
             return;
         }
 
-        Log.w(tag, "search for misaligned middle pieces");
+        // search for misaligned middle pieces
         edges = new int[]{
                 EDGE_MIDDLE_FRONT_LEFT, EDGE_MIDDLE_FRONT_RIGHT,
                 EDGE_MIDDLE_RIGHT_BACK, EDGE_MIDDLE_LEFT_BACK
@@ -853,7 +862,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         }
 
         Algorithm algo = new Algorithm();
-        Log.w(tag, "steps to align middlePiece " + delta);
         for (int i = 0; i < delta; i++) {
             algo.addStep(Axis.Y_AXIS, dir, OUTER);
         }
@@ -886,16 +894,12 @@ public class RubiksCube3x3x3 extends RubiksCube {
             }
         }
 
-        Log.w(tag, "outer face " + outerFace + " outerColor " + outerColor);
-
         // TODO: Do this in the same cycle and avoid redundant moves
         if (outerFace == FACE_RIGHT && mRightSquares.get(CENTER).mColor == outerColor) {
-            Log.w(tag, "aligned right");
             alignPiece = fixMiddleLayerFromRightFace();
             setAlgo(alignPiece);
             return;
         } else if (outerFace == FACE_FRONT && mFrontSquares.get(CENTER).mColor == outerColor) {
-            Log.w(tag, "aligned left");
             alignPiece = fixMiddleLayerFromFrontFace();
             setAlgo(alignPiece);
             return;
@@ -994,12 +998,8 @@ public class RubiksCube3x3x3 extends RubiksCube {
             colors[i] = sq.mColor;
             if (colors[i] == lastFaceColor) {
                 yellowCount++;
-            } else {
-                Log.w(tag, "colors " + lastFaceColor + " i " + i + " color " + colors[i]);
             }
         }
-
-        Log.w(tag, Square.getColorName(lastFaceColor) + " at the top = " + yellowCount);
 
         if (yellowCount == CUBE_SIDES) {
             sendMessage("top cross is in place..!");
@@ -1013,10 +1013,11 @@ public class RubiksCube3x3x3 extends RubiksCube {
             return;
         }
 
-        // if it is a line
+        /**
+         * If it is a line, apply the algo once
+         * */
         if (colors[FACE_FRONT] == colors[FACE_BACK] ||
                 colors[FACE_LEFT] == colors[FACE_RIGHT]) {
-            Log.w(tag, " top is linear ");
             // if the line is not horizontal, make it so
             if (colors[FACE_FRONT] == colors[FACE_BACK]) {
                 algo.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0, SIZE);
@@ -1044,8 +1045,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
             }
         }
 
-        Log.w(tag, "count " + count);
-
         for (int i = 0; i < count; i++) {
             algo.addStep(Axis.Y_AXIS, direction, OUTER);
         }
@@ -1070,10 +1069,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         return algo;
     }
 
-    @Override
-    protected void setAlgo(Algorithm algo) {
-        if (solveState != SolveState.LastFaceCross) {
-            algo.setAngleDelta(ANGLE_DELTA_FAST);
         }
         super.setAlgo(algo);
     }
@@ -1132,4 +1127,13 @@ public class RubiksCube3x3x3 extends RubiksCube {
                 throw new AssertionError();
         }
     }
+
+    @Override
+    protected void setAlgo(Algorithm algo) {
+        if (solveState.ordinal() < SolveState.LastFaceCornerAlign.ordinal()) {
+            algo.setAngleDelta(ANGLE_DELTA_NORMAL);
+        }
+        super.setAlgo(algo);
+    }
+
 }
