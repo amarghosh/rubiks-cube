@@ -19,8 +19,6 @@ public abstract class GLRenderer implements Renderer {
     private int mHeight;
     private long mStartTime;
     private int mFrameCount;
-    public volatile float mAngle;
-
 
     public GLRenderer() {
         mFirstDraw = true;
@@ -29,7 +27,6 @@ public abstract class GLRenderer implements Renderer {
         mHeight = -1;
         mStartTime = System.currentTimeMillis();
         mFrameCount = 0;
-        mAngle = 0;
     }
 
     protected final float[] mMVPMatrix = new float[16];
@@ -71,17 +68,7 @@ public abstract class GLRenderer implements Renderer {
         mHeight = -1;
     }
 
-    public float getAngle() {
-        return mAngle;
-    }
-
-    public void setAngle(float angle) {
-        mAngle = angle;
-    }
-
     public void onDrawFrame(GL10 arg0) {
-        float[] scratch = new float[16];
-
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0,
                 2, 2, 3f, // eye
@@ -90,9 +77,7 @@ public abstract class GLRenderer implements Renderer {
         );
 
         // Calculate the projection and view transformation
-        Matrix.multiplyMM(scratch, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-        Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, -1.0f);
-        Matrix.multiplyMM(mMVPMatrix, 0, scratch, 0, mRotationMatrix, 0);
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         onDrawFrame(mFirstDraw);
 

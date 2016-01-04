@@ -1,5 +1,6 @@
 package com.amg.rubik;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -32,8 +33,8 @@ public class RubiksCube {
     protected static final String tag = "rubik-cube";
 
     // Default value for incrementing angle during rotation
-    protected static final float ANGLE_DELTA_NORMAL = 2f;
-    protected static final float ANGLE_DELTA_FAST = 2f;
+    protected static final float ANGLE_DELTA_NORMAL = 4f;
+    protected static final float ANGLE_DELTA_FAST = 10f;
 
     protected static final int FACE_FRONT = 0;
     protected static final int FACE_RIGHT = 1;
@@ -85,6 +86,7 @@ public class RubiksCube {
 
     enum RotateMode {
         NONE,
+        MANUAL,
         RANDOM,
         ALGORITHM,
         REPEAT
@@ -303,6 +305,8 @@ public class RubiksCube {
 
             default:
                 mRotation.reset();
+                rotateMode = RotateMode.NONE;
+                mState = CubeState.IDLE;
                 break;
         }
     }
@@ -988,5 +992,27 @@ public class RubiksCube {
         mRotation = algo.getNextStep();
         rotateMode = RotateMode.ALGORITHM;
         mRotation.start();
+    }
+
+    public void rotate(Rotation rotation) {
+        if (mState != CubeState.IDLE) {
+            Log.w(tag, "Cannot rotate in state " + mState);
+            return;
+        }
+        if (rotateMode != RotateMode.NONE) {
+            Log.w(tag, "Cannot rotate in mode " + rotateMode);
+            return;
+        }
+        if (rotation.startFace + rotation.faceCount > mSize) {
+            throw new InvalidParameterException(
+                    String.format("size %d, rotation %s", mSize, rotation.toString()));
+        }
+        rotateMode = RotateMode.MANUAL;
+        mRotation = rotation.duplicate();
+        mRotation.start();
+    }
+
+    public int size() {
+        return mSize;
     }
 }
