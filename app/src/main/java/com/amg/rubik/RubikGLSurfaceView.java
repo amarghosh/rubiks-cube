@@ -22,6 +22,10 @@ public class RubikGLSurfaceView extends GLSurfaceView {
         setRenderer(mRenderer);
     }
 
+    public void printDebugInfo() {
+        Log.w(tag, "FPS " + mRenderer.getFps());
+    }
+
     public void setCube(RubiksCube cube) {
         mRenderer.setCube(cube);
     }

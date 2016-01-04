@@ -93,6 +93,7 @@ public class MainActivity extends Activity
                 break;
 
             case R.id.solveButton:
+                mRubikView.printDebugInfo();
                 solve();
                 break;
 
@@ -155,12 +156,14 @@ public class MainActivity extends Activity
     private void randomizeOnclick() {
         Button btn = (Button)findViewById(R.id.randomizeButton);
         if (mCube.getState() == RubiksCube.CubeState.IDLE) {
+            mRubikView.printDebugInfo();
             mCube.randomize();
             btn.setText(R.string.stop);
             btn = (Button)findViewById(R.id.solveButton);
             btn.setEnabled(false);
         } else if (mCube.getState() == RubiksCube.CubeState.RANDOMIZE) {
             mCube.stopRandomize();
+            mRubikView.printDebugInfo();
             btn.setText(R.string.randomize);
             btn = (Button)findViewById(R.id.solveButton);
             btn.setEnabled(true);
@@ -189,6 +192,7 @@ public class MainActivity extends Activity
                 btn.setEnabled(true);
                 btn = (Button) findViewById(R.id.randomizeButton);
                 btn.setEnabled(true);
+                mRubikView.printDebugInfo();
             }
         });
     }

@@ -84,9 +84,15 @@ public abstract class GLRenderer implements Renderer {
         mFirstDraw = false;
     }
 
+    /**
+     * Get the FPS (frames per second). This function resets the timer and frame count.
+     * */
     public int getFps() {
         long currentTime = System.currentTimeMillis();
-        return (int)(mFrameCount / (currentTime - mStartTime));
+        int fps = (int)((mFrameCount * 1000) / (currentTime - mStartTime));
+        mStartTime = System.currentTimeMillis();
+        mFrameCount = 0;
+        return fps;
     }
 
     public abstract void onCreate(int width, int height, boolean contextLost);

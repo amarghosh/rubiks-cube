@@ -40,7 +40,6 @@ public class Algorithm {
     }
 
     public void addStep(Rotation rotation) {
-        Log.w(tag, rotation.toString());
         steps.add(rotation);
     }
 
