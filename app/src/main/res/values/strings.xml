@@ -1,8 +1,17 @@
 <resources>
     <string name="app_name">Rubiks Cube</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
     <string name="author">amarghosh</string>
     <string name="randomize">randomize</string>
     <string name="stop">stop</string>
     <string name="solve">solve</string>
+
+    <string name="cube_size">Cube Size</string>
+    <string name="speed">Speed</string>
+    <string-array name="speed_values">
+        <item>Slow</item>
+        <item>Medium</item>
+        <item>Fast</item>
+    </string-array>
 </resources>
