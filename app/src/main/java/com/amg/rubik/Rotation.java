@@ -30,7 +30,7 @@ public     class Rotation {
     int startFace;
     int faceCount;
     float angle;
-    float angleDelta = 2f;
+    float angleDelta = RubiksCube.ANGLE_DELTA_NORMAL;
 
     Rotation() {
         reset();

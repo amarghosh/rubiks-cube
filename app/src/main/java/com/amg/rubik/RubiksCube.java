@@ -32,7 +32,7 @@ public class RubiksCube {
     protected static final String tag = "rubik-cube";
 
     // Default value for incrementing angle during rotation
-    protected static final float ANGLE_DELTA_NORMAL = 2f;
+    protected static final float ANGLE_DELTA_NORMAL = 4f;
     protected static final float ANGLE_DELTA_FAST = 10f;
 
     protected static final int FACE_FRONT = 0;
@@ -77,7 +77,7 @@ public class RubiksCube {
         TESTING
     }
 
-    private CubeListener mListener = null;
+    protected CubeListener mListener = null;
 
     protected CubeState mState = CubeState.IDLE;
 

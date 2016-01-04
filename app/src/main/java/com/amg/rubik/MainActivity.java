@@ -179,4 +179,17 @@ public class MainActivity extends Activity
             }
         });
     }
+
+    @Override
+    public void handleCubeSolved() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Button btn = (Button) findViewById(R.id.solveButton);
+                btn.setEnabled(true);
+                btn = (Button) findViewById(R.id.randomizeButton);
+                btn.setEnabled(true);
+            }
+        });
+    }
 }

@@ -5,4 +5,5 @@ package com.amg.rubik;
  */
 public interface CubeListener {
     public void handleCubeMessage(String msg);
+    public void handleCubeSolved();
 }

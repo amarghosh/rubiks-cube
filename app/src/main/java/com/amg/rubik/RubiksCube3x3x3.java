@@ -1407,6 +1407,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
             case LastFaceCornerAlign:
                 solveState = SolveState.None;
                 sendMessage("Tadaa..!");
+                mListener.handleCubeSolved();
                 mState = CubeState.IDLE;
                 break;
 
