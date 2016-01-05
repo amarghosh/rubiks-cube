@@ -18,6 +18,7 @@
             android:id="@+id/randomizeButton"
             android:text="@string/randomize"
             />
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,7 +43,7 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/container"
+        android:id="@+id/cube_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 

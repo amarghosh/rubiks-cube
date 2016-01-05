@@ -1,15 +1,8 @@
 package com.amg.rubik;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -27,14 +20,8 @@ public class CubeFragment extends Fragment
     private int cubeSize = 3;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.w(tag, "onCreate");
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_cube, container);
+        rootView = inflater.inflate(R.layout.fragment_cube, container, false);
         initUi();
         initializeRubikView();
         return rootView;
@@ -52,7 +39,7 @@ public class CubeFragment extends Fragment
     }
 
     private void initializeRubikView() {
-        ViewGroup view = (ViewGroup)findViewById(R.id.container);
+        ViewGroup view = (ViewGroup)findViewById(R.id.cube_holder);
         mRubikView = new RubikGLSurfaceView(getActivity());
         createCube();
         view.addView(mRubikView);
