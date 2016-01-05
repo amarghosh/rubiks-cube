@@ -1,10 +1,13 @@
 package com.amg.rubik;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,22 +15,29 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends Activity
+public class CubeFragment extends Fragment
         implements View.OnClickListener, CubeListener {
 
     private static final String tag = "rubik-main";
+
+    private View rootView;
 
     private RubiksCube mCube = null;
     private RubikGLSurfaceView mRubikView = null;
     private int cubeSize = 3;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.w(tag, "onCreate");
-        setContentView(R.layout.activity_main);
-        initializeRubikView();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        rootView = inflater.inflate(R.layout.fragment_cube, container);
         initUi();
+        initializeRubikView();
+        return rootView;
     }
 
     private void initUi() {
@@ -37,57 +47,27 @@ public class MainActivity extends Activity
         findViewById(R.id.decButton).setOnClickListener(this);
     }
 
-    private void initializeRubikView() {
-        if (mCube != null) {
-            Log.w(tag, "mCube is not null in init");
-            return;
-        }
+    private View findViewById(int id) {
+        return rootView.findViewById(id);
+    }
 
+    private void initializeRubikView() {
         ViewGroup view = (ViewGroup)findViewById(R.id.container);
-        mRubikView = new RubikGLSurfaceView(this);
+        mRubikView = new RubikGLSurfaceView(getActivity());
         createCube();
         view.addView(mRubikView);
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         mRubikView.onResume();
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         mRubikView.onPause();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        /*
-        Handle action bar item clicks here. The action bar will
-        automatically handle clicks on the Home/Up button, so long
-        as you specify a parent activity in AndroidManifest.xml.
-        */
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.author) {
-            return true;
-        }
-
-        if (id == R.id.settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -125,7 +105,8 @@ public class MainActivity extends Activity
 
     private void changeCubeSize(int factor) {
         if (mCube.getState() != RubiksCube.CubeState.IDLE) {
-            Toast.makeText(this, "Cube is in state " + mCube.getState(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Cube is in state " + mCube.getState(),
+                    Toast.LENGTH_SHORT).show();
             return;
         }
         if (cubeSize == 1 && factor < 0) {
@@ -135,7 +116,7 @@ public class MainActivity extends Activity
         createCube();
         resetButtons();
         if (cubeSize > 9) {
-            Toast.makeText(this,
+            Toast.makeText(getActivity(),
                     "Cube is too big. May not render correctly", Toast.LENGTH_SHORT).show();
         }
     }
@@ -178,12 +159,11 @@ public class MainActivity extends Activity
 
     private Toast currentToast;
     public void handleCubeMessage(final String msg) {
-        final Context ctx = this;
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (currentToast != null) currentToast.cancel();
-                currentToast = Toast.makeText(ctx, msg, Toast.LENGTH_SHORT);
+                currentToast = Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT);
                 currentToast.show();
             }
         });
@@ -191,7 +171,7 @@ public class MainActivity extends Activity
 
     @Override
     public void handleCubeSolved() {
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Button btn = (Button) findViewById(R.id.solveButton);

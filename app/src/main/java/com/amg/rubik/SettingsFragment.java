@@ -1,25 +1,35 @@
 package com.amg.rubik;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.app.Activity;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SettingsActivity extends Activity implements View.OnClickListener {
+public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     private static final int MIN_CUBE_SIZE = 2;
     private static final int MAX_CUBE_SIZE = 10;
 
+    private View rootView;
+
     private TextView cubeSizeField;
     private int cubeSize = 3;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        rootView = inflater.inflate(R.layout.fragment_settings, container);
         initUI();
+        return rootView;
+    }
+
+    private View findViewById(int id) {
+        return rootView.findViewById(id);
     }
 
     private void initUI() {
@@ -43,7 +53,7 @@ public class SettingsActivity extends Activity implements View.OnClickListener {
         }
 
         if (cubeSize > MAX_CUBE_SIZE) {
-            Toast.makeText(this, "Cube is too big", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Cube is too big", Toast.LENGTH_SHORT).show();
         }
     }
 }
