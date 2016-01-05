@@ -17,7 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class MainActivity extends Activity
-    implements  ListView.OnItemClickListener {
+    implements  ListView.OnItemClickListener, SettingsFragment.SettingsListener {
 
     private static final String tag = "rubik-main";
 
@@ -29,6 +29,7 @@ public class MainActivity extends Activity
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
 
+    private int cubeSize = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,15 +79,21 @@ public class MainActivity extends Activity
     {
         FragmentManager manager = getFragmentManager();
         Fragment fragment;
+        Bundle args = new Bundle();
         if (pos == 0) {
             fragment = new CubeFragment();
+            args.putInt(CubeFragment.CUBE_SIZE, cubeSize);
         } else if (pos == 1) {
-            fragment = new SettingsFragment();
+            SettingsFragment sf = new SettingsFragment();
+            sf.setListener(this);
+            args.putInt(CubeFragment.CUBE_SIZE, cubeSize);
+            fragment = sf;
         } else {
             Log.e(tag, "Pos was " + pos);
             return;
         }
 
+        fragment.setArguments(args);
         manager.beginTransaction().replace(R.id.content_frame, fragment).commit();
         mDrawerList.setItemChecked(pos, true);
         setTitle(mFragmentNames[pos]);
@@ -116,5 +123,10 @@ public class MainActivity extends Activity
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void setCubeSize(int size) {
+        cubeSize = size;
     }
 }

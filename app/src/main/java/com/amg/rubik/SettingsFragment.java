@@ -20,6 +20,18 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     private TextView cubeSizeField;
     private int cubeSize = 3;
 
+    private SettingsListener listener;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        cubeSize = getArguments().getInt(CubeFragment.CUBE_SIZE);
+    }
+
+    public void setListener(SettingsListener listener) {
+        this.listener = listener;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,5 +67,11 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         if (cubeSize > MAX_CUBE_SIZE) {
             Toast.makeText(getActivity(), "Cube is too big", Toast.LENGTH_SHORT).show();
         }
+
+        listener.setCubeSize(cubeSize);
+    }
+
+    public interface SettingsListener {
+        void setCubeSize(int size);
     }
 }

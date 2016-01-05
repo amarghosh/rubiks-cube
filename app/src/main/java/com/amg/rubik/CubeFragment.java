@@ -13,11 +13,19 @@ public class CubeFragment extends Fragment
 
     private static final String tag = "rubik-main";
 
+    public static final String CUBE_SIZE = "cube_size";
+
     private View rootView;
 
     private RubiksCube mCube = null;
     private RubikGLSurfaceView mRubikView = null;
     private int cubeSize = 3;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        cubeSize = getArguments().getInt(CUBE_SIZE);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -30,8 +38,6 @@ public class CubeFragment extends Fragment
     private void initUi() {
         findViewById(R.id.randomizeButton).setOnClickListener(this);
         findViewById(R.id.solveButton).setOnClickListener(this);
-        findViewById(R.id.incButton).setOnClickListener(this);
-        findViewById(R.id.decButton).setOnClickListener(this);
     }
 
     private View findViewById(int id) {
@@ -69,14 +75,6 @@ public class CubeFragment extends Fragment
                 mRubikView.printDebugInfo();
                 solve();
                 break;
-
-            case R.id.incButton:
-                changeCubeSize(1);
-                break;
-
-            case R.id.decButton:
-                changeCubeSize(-1);
-                break;
         }
     }
 
@@ -88,24 +86,6 @@ public class CubeFragment extends Fragment
         }
         mCube.setListener(this);
         mRubikView.setCube(mCube);
-    }
-
-    private void changeCubeSize(int factor) {
-        if (mCube.getState() != RubiksCube.CubeState.IDLE) {
-            Toast.makeText(getActivity(), "Cube is in state " + mCube.getState(),
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (cubeSize == 1 && factor < 0) {
-            return;
-        }
-        cubeSize += factor;
-        createCube();
-        resetButtons();
-        if (cubeSize > 9) {
-            Toast.makeText(getActivity(),
-                    "Cube is too big. May not render correctly", Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void resetButtons() {
