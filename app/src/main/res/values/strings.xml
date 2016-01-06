@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">Rubiks Cube</string>
     <string name="author">amarghosh</string>
-    <string name="randomize">randomize</string>
+    <string name="randomize">Randomize</string>
     <string name="stop">stop</string>
     <string name="solve">solve</string>
+    <string name="reset_settings">Reset</string>
+    <string name="play">Play</string>
 
     <string name="cube_size">Cube Size</string>
     <string name="speed">Speed</string>

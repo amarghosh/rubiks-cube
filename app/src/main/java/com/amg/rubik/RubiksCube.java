@@ -115,6 +115,20 @@ public class RubiksCube {
         mRotation = new Rotation();
     }
 
+    public void restoreColors(String colors) {
+        int expectedLength = FACE_COUNT * mSize * mSize;
+        if (colors.length() != expectedLength) {
+            throw new InvalidParameterException(
+                    String.format("Squares: Expected %d for size %d, got %d",
+                            expectedLength, mSize, colors.length()));
+        }
+    }
+
+    // TODO: Implement these two functions.
+    public String getColorString() {
+        return  null;
+    }
+
     public CubeState getState() {
         return mState;
     }

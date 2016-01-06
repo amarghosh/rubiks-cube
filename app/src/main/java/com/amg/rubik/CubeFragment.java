@@ -1,6 +1,5 @@
 package com.amg.rubik;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,40 +7,24 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class CubeFragment extends Fragment
-        implements View.OnClickListener, CubeListener {
-
-    private static final String tag = "rubik-main";
-
-    public static final String CUBE_SIZE = "cube_size";
-
-    private View rootView;
+public class CubeFragment extends AbstractFragment
+        implements CubeListener {
 
     private RubiksCube mCube = null;
     private RubikGLSurfaceView mRubikView = null;
-    private int cubeSize = 3;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        cubeSize = getArguments().getInt(CUBE_SIZE);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_cube, container, false);
+        tag = "rubik-game";
+        mRootView = inflater.inflate(R.layout.fragment_cube, container, false);
         initUi();
         initializeRubikView();
-        return rootView;
+        return mRootView;
     }
 
     private void initUi() {
         findViewById(R.id.randomizeButton).setOnClickListener(this);
         findViewById(R.id.solveButton).setOnClickListener(this);
-    }
-
-    private View findViewById(int id) {
-        return rootView.findViewById(id);
     }
 
     private void initializeRubikView() {
@@ -79,13 +62,15 @@ public class CubeFragment extends Fragment
     }
 
     private void createCube() {
-        if (cubeSize == 3) {
+        if (cubeSize() == 3) {
             mCube = new RubiksCube3x3x3();
         } else {
-            mCube = new RubiksCube(cubeSize);
+            mCube = new RubiksCube(cubeSize());
         }
         mCube.setListener(this);
         mRubikView.setCube(mCube);
+        if (cubeState() != null)
+            mCube.restoreColors(cubeState());
     }
 
     private void resetButtons() {

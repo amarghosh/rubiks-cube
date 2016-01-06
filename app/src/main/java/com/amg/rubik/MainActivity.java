@@ -2,22 +2,23 @@ package com.amg.rubik;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.security.InvalidParameterException;
+
 public class MainActivity extends Activity
-    implements  ListView.OnItemClickListener, SettingsFragment.SettingsListener {
+    implements  ListView.OnItemClickListener {
 
     private static final String tag = "rubik-main";
 
@@ -29,13 +30,16 @@ public class MainActivity extends Activity
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
 
-    private int cubeSize = 3;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTitle = mDrawerTitle = getTitle();
+        setupNavigation();
+        selectItem(0);
+    }
+
+    private void setupNavigation() {
         mFragmentNames = getResources().getStringArray(R.array.fragment_names);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -63,11 +67,8 @@ public class MainActivity extends Activity
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-
-        selectItem(0);
     }
 
     @Override
@@ -75,25 +76,18 @@ public class MainActivity extends Activity
         selectItem(pos);
     }
 
-    private void selectItem(int pos)
+    protected void selectItem(int pos)
     {
         FragmentManager manager = getFragmentManager();
         Fragment fragment;
-        Bundle args = new Bundle();
         if (pos == 0) {
             fragment = new CubeFragment();
-            args.putInt(CubeFragment.CUBE_SIZE, cubeSize);
         } else if (pos == 1) {
-            SettingsFragment sf = new SettingsFragment();
-            sf.setListener(this);
-            args.putInt(CubeFragment.CUBE_SIZE, cubeSize);
-            fragment = sf;
+            fragment = new SettingsFragment();
         } else {
-            Log.e(tag, "Pos was " + pos);
-            return;
+            throw new InvalidParameterException("Invalid position: " + pos);
         }
 
-        fragment.setArguments(args);
         manager.beginTransaction().replace(R.id.content_frame, fragment).commit();
         mDrawerList.setItemChecked(pos, true);
         setTitle(mFragmentNames[pos]);
@@ -123,10 +117,5 @@ public class MainActivity extends Activity
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void setCubeSize(int size) {
-        cubeSize = size;
     }
 }
