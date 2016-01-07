@@ -5,8 +5,10 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import android.graphics.Point;
 import android.opengl.GLES20;
 
+import com.amg.rubik.graphics.Point3D;
 import com.amg.rubik.graphics.ShaderCache;
 
 public class Square {
@@ -74,6 +76,10 @@ public class Square {
     }
 
     public Square(float[] vertices, int color) {
+        init(vertices, color);
+    }
+
+    private void init(float[] vertices, int color) {
         // a float is 4 bytes, therefore we multiply the number if
         // vertices with 4.
         ByteBuffer vbb = ByteBuffer.allocateDirect(vertices.length * 4);
@@ -82,6 +88,16 @@ public class Square {
         vertexBuffer.put(vertices);
         vertexBuffer.position(0);
         mColor = color % COLOR_COUNT;
+    }
+
+    public Square(Point3D[] points, int color) {
+        float[] vertices = new float[points.length * 3]; // x, y, z
+        for (int i = 0; i < points.length; i++) {
+            vertices[i*3] = points[i].getX();
+            vertices[i*3 + 1] = points[i].getY();
+            vertices[i*3 + 2] = points[i].getZ();
+        }
+        init(vertices, color);
     }
 
     // The order in which lines are drawn
