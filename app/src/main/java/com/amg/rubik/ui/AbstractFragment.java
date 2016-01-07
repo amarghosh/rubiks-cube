@@ -1,4 +1,4 @@
-package com.amg.rubik;
+package com.amg.rubik.ui;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+
+import com.amg.rubik.Constants;
 
 import java.security.InvalidParameterException;
 

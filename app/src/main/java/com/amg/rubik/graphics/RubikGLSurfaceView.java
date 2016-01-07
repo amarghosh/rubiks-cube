@@ -1,4 +1,4 @@
-package com.amg.rubik;
+package com.amg.rubik.graphics;
 
 import android.content.Context;
 import android.graphics.Point;
@@ -6,8 +6,11 @@ import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import com.amg.rubik.Rotation.Axis;
-import com.amg.rubik.Rotation.Direction;
+import com.amg.rubik.cube.Rotation;
+import com.amg.rubik.cube.Rotation.Axis;
+import com.amg.rubik.cube.Rotation.Direction;
+import com.amg.rubik.cube.RubiksCube;
+import com.amg.rubik.graphics.RubikRenderer;
 
 import java.security.InvalidParameterException;
 
@@ -26,7 +29,7 @@ public class RubikGLSurfaceView extends GLSurfaceView {
     Point mEndPoint;
     Point mIntermediatePoint;
 
-    RubikGLSurfaceView(Context context) {
+    public RubikGLSurfaceView(Context context) {
         super(context);
         Log.w(tag, "creating glsurfaceview");
         init();

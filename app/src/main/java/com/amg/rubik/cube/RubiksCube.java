@@ -1,4 +1,4 @@
-package com.amg.rubik;
+package com.amg.rubik.cube;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -7,8 +7,8 @@ import java.util.Random;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import com.amg.rubik.Rotation.Axis;
-import com.amg.rubik.Rotation.Direction;
+import com.amg.rubik.cube.Rotation.Axis;
+import com.amg.rubik.cube.Rotation.Direction;
 
 /**
  *
@@ -900,7 +900,7 @@ public class RubiksCube {
         }
     }
 
-    protected void draw(float[] mvpMatrix) {
+    public void draw(float[] mvpMatrix) {
 
         Square.startDrawing();
 

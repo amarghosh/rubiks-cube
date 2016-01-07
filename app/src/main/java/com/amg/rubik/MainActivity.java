@@ -19,6 +19,9 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.amg.rubik.ui.CubeFragment;
+import com.amg.rubik.ui.SettingsFragment;
+
 public class MainActivity extends Activity implements  ListView.OnItemClickListener {
 
     private static final String tag = "rubik-main";
@@ -80,7 +83,7 @@ public class MainActivity extends Activity implements  ListView.OnItemClickListe
         selectItem(pos);
     }
 
-    protected void selectItem(int pos) {
+    public void selectItem(int pos) {
         FragmentManager manager = getFragmentManager();
         Fragment fragment;
         if (pos == FRAGMENT_INDEX_HOME) {

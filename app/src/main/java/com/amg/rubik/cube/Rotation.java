@@ -1,4 +1,4 @@
-package com.amg.rubik;
+package com.amg.rubik.cube;
 
 import java.security.InvalidParameterException;
 
@@ -32,16 +32,16 @@ public     class Rotation {
     float angle;
     float angleDelta = RubiksCube.ANGLE_DELTA_NORMAL;
 
-    Rotation() {
+    public Rotation() {
         reset();
     }
 
-    Rotation(Axis axis, Direction dir, int face, int faceCount) {
+    public Rotation(Axis axis, Direction dir, int face, int faceCount) {
         this(axis, dir, face);
         this.faceCount = faceCount;
     }
 
-    Rotation(Axis axis, Direction dir, int face) {
+    public Rotation(Axis axis, Direction dir, int face) {
         reset();
         this.axis = axis;
         this.direction = dir;

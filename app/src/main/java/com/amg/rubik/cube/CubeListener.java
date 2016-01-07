@@ -1,4 +1,4 @@
-package com.amg.rubik;
+package com.amg.rubik.cube;
 
 /**
  * Created by amar on 9/12/15.

@@ -1,15 +1,19 @@
-package com.amg.rubik;
+package com.amg.rubik.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SettingsFragment extends AbstractFragment  {
+import com.amg.rubik.Constants;
+import com.amg.rubik.MainActivity;
+import com.amg.rubik.R;
+import com.amg.rubik.ui.AbstractFragment;
+
+public class SettingsFragment extends AbstractFragment {
 
     private static final int MIN_CUBE_SIZE = 1;
     private static final int MAX_CUBE_SIZE = 9;

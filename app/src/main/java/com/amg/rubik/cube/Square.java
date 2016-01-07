@@ -1,4 +1,4 @@
-package com.amg.rubik;
+package com.amg.rubik.cube;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -6,6 +6,8 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import android.opengl.GLES20;
+
+import com.amg.rubik.graphics.ShaderCache;
 
 public class Square {
 

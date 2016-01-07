@@ -1,5 +1,5 @@
 
-package com.amg.rubik;
+package com.amg.rubik.graphics;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;

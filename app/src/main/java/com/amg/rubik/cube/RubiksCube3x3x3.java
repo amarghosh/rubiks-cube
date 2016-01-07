@@ -1,4 +1,4 @@
-package com.amg.rubik;
+package com.amg.rubik.cube;
 
 import android.util.Log;
 
@@ -6,8 +6,8 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.amg.rubik.Rotation.Direction;
-import com.amg.rubik.Rotation.Axis;
+import com.amg.rubik.cube.Rotation.Direction;
+import com.amg.rubik.cube.Rotation.Axis;
 
 /**
  * Created by amar on 9/12/15.

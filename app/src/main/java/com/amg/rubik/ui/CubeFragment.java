@@ -1,4 +1,4 @@
-package com.amg.rubik;
+package com.amg.rubik.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -6,6 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.amg.rubik.cube.CubeListener;
+import com.amg.rubik.R;
+import com.amg.rubik.graphics.RubikGLSurfaceView;
+import com.amg.rubik.cube.RubiksCube;
+import com.amg.rubik.cube.RubiksCube3x3x3;
 
 public class CubeFragment extends AbstractFragment
         implements CubeListener {
