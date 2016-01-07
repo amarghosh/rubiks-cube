@@ -2,6 +2,7 @@ package com.amg.rubik.graphics;
 
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -25,9 +26,8 @@ public class RubikGLSurfaceView extends GLSurfaceView {
 
     private static final int TAP_SENSITIVITY_FACTOR = 10;
 
-    Point mStartPoint;
-    Point mEndPoint;
-    Point mIntermediatePoint;
+    PointF mStartPoint;
+    PointF mEndPoint;
 
     public RubikGLSurfaceView(Context context) {
         super(context);
@@ -40,9 +40,8 @@ public class RubikGLSurfaceView extends GLSurfaceView {
     }
 
     void init() {
-        mStartPoint = new Point();
-        mEndPoint = new Point();
-        mIntermediatePoint = new Point();
+        mStartPoint = new PointF();
+        mEndPoint = new PointF();
     }
 
     @Override
@@ -58,14 +57,37 @@ public class RubikGLSurfaceView extends GLSurfaceView {
                 break;
         }
 
-        mIntermediatePoint.x = (int)e.getX();
-        mIntermediatePoint.y = (int)e.getY();
         return true;
     }
 
+    private void handleMovementEndExp(MotionEvent e) {
+        float frontFaceZ = mCube.getFrontFaceZ();
+        mEndPoint.x = e.getX();
+        mEndPoint.y = e.getY();
+
+        float touchX = mRenderer.getFrustrumLeft() +
+                (e.getX() * mRenderer.getFrustrumWidth()) / getWidth();
+
+        float touchY = mRenderer.getFrustrumBottom() +
+                (e.getY() * mRenderer.getFrustrumHeight()) / getHeight();
+        touchY *= -1;
+
+        Point3D eye = mRenderer.getEye();
+
+        Point3D point = new Point3D(touchX, touchY, frontFaceZ);
+
+        Log.w(tag, String.format("touch %f,%f z %f", touchX, touchY, frontFaceZ));
+
+        mRenderer.setHighlightPoint(point, Axis.Z_AXIS);
+    }
+
+    private void translatePointTo3D() {
+
+    }
+
     private void handleMovementStart(MotionEvent e) {
-        mStartPoint.x = (int)e.getX();
-        mStartPoint.y = (int)e.getY();
+        mStartPoint.x = e.getX();
+        mStartPoint.y = e.getY();
     }
 
     private static final float SLOPE_CUTOFF_MIN_X = -50.0f;
@@ -83,6 +105,7 @@ public class RubikGLSurfaceView extends GLSurfaceView {
     private static final int FACE_RANGE_Z_MAX = 40;
 
     private void handleMovementEnd(MotionEvent e) {
+        handleMovementEndExp(e);
         Rotation rot = null;
         Direction direction;
         Axis axis;
@@ -90,8 +113,8 @@ public class RubikGLSurfaceView extends GLSurfaceView {
 
         mEndPoint.x = (int)e.getX();
         mEndPoint.y = (int)e.getY();
-        int dx = mEndPoint.x - mStartPoint.x;
-        int dy = mEndPoint.y - mStartPoint.y;
+        int dx = (int) (mEndPoint.x - mStartPoint.x);
+        int dy = (int) (mEndPoint.y - mStartPoint.y);
 
         if (Math.abs(dx) + Math.abs(dy) < TAP_SENSITIVITY_FACTOR) {
             Log.w(tag, String.format("noop: dx %d, dy %d", dx, dy));
@@ -101,27 +124,27 @@ public class RubikGLSurfaceView extends GLSurfaceView {
 
         float slope = ((float)dy) / dx;
 
-        Log.w(tag, String.format("From %d,%d to %d,%d: slope %f",
+        Log.w(tag, String.format("From %f,%f to %f,%f: slope %f",
                 mStartPoint.x, mStartPoint.y,
                 mEndPoint.x, mEndPoint.y, slope));
 
         if (slope > SLOPE_CUTOFF_MIN_X && slope < SLOPE_CUTOFF_MAX_X) {
             axis = Axis.X_AXIS;
             direction = dy > 0 ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
-            face = estimateFace(mStartPoint.x, getWidth(), mCube.size(),
+            face = estimateFace((int) mStartPoint.x, getWidth(), mCube.size(),
                     FACE_RANGE_X_MIN, FACE_RANGE_X_MAX);
             rot = new Rotation(axis, direction, face);
         } else if (slope > SLOPE_CUTOFF_MIN_Y && slope < SLOPE_CUTOFF_MAX_Y) {
             axis = Axis.Y_AXIS;
             direction = dx > 0 ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
-            face = estimateFace(mStartPoint.y, getHeight(), mCube.size(),
+            face = estimateFace((int) mStartPoint.y, getHeight(), mCube.size(),
                     FACE_RANGE_Y_MIN, FACE_RANGE_Y_MAX);
             face = mCube.size() - 1 - face;
             rot = new Rotation(axis, direction, face);
         } else if (slope > SLOPE_CUTOFF_MIN_Z && slope < SLOPE_CUTOFF_MAX_Z) {
             axis = Axis.Z_AXIS;
             direction = dy > 0 ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
-            face = estimateFace(mStartPoint.y, getHeight(), mCube.size(),
+            face = estimateFace((int) mStartPoint.y, getHeight(), mCube.size(),
                     FACE_RANGE_Z_MIN, FACE_RANGE_Z_MAX);
             rot = new Rotation(axis, direction, face);
         } else {

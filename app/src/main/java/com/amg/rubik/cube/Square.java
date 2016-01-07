@@ -19,19 +19,23 @@ public class Square {
     public static final int ORANGE = 3;
     public static final int BLUE = 4;
     public static final int WHITE = 5;
-    private static final int COLOR_COUNT = 6;
+    public static final int HIGHLIGHT_COLOR = 6;
+
+    private static final int COLOR_COUNT = 7;
 
     private static final int COORDS_PER_VERTEX = 3;
 
     // 3 * size of float
     private static final int VERTEX_STRIDE = 12;
 
+    // TODO: colors and squares are coupled here. This needs to be cleaned up.
     static float green[] = { 0.2f, 0.7f, 0.2f, 1.0f };
     static float red[] = { 0.7f, 0.2f, 0.2f, 1.0f };
     static float blue[] = { 0.2f, 0.2f, 0.7f, 1.0f };
     static float white[] = { 0.8f, 0.8f, 0.8f, 1.0f };
     static float yellow[] = { 0.8f, 0.8f, 0.2f, 1.0f };
     static float orange[] = { 0.8f, 0.4f, 0.1f, 1.0f };
+    static float highlight[] = {0f, 1f, 1f, 1f}; // Cyan
     static Color[] colors;
 
     private int face;
@@ -53,6 +57,7 @@ public class Square {
         colors[ORANGE] = new Color(orange, "orange");
         colors[BLUE] = new Color(blue, "blue");
         colors[WHITE] = new Color(white, "white");
+        colors[COLOR_COUNT - 1] = new Color(highlight, "highlight");
     }
 
     protected int mColor = WHITE;

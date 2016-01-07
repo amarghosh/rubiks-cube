@@ -900,12 +900,9 @@ public class RubiksCube {
 
     public void draw(float[] mvpMatrix) {
 
-        Square.startDrawing();
-
         if (rotateMode == RotateMode.NONE ||
                 mRotation.getStatus() == false) {
             drawCube(mvpMatrix);
-            Square.finishDrawing();
             return;
         }
 
@@ -970,8 +967,6 @@ public class RubiksCube {
         } else {
             mRotation.increment();
         }
-
-        Square.finishDrawing();
     }
 
     protected boolean checkFace(ArrayList<Square> squares) {
