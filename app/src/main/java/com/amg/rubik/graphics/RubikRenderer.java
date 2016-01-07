@@ -25,7 +25,7 @@ public class RubikRenderer extends GLRenderer {
 
     @Override
     public void onCreate(int width, int height, boolean contextLost) {
-        GLES20.glClearColor(0f, 0f, 0f, 1f);
+        GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1f);
     }
 
     Square highlightPoint;
