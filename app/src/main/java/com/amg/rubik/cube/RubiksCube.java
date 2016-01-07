@@ -826,11 +826,10 @@ public class RubiksCube {
      *
      * On positive z (near plane).
      * */
-    private void createFrontSquares(int color)
-    {
+    private void createFrontSquares(int color) {
         float startX = 0 - (squareSize + GAP) * (mSize / 2.0f);
         float startY = (squareSize + GAP) * (mSize / 2.0f);
-        float startZ = (squareSize + GAP) * (mSize / 2.0f);
+        float startZ = getFrontFaceZ();
 
         float vertices[] = {
                   startX,  startY, startZ,
@@ -863,8 +862,7 @@ public class RubiksCube {
      *
      * On negative z (far plane).
      * */
-    private void createBackSquares(int color)
-    {
+    private void createBackSquares(int color) {
         float startX = (squareSize + GAP) * (mSize / 2.0f);
         float startY = (squareSize + GAP) * (mSize / 2.0f);
         float startZ = - (squareSize + GAP) * (mSize / 2.0f);
@@ -1024,6 +1022,11 @@ public class RubiksCube {
         rotateMode = RotateMode.MANUAL;
         mRotation = rotation.duplicate();
         mRotation.start();
+    }
+
+    public float getFrontFaceZ() {
+        float startZ = (squareSize + GAP) * (mSize / 2.0f);
+        return startZ;
     }
 
     public int size() {
