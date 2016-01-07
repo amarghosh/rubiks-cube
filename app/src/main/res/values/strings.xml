@@ -17,7 +17,9 @@
     </string-array>
 
     <string-array name="fragment_names">
-        <item>Cube</item>
+        <item>Play</item>
+        <item>Algorithms</item>
+        <item>My cube</item>
         <item>Settings</item>
     </string-array>
 

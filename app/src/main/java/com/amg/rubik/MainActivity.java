@@ -2,25 +2,29 @@ package com.amg.rubik;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.app.Activity;
+import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-import java.security.InvalidParameterException;
-
-public class MainActivity extends Activity
-    implements  ListView.OnItemClickListener {
+public class MainActivity extends Activity implements  ListView.OnItemClickListener {
 
     private static final String tag = "rubik-main";
+
+    private static final int FRAGMENT_INDEX_HOME = 0;
+    private static final int FRAGMENT_INDEX_SETTINGS = 3;
 
     private String[] mFragmentNames;
     private DrawerLayout mDrawerLayout;
@@ -76,16 +80,15 @@ public class MainActivity extends Activity
         selectItem(pos);
     }
 
-    protected void selectItem(int pos)
-    {
+    protected void selectItem(int pos) {
         FragmentManager manager = getFragmentManager();
         Fragment fragment;
-        if (pos == 0) {
+        if (pos == FRAGMENT_INDEX_HOME) {
             fragment = new CubeFragment();
-        } else if (pos == 1) {
+        } else if (pos == FRAGMENT_INDEX_SETTINGS) {
             fragment = new SettingsFragment();
         } else {
-            throw new InvalidParameterException("Invalid position: " + pos);
+            fragment = new PlaceholderFragment();
         }
 
         manager.beginTransaction().replace(R.id.content_frame, fragment).commit();
@@ -99,6 +102,7 @@ public class MainActivity extends Activity
         mTitle = title;
         getActionBar().setTitle(mTitle);
     }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -118,4 +122,31 @@ public class MainActivity extends Activity
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public static class PlaceholderFragment extends Fragment {
+
+        @Nullable
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
+            RelativeLayout rootView = new RelativeLayout(getActivity());
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT
+            );
+            rootView.setLayoutParams(lp);
+
+            TextView textView = new TextView(getActivity());
+            textView.setText("Not implemented");
+
+            RelativeLayout.LayoutParams tv_lp = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
+            tv_lp.addRule(RelativeLayout.CENTER_IN_PARENT);
+            textView.setLayoutParams(tv_lp);
+            rootView.addView(textView);
+
+            return rootView;
+        }
+    }
 }
+
