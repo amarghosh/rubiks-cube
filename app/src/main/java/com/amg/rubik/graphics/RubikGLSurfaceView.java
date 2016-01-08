@@ -18,10 +18,12 @@ public class RubikGLSurfaceView extends GLSurfaceView {
     private RubikRenderer mRenderer;
     private RubiksCube mCube;
 
+    private boolean mRotateWholeCube = false;
+
     private static final int TAP_SENSITIVITY_FACTOR = 10;
 
-    PointF mStartPoint;
-    PointF mEndPoint;
+    private PointF mStartPoint;
+    private PointF mEndPoint;
 
     public RubikGLSurfaceView(Context context) {
         super(context);
@@ -221,6 +223,10 @@ public class RubikGLSurfaceView extends GLSurfaceView {
         }
 
         if (rot != null) {
+            if (mRotateWholeCube) {
+                rot.setStartFace(0);
+                rot.setFaceCount(cubeSize);
+            }
             mCube.rotate(rot);
         }
     }
@@ -232,6 +238,10 @@ public class RubikGLSurfaceView extends GLSurfaceView {
     public void setCube(RubiksCube cube) {
         mCube = cube;
         mRenderer.setCube(cube);
+    }
+
+    public void setWholeCubeRotation(boolean value) {
+        mRotateWholeCube = value;
     }
 
     private static class TouchInfo {

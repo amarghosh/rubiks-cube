@@ -8,7 +8,7 @@ import java.security.InvalidParameterException;
 /**
  * Created by amar on 11/12/15.
  */
-public     class Rotation {
+public class Rotation {
 
     /*
     public static final int X_AXIS = 0;
@@ -96,6 +96,10 @@ public     class Rotation {
                 angle = 90;
             }
         }
+    }
+
+    public void setFaceCount(int faceCount) {
+        this.faceCount = faceCount;
     }
 
     public boolean getStatus() {

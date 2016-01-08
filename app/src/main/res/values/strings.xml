@@ -7,6 +7,9 @@
     <string name="reset_settings">Reset</string>
     <string name="play">Play</string>
 
+    <string name="lock_faces">Cube</string>
+    <string name="unlock_faces">Face</string>
+
     <string name="cube_size">Cube Size</string>
     <string name="speed">Speed</string>
 

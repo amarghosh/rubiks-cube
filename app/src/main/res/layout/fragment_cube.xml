@@ -25,6 +25,15 @@
             android:id="@+id/solveButton"
             android:text="@string/solve"/>
 
+        <ToggleButton
+            android:id="@+id/btn_rotate_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textOff="@string/unlock_faces"
+            android:textOn="@string/lock_faces"
+
+            />
+
     </LinearLayout>
 
     <RelativeLayout
