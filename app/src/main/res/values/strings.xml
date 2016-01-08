@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Rubiks Cube</string>
     <string name="author">amarghosh</string>
-    <string name="randomize">Randomize</string>
+    <string name="randomize">scramble</string>
     <string name="stop">stop</string>
     <string name="solve">solve</string>
     <string name="reset_settings">Reset</string>

@@ -16,6 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/randomizeButton"
+            android:textAllCaps="true"
             android:text="@string/randomize"
             />
 
@@ -23,6 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/solveButton"
+            android:textAllCaps="true"
             android:text="@string/solve"/>
 
         <ToggleButton
@@ -31,7 +33,7 @@
             android:layout_height="wrap_content"
             android:textOff="@string/unlock_faces"
             android:textOn="@string/lock_faces"
-
+            android:textAllCaps="true"
             />
 
     </LinearLayout>
