@@ -57,9 +57,15 @@ public class RubikGLSurfaceView extends GLSurfaceView {
     }
 
     private void handleMovementEndExp(MotionEvent e) {
-        float frontFaceZ = mCube.getFrontFaceZ();
+        Point3D eye = mRenderer.getEye();
         mEndPoint.x = e.getX();
         mEndPoint.y = e.getY();
+
+        /**
+         * Figure out the touched point by translating 2D coordinates to the near plane.
+         * Keep in mind that opengl uses regular cartesian coordinates, whereas android uses
+         * computer coordinates where origin is at top left corner.
+         * */
 
         float touchX = mRenderer.getFrustrumLeft() +
                 (e.getX() * mRenderer.getFrustrumWidth()) / getWidth();
@@ -68,13 +74,84 @@ public class RubikGLSurfaceView extends GLSurfaceView {
                 (e.getY() * mRenderer.getFrustrumHeight()) / getHeight();
         touchY *= -1;
 
-        Point3D eye = mRenderer.getEye();
+        float touchZ = eye.getZ();
 
-        Point3D point = new Point3D(touchX, touchY, frontFaceZ);
+        // translate touched point to the eye vector (z value remains same)
+        touchX += eye.getX();
+        touchY += eye.getY();
 
-        Log.w(tag, String.format("touch %f,%f z %f", touchX, touchY, frontFaceZ));
+        /**
+         * Imagine a line through this point and parallel to the eye vector.
+         * Check if this line touches either of the three visible faces.
+         * Parametric equation for a line is
+         * x = x1 + t * a;
+         * y = y1 + t * b;
+         * z = z1 + t * c;
+         * where x1, y1, z1 is a known point and a, b, c is the directional vector.
+         *
+         * As we know the value of one of x, y, z for each plane, we can find t from there
+         * */
 
-        mRenderer.setHighlightPoint(point, Axis.Z_AXIS);
+        float a = eye.getX();
+        float b = eye.getY();
+        float c = eye.getZ();
+        float x, y, z, t;
+
+        // check for front face
+        z = mCube.getFrontFaceZ();
+        t = (z - touchZ) / c;
+        x = touchX + t * a;
+        y = touchY + t * b;
+
+        if (x > mCube.getLeftFaceX() && x < mCube.getRightFaceX() &&
+                y > mCube.getBottomFaceY() && y < mCube.getTopFaceY()) {
+            Log.w(tag, String.format("Front face x %f (%f to %f), y %f (%f to %f)",
+                    x, mCube.getLeftFaceX(), mCube.getRightFaceX(),
+                    y, mCube.getBottomFaceY(), mCube.getTopFaceY()));
+            Point3D point = new Point3D(x, y, z);
+            mRenderer.setHighlightPoint(point, Axis.Z_AXIS);
+            return;
+        } else {
+            Log.w(tag, String.format("doesn't touch front face: %f,%f,%f",
+                    x, y, z));
+        }
+
+        // check top face
+        y = mCube.getTopFaceY();
+        t = (y - touchY) / b;
+        x = touchX + t * a;
+        z = touchZ + t * c;
+
+        if (x > mCube.getLeftFaceX() && x < mCube.getRightFaceX() &&
+                z > mCube.getBackFaceZ() && z < mCube.getFrontFaceZ()) {
+            Log.w(tag, "touched on top face");
+            Point3D point = new Point3D(x, y, z);
+            mRenderer.setHighlightPoint(point, Axis.Y_AXIS);
+            return;
+        } else {
+            Log.w(tag, String.format("doesn't touch top face: %f,%f,%f",
+                    x, y, z));
+        }
+
+        // check right face
+        x = mCube.getRightFaceX();
+        t = (x - touchX) / a;
+        y = touchY + t * b;
+        z = touchZ + t * c;
+
+        if (y > mCube.getBottomFaceY() && y < mCube.getTopFaceY() &&
+                z > mCube.getBackFaceZ() && z < mCube.getFrontFaceZ()) {
+            Log.w(tag, "touched on right face");
+            Point3D point = new Point3D(x, y, z);
+            mRenderer.setHighlightPoint(point, Axis.X_AXIS);
+            return;
+        } else {
+            Log.w(tag, String.format("doesn't touch right face: %f,%f,%f",
+                    x, y, z));
+        }
+
+        Log.w(tag, "touch went outside");
+        mRenderer.clearHighlight();
     }
 
     private void translatePointTo3D() {

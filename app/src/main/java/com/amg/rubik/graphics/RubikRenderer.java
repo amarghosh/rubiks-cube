@@ -27,20 +27,40 @@ public class RubikRenderer extends GLRenderer {
         GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1f);
     }
 
+    boolean highlightFlag = false;
     Square highlightPoint;
     float mSize = 0.03f;
 
+    public void clearHighlight() {
+        highlightFlag = false;
+    }
+
     public void setHighlightPoint(Point3D point, Axis axis) {
         // TODO: only front face is implemented now
-        if (axis != Axis.Z_AXIS) throw new AssertionError();
         Point3D[] corners = new Point3D[4];
 
-        corners[0] = new Point3D(point.getX() - mSize, point.getY() + mSize, point.getZ());
-        corners[1] = new Point3D(point.getX() - mSize, point.getY() - mSize, point.getZ());
-        corners[2] = new Point3D(point.getX() + mSize, point.getY() - mSize, point.getZ());
-        corners[3] = new Point3D(point.getX() + mSize, point.getY() + mSize, point.getZ());
-
+        switch (axis) {
+            case X_AXIS:
+                corners[0] = new Point3D(point.getX(), point.getY() + mSize, point.getZ() + mSize);
+                corners[1] = new Point3D(point.getX(), point.getY() - mSize, point.getZ() + mSize);
+                corners[2] = new Point3D(point.getX(), point.getY() - mSize, point.getZ() - mSize);
+                corners[3] = new Point3D(point.getX(), point.getY() + mSize, point.getZ() - mSize);
+                break;
+            case Y_AXIS:
+                corners[0] = new Point3D(point.getX() - mSize, point.getY(), point.getZ() - mSize);
+                corners[1] = new Point3D(point.getX() - mSize, point.getY(), point.getZ() + mSize);
+                corners[2] = new Point3D(point.getX() + mSize, point.getY(), point.getZ() + mSize);
+                corners[3] = new Point3D(point.getX() + mSize, point.getY(), point.getZ() - mSize);
+                break;
+            case Z_AXIS:
+                corners[0] = new Point3D(point.getX() - mSize, point.getY() + mSize, point.getZ());
+                corners[1] = new Point3D(point.getX() - mSize, point.getY() - mSize, point.getZ());
+                corners[2] = new Point3D(point.getX() + mSize, point.getY() - mSize, point.getZ());
+                corners[3] = new Point3D(point.getX() + mSize, point.getY() + mSize, point.getZ());
+                break;
+        }
         this.highlightPoint = new Square(corners, Square.HIGHLIGHT_COLOR);
+        highlightFlag = true;
     }
 
     @Override
@@ -54,7 +74,7 @@ public class RubikRenderer extends GLRenderer {
 
         Square.startDrawing();
         mCube.draw(mMVPMatrix);
-        if (highlightPoint != null) {
+        if (highlightFlag) {
             highlightPoint.draw(mMVPMatrix);
         }
         Square.finishDrawing();
