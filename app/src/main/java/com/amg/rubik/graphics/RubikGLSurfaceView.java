@@ -1,17 +1,13 @@
 package com.amg.rubik.graphics;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.MotionEvent;
 
 import com.amg.rubik.cube.Rotation;
-import com.amg.rubik.cube.Rotation.Axis;
-import com.amg.rubik.cube.Rotation.Direction;
 import com.amg.rubik.cube.RubiksCube;
-import com.amg.rubik.graphics.RubikRenderer;
 
 import java.security.InvalidParameterException;
 

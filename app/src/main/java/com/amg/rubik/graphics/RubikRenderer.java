@@ -3,7 +3,6 @@ package com.amg.rubik.graphics;
 import android.opengl.GLES20;
 import android.util.Log;
 
-import com.amg.rubik.cube.Rotation;
 import com.amg.rubik.cube.RubiksCube;
 import com.amg.rubik.cube.Square;
 
@@ -31,9 +30,9 @@ public class RubikRenderer extends GLRenderer {
     Square highlightPoint;
     float mSize = 0.03f;
 
-    public void setHighlightPoint(Point3D point, Rotation.Axis axis) {
+    public void setHighlightPoint(Point3D point, Axis axis) {
         // TODO: only front face is implemented now
-        if (axis != Rotation.Axis.Z_AXIS) throw new AssertionError();
+        if (axis != Axis.Z_AXIS) throw new AssertionError();
         Point3D[] corners = new Point3D[4];
 
         corners[0] = new Point3D(point.getX() - mSize, point.getY() + mSize, point.getZ());

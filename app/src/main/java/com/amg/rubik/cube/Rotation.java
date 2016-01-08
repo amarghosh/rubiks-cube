@@ -1,19 +1,15 @@
 package com.amg.rubik.cube;
 
+import com.amg.rubik.graphics.Axis;
+import com.amg.rubik.graphics.Direction;
+
 import java.security.InvalidParameterException;
 
 /**
  * Created by amar on 11/12/15.
  */
 public     class Rotation {
-    public enum Direction {
-        CLOCKWISE,
-        COUNTER_CLOCKWISE
-    }
 
-    public enum Axis {
-        X_AXIS, Y_AXIS, Z_AXIS
-    }
     /*
     public static final int X_AXIS = 0;
     public static final int Y_AXIS = 1;

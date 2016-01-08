@@ -2,6 +2,9 @@ package com.amg.rubik.cube;
 
 import android.util.Log;
 
+import com.amg.rubik.graphics.Axis;
+import com.amg.rubik.graphics.Direction;
+
 import java.util.ArrayList;
 
 /**
@@ -31,11 +34,11 @@ public class Algorithm {
         currentPosition = 0;
     }
 
-    public void addStep(Rotation.Axis axis, Rotation.Direction direction, int face, int faceCount) {
+    public void addStep(Axis axis, Direction direction, int face, int faceCount) {
         addStep(new Rotation(axis, direction, face, faceCount));
     }
 
-    public void addStep(Rotation.Axis axis, Rotation.Direction direction, int face) {
+    public void addStep(Axis axis, Direction direction, int face) {
         addStep(new Rotation(axis, direction, face));
     }
 
@@ -72,7 +75,7 @@ public class Algorithm {
         return steps.get(currentPosition++).duplicate();
     }
 
-    public static Algorithm rotateWhole (Rotation.Axis axis, Rotation.Direction direction,
+    public static Algorithm rotateWhole (Axis axis, Direction direction,
                                          int cubeSize, int count) {
         Algorithm algo = new Algorithm();
         for (int i = 0; i < count; i++) {

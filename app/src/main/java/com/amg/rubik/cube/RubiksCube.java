@@ -7,8 +7,8 @@ import java.util.Random;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import com.amg.rubik.cube.Rotation.Axis;
-import com.amg.rubik.cube.Rotation.Direction;
+import com.amg.rubik.graphics.Axis;
+import com.amg.rubik.graphics.Direction;
 
 /**
  *

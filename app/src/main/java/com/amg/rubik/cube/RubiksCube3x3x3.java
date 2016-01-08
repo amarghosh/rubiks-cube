@@ -6,8 +6,8 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.amg.rubik.cube.Rotation.Direction;
-import com.amg.rubik.cube.Rotation.Axis;
+import com.amg.rubik.graphics.Direction;
+import com.amg.rubik.graphics.Axis;
 
 /**
  * Created by amar on 9/12/15.
