@@ -36,12 +36,17 @@ public class RubiksCube {
     protected static final float ANGLE_DELTA_NORMAL = 4f;
     protected static final float ANGLE_DELTA_FAST = 10f;
 
-    protected static final int FACE_FRONT = 0;
-    protected static final int FACE_RIGHT = 1;
-    protected static final int FACE_BACK = 2;
-    protected static final int FACE_LEFT = 3;
-    protected static final int FACE_TOP = 4;
-    protected static final int FACE_BOTTOM = 5;
+    // Do not change these values. They are used during solving.
+    public static final int FACE_FRONT = 0;
+    public static final int FACE_RIGHT = 1;
+    public static final int FACE_BACK = 2;
+    public static final int FACE_LEFT = 3;
+    public static final int FACE_TOP = 4;
+    public static final int FACE_BOTTOM = 5;
+    private static String[] faceNames = {
+            "front", "right", "back", "left", "top", "bottom"
+    };
+
 
     // We don't support skewed cubes yet.
     protected static final int CUBE_SIDES = 4;
@@ -1045,5 +1050,25 @@ public class RubiksCube {
 
     public int size() {
         return mSize;
+    }
+
+    public static Axis face2axis(int face) {
+        switch (face) {
+            case FACE_BACK:
+            case FACE_FRONT:
+                return Axis.Z_AXIS;
+            case FACE_BOTTOM:
+            case FACE_TOP:
+                return Axis.Y_AXIS;
+            case FACE_LEFT:
+            case FACE_RIGHT:
+                return Axis.X_AXIS;
+            default:
+                throw new InvalidParameterException("Whats on face " + face);
+        }
+    }
+
+    public static String faceName(int face) {
+        return faceNames[face];
     }
 }

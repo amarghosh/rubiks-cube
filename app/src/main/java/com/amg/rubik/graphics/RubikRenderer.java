@@ -29,7 +29,7 @@ public class RubikRenderer extends GLRenderer {
 
     boolean highlightFlag = false;
     Square highlightPoint;
-    float mSize = 0.03f;
+    float mSize = 0.02f;
 
     public void clearHighlight() {
         highlightFlag = false;
