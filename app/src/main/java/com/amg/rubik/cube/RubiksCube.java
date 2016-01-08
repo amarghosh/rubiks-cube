@@ -52,14 +52,14 @@ public class RubiksCube {
     protected static final int CUBE_SIDES = 4;
     protected static final int FACE_COUNT = 6;
 
-    private static final float SQUARE_SIZE_2 = 0.4f;
-    private static final float SQUARE_SIZE_3 = 0.3f;
+    private static final float SQUARE_SIZE_3 = 0.4f;
+    private static final float SQUARE_SIZE_4 = 0.3f;
     private static final float SQUARE_SIZE_6 = 0.2f;
     private static final float SQUARE_SIZE_N = 0.1f;
 
     private static final float GAP = 0.005f;
 
-    private int mSize = 3;
+    private int mSize;
 
     private float squareSize;
 
@@ -105,10 +105,10 @@ public class RubiksCube {
     public RubiksCube(int size) {
         if (size <= 0) throw new AssertionError();
         mSize = size;
-        if (mSize <= 2) {
-            squareSize = SQUARE_SIZE_2;
-        } else if (mSize == 3) {
+        if (mSize <= 3) {
             squareSize = SQUARE_SIZE_3;
+        } else if (mSize == 4) {
+            squareSize = SQUARE_SIZE_4;
         } else if (mSize <= 6) {
             squareSize = SQUARE_SIZE_6;
         } else {
