@@ -680,7 +680,7 @@ public class RubiksCube {
      * */
     private void createLeftSquares(int color)
     {
-        float startX = 0 - squareSize * (mSize / 2.0f) - GAP * (mSize - 1);
+        float startX = getLeftFaceX();
         float startY = (squareSize + GAP) * (mSize / 2.0f);
         float startZ = 0 - (squareSize + GAP) * (mSize / 2.0f);
 
@@ -717,7 +717,7 @@ public class RubiksCube {
      * */
     private void createRightSquares(int color)
     {
-        float startX = squareSize * (mSize / 2.0f) + GAP * (mSize -1);
+        float startX = getRightFaceX();
         float startY = (squareSize + GAP) * (mSize / 2.0f);
         float startZ = (squareSize + GAP) * (mSize / 2.0f);
 
@@ -755,7 +755,7 @@ public class RubiksCube {
     private void createTopSquares(int color)
     {
         float startX = - (squareSize + GAP) * (mSize / 2.0f);
-        float startY = (squareSize + GAP) * (mSize / 2.0f);
+        float startY = getTopFaceY();
         float startZ = - (squareSize + GAP) * (mSize / 2.0f);
 
         float vertices[] = {
@@ -792,7 +792,7 @@ public class RubiksCube {
     private void createBottomSquares(int color)
     {
         float startX = - (squareSize + GAP) * (mSize / 2.0f);
-        float startY = - (squareSize + GAP) * (mSize / 2.0f);
+        float startY = getBottomFaceY();
         float startZ = (squareSize + GAP) * (mSize / 2.0f);
 
         float vertices[] = {
@@ -865,7 +865,7 @@ public class RubiksCube {
     private void createBackSquares(int color) {
         float startX = (squareSize + GAP) * (mSize / 2.0f);
         float startY = (squareSize + GAP) * (mSize / 2.0f);
-        float startZ = - (squareSize + GAP) * (mSize / 2.0f);
+        float startZ = getBackFaceZ();
 
         float vertices[] = {
                   startX,  startY, startZ,
@@ -1020,8 +1020,27 @@ public class RubiksCube {
     }
 
     public float getFrontFaceZ() {
-        float startZ = (squareSize + GAP) * (mSize / 2.0f);
-        return startZ;
+        return (squareSize + GAP) * (mSize / 2.0f);
+    }
+
+    public float getBackFaceZ() {
+        return - (squareSize + GAP) * (mSize / 2.0f);
+    }
+
+    public float getLeftFaceX() {
+        return  - squareSize * (mSize / 2.0f) - GAP * (mSize - 1);
+    }
+
+    public float getRightFaceX() {
+        return squareSize * (mSize / 2.0f) + GAP * (mSize -1);
+    }
+
+    public float getTopFaceY() {
+        return (squareSize + GAP) * (mSize / 2.0f);
+    }
+
+    public float getBottomFaceY() {
+        return - (squareSize + GAP) * (mSize / 2.0f);
     }
 
     public int size() {
