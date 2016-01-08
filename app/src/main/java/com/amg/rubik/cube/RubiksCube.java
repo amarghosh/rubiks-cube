@@ -47,7 +47,6 @@ public class RubiksCube {
             "front", "right", "back", "left", "top", "bottom"
     };
 
-
     // We don't support skewed cubes yet.
     protected static final int CUBE_SIDES = 4;
     protected static final int FACE_COUNT = 6;
@@ -58,6 +57,8 @@ public class RubiksCube {
     private static final float SQUARE_SIZE_N = 0.1f;
 
     private static final float GAP = 0.005f;
+
+    private static final int MAX_UNDO_COUNT = 10;
 
     private int mSize;
 
@@ -102,6 +103,8 @@ public class RubiksCube {
     private Algorithm mCurrentAlgo;
     private int mAlgoIndex = 0;
 
+    private ArrayList<Rotation> mUndoStack;
+
     public RubiksCube(int size) {
         if (size <= 0) throw new AssertionError();
         mSize = size;
@@ -118,6 +121,7 @@ public class RubiksCube {
         cube();
         mCurrentAlgo = null;
         mRotation = new Rotation();
+        mUndoStack = new ArrayList<>();
     }
 
     public void restoreColors(String colors) {
@@ -143,6 +147,7 @@ public class RubiksCube {
             Log.e(tag, "invalid state for randomize " + mState);
             return;
         }
+        clearUndoStack();
         rotateMode = RotateMode.RANDOM;
         mState = CubeState.RANDOMIZE;
         mRotation.setAngleDelta(ANGLE_DELTA_FAST);
@@ -1021,6 +1026,10 @@ public class RubiksCube {
         }
         rotateMode = RotateMode.MANUAL;
         mRotation = rotation.duplicate();
+        if (mUndoStack.size() == MAX_UNDO_COUNT) {
+            mUndoStack.remove(0);
+        }
+        mUndoStack.add(rotation.getReverse());
         mRotation.start();
     }
 
@@ -1070,5 +1079,31 @@ public class RubiksCube {
 
     public static String faceName(int face) {
         return faceNames[face];
+    }
+
+    public void undo() {
+        if (mState != CubeState.IDLE) {
+            Log.w(tag, "Cannot undo in state " + mState);
+            return;
+        }
+        if (rotateMode != RotateMode.NONE) {
+            Log.w(tag, "Cannot undo in mode " + rotateMode);
+            return;
+        }
+
+        if (mUndoStack.size() == 0) {
+            Log.d(tag, "nothing to undo");
+            return;
+        }
+        rotateMode = RotateMode.MANUAL;
+        int index = mUndoStack.size() - 1;
+        Rotation rotation = mUndoStack.get(index);
+        mUndoStack.remove(index);
+        mRotation = rotation;
+        mRotation.start();
+    }
+
+    protected void clearUndoStack() {
+        mUndoStack.clear();
     }
 }

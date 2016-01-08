@@ -33,6 +33,7 @@ public class CubeFragment extends AbstractFragment
     private void initUi() {
         findViewById(R.id.randomizeButton).setOnClickListener(this);
         findViewById(R.id.solveButton).setOnClickListener(this);
+        findViewById(R.id.btn_undo).setOnClickListener(this);
         ToggleButton btn = (ToggleButton)findViewById(R.id.btn_rotate_mode);
         btn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -72,6 +73,10 @@ public class CubeFragment extends AbstractFragment
             case R.id.solveButton:
                 mRubikView.printDebugInfo();
                 solve();
+                break;
+
+            case R.id.btn_undo:
+                mCube.undo();
                 break;
         }
     }

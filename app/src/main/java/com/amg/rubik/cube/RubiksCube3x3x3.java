@@ -174,6 +174,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
             sendMessage("Invalid state to solve: " + mState);
             return -1;
         }
+        clearUndoStack();
         mState = CubeState.SOLVING;
         startSolving();
         return 0;
@@ -1423,5 +1424,4 @@ public class RubiksCube3x3x3 extends RubiksCube {
         }
         super.setAlgo(algo);
     }
-
 }

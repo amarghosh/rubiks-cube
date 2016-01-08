@@ -51,6 +51,13 @@ public class Rotation {
         return dup;
     }
 
+    public Rotation getReverse() {
+        Rotation rot = duplicate();
+        rot.direction = rot.direction == Direction.CLOCKWISE ?
+                Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
+        return rot;
+    }
+
     void reset() {
         status = false;
         axis = Axis.Z_AXIS;
