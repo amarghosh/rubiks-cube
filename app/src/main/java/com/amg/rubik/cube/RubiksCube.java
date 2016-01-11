@@ -1042,11 +1042,11 @@ public class RubiksCube {
     }
 
     public float getLeftFaceX() {
-        return  - squareSize * (mSize / 2.0f) - GAP * (mSize - 1);
+        return  - (squareSize + GAP) * (mSize / 2.0f);
     }
 
     public float getRightFaceX() {
-        return squareSize * (mSize / 2.0f) + GAP * (mSize -1);
+        return (squareSize + GAP) * (mSize / 2.0f);
     }
 
     public float getTopFaceY() {
