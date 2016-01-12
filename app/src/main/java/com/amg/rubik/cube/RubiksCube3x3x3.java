@@ -12,6 +12,14 @@ import com.amg.rubik.graphics.Axis;
 /**
  * Created by amar on 9/12/15.
  */
+
+/**
+ * An algorithm can't be smarter than the human who devised it.
+ *
+ * This is a beginner's approach to solving 3x3 cube. You will see many easy to think of
+ * improvements in the logic. Like how it takes 150 moves for a cube that could have been
+ * solved in a single move.
+ * */
 public class RubiksCube3x3x3 extends RubiksCube {
 
     enum SolveState {
@@ -186,6 +194,13 @@ public class RubiksCube3x3x3 extends RubiksCube {
         return super.cancelSolving();
     }
 
+    /**
+     * TODO: scope for lot of optimizations.
+     * 1. Check for already solved faces with proper T (possibly attainable with a rotation)
+     * 2. If there are no T, see if there are any top face crosses
+     * 3. If first face cross is not solved, start with a face that is closer to the cross
+     * 4. On the selected face, start with the already solved side (rotate if needed).
+     * */
     private void startSolving() {
         solveState = SolveState.FirstFaceCross;
         mTopColor = mTopSquares.get(CENTER).mColor;
@@ -256,7 +271,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
     }
 
     private void firstFaceEdge_fromTopLayer(final int pos) {
-        sendMessage("Edge piece from top layer");
+        Log.d(tag, "Edge piece from top layer");
         Algorithm algo = new Algorithm();
         ArrayList<Rotation> middleRotations;
         Rotation rot = null;
@@ -366,7 +381,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
     }
 
     private void firstFaceEdge_fromMiddleLayer(int pos) {
-        sendMessage("Edge piece from middle layer");
+        Log.d(tag, "Edge piece from middle layer");
         Square topColorSquare = getSquareByColor(mYaxisFaceList, MIDDLE, pos, mTopColor);
         int faceIndex = topColorSquare.getFace();
 
@@ -383,7 +398,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
      * The piece should have non-white on bottom face
      */
     private void firstFaceEdge_fromLowerLayer(int pos) {
-        sendMessage("Edge piece from lower layer");
+        Log.d(tag, "Edge piece from lower layer");
         Algorithm algorithm = new Algorithm();
 
         // the white should be on one of the sides, not front or back
@@ -416,7 +431,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
      */
     private void firstFaceEdge_fromBottomFace(int pos) {
         Algorithm algo = new Algorithm();
-        sendMessage("Edge piece from bottom face");
+        Log.d(tag, "Edge piece from bottom face");
 
         /**
          * Piece is not aligned yet.
@@ -460,7 +475,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
             Square topColoredSquare = cornerPiece.getSquare(mTopColor);
             if (topColoredSquare == null) continue;
             if (topColoredSquare.getFace() == FACE_BOTTOM) continue;
-            sendMessage("Found " + cornerPiece + " at " + corners[i]);
+            Log.d(tag, "Found " + cornerPiece + " at " + corners[i]);
             firstFaceCorner(corners[i]);
             return;
         }
@@ -475,7 +490,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
                 throw new AssertionError("white faces " +
                         topColoredSquare.getFace() + " at " + corners[i]);
             }
-            sendMessage("White faces down in " + cornerPiece + " at " + corners[i]);
+            Log.d(tag, "White faces down in " + cornerPiece + " at " + corners[i]);
             firstFaceCornerWhiteOnBottom(corners[i]);
             return;
         }
@@ -486,7 +501,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
             if (isCornerAligned(cornerPiece)) {
                 continue;
             }
-            sendMessage("unaligned at top row " + cornerPiece + " at " + corners[i]);
+            Log.d(tag, "unaligned at top row " + cornerPiece + " at " + corners[i]);
             firstFaceCornerFromTopLayer(corners[i]);
             return;
         }
@@ -810,7 +825,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         for (int i = 0; i < edges.length; i++) {
             Piece piece = mYaxisFaceList.get(OUTER).get(edges[i]);
             if (piece.hasColor(mBottomColor)) continue;
-            sendMessage("Found Edge " + piece + " at " + edges[i]);
+            Log.d(tag, "Found Edge " + piece + " at " + edges[i]);
             fixMiddleLayer(edges[i]);
             return;
         }
@@ -826,7 +841,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
             if (isEdgeAligned(piece)) {
                 continue;
             }
-            sendMessage("bring to top " + piece);
+            Log.d(tag, "bring to top " + piece);
             bringUpUnalignedMiddleEdge(edges[i]);
             return;
         }

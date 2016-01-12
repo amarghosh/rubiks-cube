@@ -191,9 +191,9 @@ public class RubiksCube {
 
     public int solve() {
         if (mSize == 1) {
-            sendMessage("Tadaa..!");
+            sendMessage(":-)");
         } else {
-            sendMessage("solving is available only for 3x3 cubes at the moment");
+            sendMessage("Robots can solve only 3x3 cubes right now");
         }
         return -1;
     }
