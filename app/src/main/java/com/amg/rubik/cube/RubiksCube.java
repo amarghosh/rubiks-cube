@@ -8,6 +8,7 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 import com.amg.rubik.graphics.Axis;
+import com.amg.rubik.graphics.CubeRenderer;
 import com.amg.rubik.graphics.Direction;
 
 /**
@@ -76,6 +77,12 @@ public class RubiksCube {
     protected ArrayList<ArrayList<Piece>> mXaxisFaceList;
     protected ArrayList<ArrayList<Piece>> mYaxisFaceList;
     protected ArrayList<ArrayList<Piece>> mZaxisFaceList;
+
+    private CubeRenderer mRenderer;
+
+    public void setRenderer(CubeRenderer renderer) {
+        mRenderer = renderer;
+    }
 
     public enum CubeState {
         IDLE,
@@ -904,7 +911,7 @@ public class RubiksCube {
 
     private void drawCube(float[] matrix) {
         for (Square sq: mAllSquares) {
-            sq.draw(matrix);
+            mRenderer.drawSquare(sq, matrix);
         }
     }
 
@@ -949,7 +956,7 @@ public class RubiksCube {
             ArrayList<Piece> pieces = faceList.get(i);
             for (Piece piece: pieces) {
                 for (Square square: piece.mSquares) {
-                    square.draw(mvpMatrix);
+                    mRenderer.drawSquare(square, mvpMatrix);
                 }
             }
         }
@@ -958,7 +965,7 @@ public class RubiksCube {
             ArrayList<Piece> pieces = faceList.get(mRotation.startFace + i);
             for (Piece piece: pieces) {
                 for (Square square: piece.mSquares) {
-                    square.draw(scratch);
+                    mRenderer.drawSquare(square, scratch);
                 }
             }
         }
@@ -967,7 +974,7 @@ public class RubiksCube {
             ArrayList<Piece> pieces = faceList.get(i);
             for (Piece piece: pieces) {
                 for (Square square: piece.mSquares) {
-                    square.draw(mvpMatrix);
+                    mRenderer.drawSquare(square, mvpMatrix);
                 }
             }
         }

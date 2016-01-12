@@ -6,20 +6,37 @@ import android.util.Log;
 import com.amg.rubik.cube.RubiksCube;
 import com.amg.rubik.cube.Square;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
+
 /**
  * Created by amar on 30/11/15.
  */
-public class RubikRenderer extends GLRenderer {
+public class CubeRendererImpl extends GLRenderer
+    implements CubeRenderer {
 
     private static final String tag = "rubik-renderer";
+
+    private static final int COORDS_PER_VERTEX = 3;
+
+    // 3 * size of float
+    private static final int VERTEX_STRIDE = 12;
+
     RubiksCube mCube;
 
-    public RubikRenderer() {
+    private int PROGRAM;
+    private int POSITION_HANDLE;
+    private int COLOR_HANDLE;
+    private int MATRIX_HANDLE;
+
+    public CubeRendererImpl() {
         mCube = null;
     }
 
     public void setCube(RubiksCube cube) {
-        this.mCube = cube;
+        mCube = cube;
+        mCube.setRenderer(this);
     }
 
     @Override
@@ -72,11 +89,57 @@ public class RubikRenderer extends GLRenderer {
             return;
         }
 
-        Square.startDrawing();
+        startDrawing();
         mCube.draw(mMVPMatrix);
         if (highlightFlag) {
-            highlightPoint.draw(mMVPMatrix);
+            drawSquare(highlightPoint, mMVPMatrix);
         }
-        Square.finishDrawing();
+        finishDrawing();
+    }
+
+    public void startDrawing()
+    {
+        PROGRAM = ShaderCache.getInstance().getProgram();
+        GLES20.glUseProgram(PROGRAM);
+        POSITION_HANDLE = GLES20.glGetAttribLocation(PROGRAM, "vPosition");
+        GLES20.glEnableVertexAttribArray(POSITION_HANDLE);
+        COLOR_HANDLE = GLES20.glGetUniformLocation(PROGRAM, "vColor");
+        MATRIX_HANDLE = GLES20.glGetUniformLocation(PROGRAM, "uMVPMatrix");
+    }
+
+    public void finishDrawing() {
+        GLES20.glDisableVertexAttribArray(POSITION_HANDLE);
+    }
+
+    // The order in which lines are drawn
+    private static short[] indices = { 0, 1, 2, 0, 2, 3};
+    // Our index buffer.
+    private static ShortBuffer indexBuffer;
+
+    static {
+        /**
+         *  As all squares are initialized in counter clockwise order,
+         *  they can share the index buffer. Initialize it in this static block.
+         * */
+
+        // short is 2 bytes, therefore we multiply the number if
+        // vertices with 2.
+        ByteBuffer ibb = ByteBuffer.allocateDirect(indices.length * 2);
+        ibb.order(ByteOrder.nativeOrder());
+        indexBuffer = ibb.asShortBuffer();
+        indexBuffer.put(indices);
+        indexBuffer.position(0);
+    }
+
+    public void drawSquare(Square square, float[] matrix) {
+        GLES20.glVertexAttribPointer(POSITION_HANDLE,
+                COORDS_PER_VERTEX,
+                GLES20.GL_FLOAT, false,
+                VERTEX_STRIDE, square.vertexBuffer());
+
+        GLES20.glUniform4fv(COLOR_HANDLE, 1, square.color(), 0);
+        GLES20.glUniformMatrix4fv(MATRIX_HANDLE, 1, false, matrix, 0);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length,
+                GLES20.GL_UNSIGNED_SHORT, indexBuffer);
     }
 }

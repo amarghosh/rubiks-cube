@@ -3,13 +3,8 @@ package com.amg.rubik.cube;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
-
-import android.graphics.Point;
-import android.opengl.GLES20;
 
 import com.amg.rubik.graphics.Point3D;
-import com.amg.rubik.graphics.ShaderCache;
 
 public class Square {
 
@@ -22,11 +17,6 @@ public class Square {
     public static final int HIGHLIGHT_COLOR = 6;
 
     private static final int COLOR_COUNT = 7;
-
-    private static final int COORDS_PER_VERTEX = 3;
-
-    // 3 * size of float
-    private static final int VERTEX_STRIDE = 12;
 
     // TODO: colors and squares are coupled here. This needs to be cleaned up.
     static float green[] = { 0.2f, 0.7f, 0.2f, 1.0f };
@@ -63,14 +53,7 @@ public class Square {
     protected int mColor = WHITE;
 
     // Our vertex buffer.
-    private FloatBuffer vertexBuffer;
-
-    // Our index buffer.
-    private static ShortBuffer indexBuffer;
-    private static int PROGRAM;
-    private static int POS_HANDLE;
-    private static int COL_HANDLE;
-    private static int MAT_HANDLE;
+    private FloatBuffer mVertexBuffer;
 
     public int getFace() {
         return face;
@@ -89,9 +72,9 @@ public class Square {
         // vertices with 4.
         ByteBuffer vbb = ByteBuffer.allocateDirect(vertices.length * 4);
         vbb.order(ByteOrder.nativeOrder());
-        vertexBuffer = vbb.asFloatBuffer();
-        vertexBuffer.put(vertices);
-        vertexBuffer.position(0);
+        mVertexBuffer = vbb.asFloatBuffer();
+        mVertexBuffer.put(vertices);
+        mVertexBuffer.position(0);
         mColor = color % COLOR_COUNT;
     }
 
@@ -105,53 +88,12 @@ public class Square {
         init(vertices, color);
     }
 
-    // The order in which lines are drawn
-    private static short[] indices = { 0, 1, 2, 0, 2, 3};
-
-    static {
-        /**
-         *  As all squares are initialized in counter clockwise order,
-         *  they can share the index buffer. Initialize it in this static block.
-         * */
-
-        // short is 2 bytes, therefore we multiply the number if
-        // vertices with 2.
-        ByteBuffer ibb = ByteBuffer.allocateDirect(indices.length * 2);
-        ibb.order(ByteOrder.nativeOrder());
-        indexBuffer = ibb.asShortBuffer();
-        indexBuffer.put(indices);
-        indexBuffer.position(0);
+    public FloatBuffer vertexBuffer() {
+        return mVertexBuffer;
     }
 
-    /**
-     * These needs be called once per each frame.
-     * TODO: Move this to renderer class
-     * */
-    public static void startDrawing()
-    {
-        PROGRAM = ShaderCache.getInstance().getProgram();
-        GLES20.glUseProgram(PROGRAM);
-        POS_HANDLE = GLES20.glGetAttribLocation(PROGRAM, "vPosition");
-        GLES20.glEnableVertexAttribArray(POS_HANDLE);
-        COL_HANDLE = GLES20.glGetUniformLocation(PROGRAM, "vColor");
-        MAT_HANDLE = GLES20.glGetUniformLocation(PROGRAM, "uMVPMatrix");
-    }
-
-    public static void finishDrawing() {
-        GLES20.glDisableVertexAttribArray(POS_HANDLE);
-    }
-
-
-    public void draw(float[] mvpMatrix) {
-        GLES20.glVertexAttribPointer(POS_HANDLE,
-                COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
-                VERTEX_STRIDE, vertexBuffer);
-
-        GLES20.glUniform4fv(COL_HANDLE, 1, colors[mColor].rgba, 0);
-        GLES20.glUniformMatrix4fv(MAT_HANDLE, 1, false, mvpMatrix, 0);
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length,
-                GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+    public float[] color() {
+        return colors[mColor].rgba;
     }
 
     public String colorName() {

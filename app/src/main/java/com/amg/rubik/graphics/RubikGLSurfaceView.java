@@ -15,7 +15,7 @@ import com.amg.rubik.cube.RubiksCube;
 public class RubikGLSurfaceView extends GLSurfaceView {
 
     private static final String tag = "rubik-view";
-    private RubikRenderer mRenderer;
+    private CubeRendererImpl mRenderer;
     private RubiksCube mCube;
 
     private boolean mRotateWholeCube = false;
@@ -31,7 +31,7 @@ public class RubikGLSurfaceView extends GLSurfaceView {
         init();
         setEGLContextClientVersion(2);
         setPreserveEGLContextOnPause(true);
-        mRenderer = new RubikRenderer();
+        mRenderer = new CubeRendererImpl();
         setRenderer(mRenderer);
     }
 
