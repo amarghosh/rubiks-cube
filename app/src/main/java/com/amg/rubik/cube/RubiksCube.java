@@ -26,6 +26,10 @@ import com.amg.rubik.graphics.Direction;
 
      Bottom
 
+ *
+ *  TODO: Some state variables are accessed from the renderer thread and UI thread.
+ *  This might corrupt the cube due to race condition.
+ *  The solve, cancel, randomize etc need to be synchronized with the draw function.
  * */
 
 public class RubiksCube {
@@ -81,6 +85,15 @@ public class RubiksCube {
 
     public void setRenderer(CubeRenderer renderer) {
         mRenderer = renderer;
+    }
+
+    public int cancelSolving() {
+        if (mState == CubeState.SOLVING) {
+            rotateMode = RotateMode.MANUAL;
+            mCurrentAlgo = null;
+            // State will be set to idle in finishRotation called in the next frame
+        }
+        return 0;
     }
 
     public enum CubeState {

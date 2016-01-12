@@ -4,6 +4,7 @@
     <string name="randomize">scramble</string>
     <string name="stop">stop</string>
     <string name="solve">solve</string>
+    <string name="cancel">cancel</string>
     <string name="reset_settings">Reset</string>
     <string name="play">Play</string>
 

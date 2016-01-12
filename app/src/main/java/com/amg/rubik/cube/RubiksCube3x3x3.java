@@ -180,6 +180,12 @@ public class RubiksCube3x3x3 extends RubiksCube {
         return 0;
     }
 
+    @Override
+    public int cancelSolving() {
+        solveState = SolveState.None;
+        return super.cancelSolving();
+    }
+
     private void startSolving() {
         solveState = SolveState.FirstFaceCross;
         mTopColor = mTopSquares.get(CENTER).mColor;

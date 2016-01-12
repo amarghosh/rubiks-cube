@@ -103,12 +103,19 @@ public class CubeFragment extends AbstractFragment
     }
 
     private void solve() {
-        int solveRet = mCube.solve();
-        if (solveRet == 0) {
-            Button btn = (Button)findViewById(R.id.solveButton);
-            btn.setEnabled(false);
+        Button btn = (Button)findViewById(R.id.solveButton);
+        if (mCube.getState() == RubiksCube.CubeState.IDLE) {
+            int solveRet = mCube.solve();
+            if (solveRet == 0) {
+                btn.setText(R.string.cancel);
+                btn = (Button)findViewById(R.id.randomizeButton);
+                btn.setEnabled(false);
+            }
+        } else if (mCube.getState() == RubiksCube.CubeState.SOLVING) {
+            mCube.cancelSolving();
+            btn.setText(R.string.solve);
             btn = (Button)findViewById(R.id.randomizeButton);
-            btn.setEnabled(false);
+            btn.setEnabled(true);
         }
     }
 
@@ -146,10 +153,7 @@ public class CubeFragment extends AbstractFragment
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Button btn = (Button) findViewById(R.id.solveButton);
-                btn.setEnabled(true);
-                btn = (Button) findViewById(R.id.randomizeButton);
-                btn.setEnabled(true);
+                resetButtons();
                 mRubikView.printDebugInfo();
             }
         });
