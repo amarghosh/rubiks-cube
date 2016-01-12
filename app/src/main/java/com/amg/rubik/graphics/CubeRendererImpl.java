@@ -1,6 +1,7 @@
 package com.amg.rubik.graphics;
 
 import android.opengl.GLES20;
+import android.opengl.Matrix;
 import android.util.Log;
 
 import com.amg.rubik.cube.RubiksCube;
@@ -32,11 +33,17 @@ public class CubeRendererImpl extends GLRenderer
 
     public CubeRendererImpl() {
         mCube = null;
+        resetRotation();
+    }
+
+    private void resetRotation() {
+        mHasRotation = false;
     }
 
     public void setCube(RubiksCube cube) {
         mCube = cube;
         mCube.setRenderer(this);
+        resetRotation();
     }
 
     @Override
@@ -90,9 +97,9 @@ public class CubeRendererImpl extends GLRenderer
         }
 
         startDrawing();
-        mCube.draw(mMVPMatrix);
+        mCube.draw();
         if (highlightFlag) {
-            drawSquare(highlightPoint, mMVPMatrix);
+            drawSquare(highlightPoint);
         }
         finishDrawing();
     }
@@ -131,7 +138,8 @@ public class CubeRendererImpl extends GLRenderer
         indexBuffer.position(0);
     }
 
-    public void drawSquare(Square square, float[] matrix) {
+    public void drawSquare(Square square) {
+        float[] matrix = mHasRotation ? mRotationMatrix : mMVPMatrix;
         GLES20.glVertexAttribPointer(POSITION_HANDLE,
                 COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
@@ -141,5 +149,22 @@ public class CubeRendererImpl extends GLRenderer
         GLES20.glUniformMatrix4fv(MATRIX_HANDLE, 1, false, matrix, 0);
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length,
                 GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+    }
+
+    private final float[] mRotationMatrix = new float[16];
+    private boolean mHasRotation;
+
+    @Override
+    public void setRotation(float angle, float x, float y, float z) {
+        float[] temp = new float[16];
+        for (int i = 0; i < 16; i++) {
+            mRotationMatrix[i] = 0;
+            temp[i] = 0;
+        }
+        Matrix.setRotateM(temp, 0, angle, x, y, z);
+        Matrix.multiplyMM(mRotationMatrix, 0, mMVPMatrix, 0, temp, 0);
+
+        mHasRotation = !(angle == 0f &&
+                x == 0f && y == 0f && z == 0f);
     }
 }

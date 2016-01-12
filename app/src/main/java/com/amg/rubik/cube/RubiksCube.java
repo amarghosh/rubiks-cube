@@ -4,7 +4,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import android.opengl.Matrix;
 import android.util.Log;
 
 import com.amg.rubik.graphics.Axis;
@@ -909,24 +908,23 @@ public class RubiksCube {
         }
     }
 
-    private void drawCube(float[] matrix) {
+    private void drawCube() {
+        mRenderer.setRotation(0, 0, 0, 0);
         for (Square sq: mAllSquares) {
-            mRenderer.drawSquare(sq, matrix);
+            mRenderer.drawSquare(sq);
         }
     }
 
-    public void draw(float[] mvpMatrix) {
+    public void draw() {
 
         if (rotateMode == RotateMode.NONE ||
                 mRotation.getStatus() == false) {
-            drawCube(mvpMatrix);
+            drawCube();
             return;
         }
 
         ArrayList<ArrayList<Piece>> faceList = null;
 
-        float[] scratch = new float[16];
-        float[] rotationMatrix = new float[16];
         float angle = mRotation.angle;
         float angleX = 0;
         float angleY = 0;
@@ -949,32 +947,32 @@ public class RubiksCube {
                 throw new RuntimeException("What is " + mRotation.axis);
         }
 
-        Matrix.setRotateM(rotationMatrix, 0, angle, angleX, angleY, angleZ);
-        Matrix.multiplyMM(scratch, 0, mvpMatrix, 0, rotationMatrix, 0);
-
+        mRenderer.setRotation(0, 0, 0, 0);
         for (int i = 0; i < mRotation.startFace; i++) {
             ArrayList<Piece> pieces = faceList.get(i);
             for (Piece piece: pieces) {
-                for (Square square: piece.mSquares) {
-                    mRenderer.drawSquare(square, mvpMatrix);
+                for (Square square : piece.mSquares) {
+                    mRenderer.drawSquare(square);
                 }
             }
         }
 
+        mRenderer.setRotation(angle, angleX, angleY, angleZ);
         for (int i = 0; i < mRotation.faceCount; i++) {
             ArrayList<Piece> pieces = faceList.get(mRotation.startFace + i);
             for (Piece piece: pieces) {
                 for (Square square: piece.mSquares) {
-                    mRenderer.drawSquare(square, scratch);
+                    mRenderer.drawSquare(square);
                 }
             }
         }
 
+        mRenderer.setRotation(0, 0, 0, 0);
         for (int i = mRotation.startFace + mRotation.faceCount; i < mSize; i++) {
             ArrayList<Piece> pieces = faceList.get(i);
             for (Piece piece: pieces) {
                 for (Square square: piece.mSquares) {
-                    mRenderer.drawSquare(square, mvpMatrix);
+                    mRenderer.drawSquare(square);
                 }
             }
         }
