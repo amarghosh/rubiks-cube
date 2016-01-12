@@ -55,14 +55,18 @@ public class RubiksCube {
     protected static final int CUBE_SIDES = 4;
     protected static final int FACE_COUNT = 6;
 
-    private static final float SQUARE_SIZE_3 = 0.4f;
-    private static final float SQUARE_SIZE_4 = 0.3f;
-    private static final float SQUARE_SIZE_6 = 0.2f;
-    private static final float SQUARE_SIZE_N = 0.1f;
+    /**
+     * To calculate the square size:
+     * Screen spans from -1f to +1f.
+     * OpenGl won't draw things close to the frustrum border, hence we add padding and use
+     * 1.2f instead of 2.0f as the total size
+     * */
+    private static final float TOTAL_SIZE = 2.0f;
+    private static final float PADDING = 0.8f;
 
-    private static final float GAP = 0.005f;
+    private static final float GAP = 0.01f;
 
-    private static final int MAX_UNDO_COUNT = 10;
+    private static final int MAX_UNDO_COUNT = 20;
 
     private int mSize;
 
@@ -104,9 +108,7 @@ public class RubiksCube {
     }
 
     protected CubeListener mListener = null;
-
     protected CubeState mState = CubeState.IDLE;
-
     protected Rotation mRotation;
 
     enum RotateMode {
@@ -127,16 +129,7 @@ public class RubiksCube {
     public RubiksCube(int size) {
         if (size <= 0) throw new AssertionError();
         mSize = size;
-        if (mSize <= 3) {
-            squareSize = SQUARE_SIZE_3;
-        } else if (mSize == 4) {
-            squareSize = SQUARE_SIZE_4;
-        } else if (mSize <= 6) {
-            squareSize = SQUARE_SIZE_6;
-        } else {
-            squareSize = SQUARE_SIZE_N;
-        }
-
+        squareSize = (TOTAL_SIZE - PADDING - GAP * (mSize + 1)) / mSize;
         cube();
         mCurrentAlgo = null;
         mRotation = new Rotation();
