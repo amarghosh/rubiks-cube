@@ -201,7 +201,9 @@ public class RubiksCube3x3x3 extends RubiksCube {
      * 3. If first face cross is not solved, start with a face that is closer to the cross
      * 4. On the selected face, start with the already solved side (rotate if needed).
      * */
-    private void startSolving() {
+    @Override
+    protected void startSolving() {
+        super.startSolving();
         solveState = SolveState.FirstFaceCross;
         mTopColor = mTopSquares.get(CENTER).mColor;
         mBottomColor = mBottomSquares.get(CENTER).mColor;
@@ -1428,7 +1430,8 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
             case LastFaceCornerAlign:
                 solveState = SolveState.None;
-                sendMessage("Tadaa..!");
+                sendMessage(String.format("Solved in %d move%c",
+                        mMoveCount, mMoveCount == 1 ? ' ' : 's'));
                 mListener.handleCubeSolved();
                 mState = CubeState.IDLE;
                 break;

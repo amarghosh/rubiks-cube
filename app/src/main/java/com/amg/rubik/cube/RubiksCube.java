@@ -122,8 +122,7 @@ public class RubiksCube {
     private RotateMode rotateMode = RotateMode.NONE;
 
     private Algorithm mCurrentAlgo;
-    private int mAlgoIndex = 0;
-
+    protected int mMoveCount;
     private ArrayList<Rotation> mUndoStack;
 
     public RubiksCube(int size) {
@@ -134,6 +133,7 @@ public class RubiksCube {
         mCurrentAlgo = null;
         mRotation = new Rotation();
         mUndoStack = new ArrayList<>();
+        mMoveCount = 0;
     }
 
     public void restoreColors(String colors) {
@@ -176,6 +176,7 @@ public class RubiksCube {
         mRotation.reset();
         mRotation.setAngleDelta(ANGLE_DELTA_NORMAL);
         mState = CubeState.IDLE;
+        mMoveCount = 0;
     }
 
     protected void sendMessage(String str) {
@@ -319,6 +320,11 @@ public class RubiksCube {
         }
 
         updateSquareFaces();
+
+        /**
+         * Exclude whole cube rotations from the count
+         * */
+        if (mRotation.faceCount != mSize) mMoveCount++;
 
         switch (rotateMode) {
             case ALGORITHM:
@@ -1116,5 +1122,9 @@ public class RubiksCube {
 
     protected void clearUndoStack() {
         mUndoStack.clear();
+    }
+
+    protected void startSolving() {
+        mMoveCount = 0;
     }
 }
