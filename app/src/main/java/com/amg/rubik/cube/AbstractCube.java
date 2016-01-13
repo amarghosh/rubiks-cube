@@ -1,6 +1,7 @@
 package com.amg.rubik.cube;
 
 import com.amg.rubik.graphics.Axis;
+import com.amg.rubik.graphics.Direction;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -541,6 +542,101 @@ public class AbstractCube {
         mZaxisFaceList.add(frontFace);
     }
 
+    /**
+     * Rotate the colors in the border. This is the first part of rotating a layer.
+     * */
+    private void rotateRingColors(ArrayList<ArrayList<Square>> squareList, Direction dir) {
+        ArrayList<ArrayList<Square>> workingCopy;
+        ArrayList<Integer> tempColors = new ArrayList<>(mSize);
+        ArrayList<Square> dst;
+        ArrayList<Square> src;
+
+        if (dir == Direction.COUNTER_CLOCKWISE) {
+            // input is in clockwise order
+            workingCopy = squareList;
+        } else {
+            // reverse and rotate
+            workingCopy = new ArrayList<>(mSize);
+            for (int i = 0; i < CUBE_SIDES; i++) {
+                workingCopy.add(squareList.get(CUBE_SIDES - 1 - i));
+            }
+        }
+
+        src = workingCopy.get(0);
+        for (int i = 0; i < mSize; i++) {
+            tempColors.add(src.get(i).mColor);
+        }
+
+        for (int i = 0; i < CUBE_SIDES - 1; i++) {
+            dst = workingCopy.get(i);
+            src = workingCopy.get(i + 1);
+            for (int j = 0; j < mSize; j++) {
+                dst.get(j).mColor = src.get(j).mColor;
+            }
+        }
+
+        dst = workingCopy.get(CUBE_SIDES-1);
+        for (int i = 0; i < mSize; i++) {
+            dst.get(i).mColor = tempColors.get(i);
+        }
+    }
+
+    /**
+     * Rotate colors of a given face. This is the second part of rotating a face.
+     * This function calls itself recursively to rotate inner squares.
+     * */
+    private void rotateFaceColors(ArrayList<Square> squares, Direction direction, int size) {
+        ArrayList<Integer> tempColors = new ArrayList<>(size);
+        if (direction == Direction.COUNTER_CLOCKWISE) {
+            for (int i = 0; i < size - 1; i++) {
+                tempColors.add(squares.get(i).mColor);
+                squares.get(i).mColor = squares.get(i * size + size - 1).mColor;
+            }
+
+            for (int i = 0; i < size - 1; i++) {
+                squares.get(i * size + size - 1).mColor =
+                        squares.get(size * size - 1 - i).mColor;
+            }
+
+            for (int i = 0; i < size - 1; i++) {
+                squares.get(size * size - 1 - i).mColor =
+                        squares.get(size * (size - 1 - i)).mColor;
+            }
+
+            for (int i = 0; i < size - 1; i++) {
+                squares.get(size * (size - 1 - i)).mColor =
+                        tempColors.get(i);
+            }
+        } else {
+            for (int i = 0; i < size - 1; i++) {
+                tempColors.add(squares.get(i).mColor);
+                squares.get(i).mColor = squares.get(size * (size - 1 - i)).mColor;
+            }
+            for (int i = 0; i < size - 1; i++) {
+                squares.get(size * (size - 1 - i)).mColor =
+                        squares.get(size * size - 1 - i).mColor;
+            }
+            for (int i = 0; i < size - 1; i++) {
+                squares.get(size * size - 1 - i).mColor =
+                        squares.get(i * size + size - 1).mColor;
+            }
+            for (int i = 0; i < size - 1; i++) {
+                squares.get(i * size + size - 1).mColor =
+                        tempColors.get(i);
+            }
+        }
+
+        if (size > 3) {
+            ArrayList<Square> subset = new ArrayList<>(size - 2);
+            for (int i = 1; i < size - 1; i++) {
+                for (int j = 1; j < size - 1; j++) {
+                    subset.add(squares.get(i * size + j));
+                }
+            }
+            rotateFaceColors(subset, direction, size - 2);
+        }
+    }
+
     public float getFrontFaceZ() {
         return (squareSize + GAP) * (mSize / 2.0f);
     }
@@ -587,5 +683,83 @@ public class AbstractCube {
 
     public static String faceName(int face) {
         return faceNames[face];
+    }
+
+    protected void rotate(Axis axis, Direction direction, int face) {
+        if (face < 0 || face >= mSize) {
+            throw new InvalidParameterException(
+                    String.format("Value %d is invalid for face (size is %d)", face, mSize));
+        }
+
+        ArrayList<Square> faceSquares = null;
+        ArrayList<ArrayList<Square>> squareList = new ArrayList<>(CUBE_SIDES);
+        for (int i = 0; i < CUBE_SIDES; i++) {
+            squareList.add(new ArrayList<Square>(mSize));
+        }
+        switch (axis) {
+            case X_AXIS:
+                for (int i = 0; i < mSize; i++) {
+                    squareList.get(0).add(mFrontSquares.get(mSize * i + face));
+                    squareList.get(1).add(mTopSquares.get(mSize * i + face));
+                    squareList.get(2).add(mBackSquares.get((mSize - 1 - i) * mSize +
+                            (mSize - 1 - face)));
+                    squareList.get(3).add(mBottomSquares.get(mSize * i + face));
+                }
+                if (face == 0) {
+                    faceSquares = mLeftSquares;
+                } else if (face == mSize - 1) {
+                    faceSquares = mRightSquares;
+                }
+                break;
+
+            case Y_AXIS:
+                for (int i = 0; i < mSize; i++) {
+                    squareList.get(0).add(
+                            mFrontSquares.get((mSize - 1 - face) * mSize + i));
+                    squareList.get(1).add(
+                            mLeftSquares.get((mSize - 1 - face) * mSize + i));
+                    squareList.get(2).add(
+                            mBackSquares.get((mSize - 1 - face) * mSize + i));
+                    squareList.get(3).add(
+                            mRightSquares.get((mSize - 1 - face) * mSize + i));
+                }
+                if (face == 0) {
+                    faceSquares = mBottomSquares;
+                } else if (face == mSize - 1) {
+                    faceSquares = mTopSquares;
+                }
+                break;
+
+            case Z_AXIS:
+                for (int i = 0; i < mSize; i++) {
+                    squareList.get(0).add(mTopSquares.get(mSize * face + i));
+                    squareList.get(1).add(
+                            mRightSquares.get(mSize * i + mSize - 1 - face));
+                    squareList.get(2).add(mBottomSquares.get(
+                            mSize * (mSize - 1 - face) + mSize - 1 - i));
+                    squareList.get(3).add(
+                            mLeftSquares.get(mSize * (mSize - 1 - i) + face));
+                }
+                if (face == 0) {
+                    faceSquares = mBackSquares;
+                } else if (face == mSize - 1) {
+                    faceSquares = mFrontSquares;
+                }
+                break;
+        }
+        rotateRingColors(squareList, direction);
+
+        if (face == mSize - 1) {
+            // Rotate a face that is on the positive edge of the
+            // corresponding axis (front, top or right).
+            // As squares are stored in clockwise order, rotation is straightforward.
+            rotateFaceColors(faceSquares, direction, mSize);
+        } else if (face == 0) {
+            rotateFaceColors(faceSquares,
+                    direction == Direction.CLOCKWISE ?
+                            Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE, mSize);
+        }
+
+        updateSquareFaces();
     }
 }
