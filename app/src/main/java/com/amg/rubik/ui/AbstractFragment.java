@@ -17,9 +17,9 @@ import java.security.InvalidParameterException;
 public abstract class AbstractFragment extends Fragment
         implements View.OnClickListener {
 
-    protected String tag = "rubik-fragment";
+    String tag = "rubik-fragment";
 
-    protected View mRootView;
+    View mRootView;
     private SharedPreferences mPref;
     private int mCubeSize;
     private String mCubeState;
@@ -32,22 +32,22 @@ public abstract class AbstractFragment extends Fragment
         mCubeState = mPref.getString(Constants.CUBE_STATE, null);
     }
 
-    protected View findViewById(int id) {
+    View findViewById(int id) {
         return mRootView.findViewById(id);
     }
 
-    protected int cubeSize() {
+    int cubeSize() {
         return mCubeSize;
     }
 
-    protected void setCubeSize(int value) {
+    void setCubeSize(int value) {
         if (value <= 0) {
             throw new InvalidParameterException("Invalid cube size: " + value);
         }
         mCubeSize = value;
     }
 
-    protected String cubeState() {
+    String cubeState() {
         return mCubeState;
     }
 
@@ -67,6 +67,6 @@ public abstract class AbstractFragment extends Fragment
         Log.w(tag, String.format("Saving cube size %d", mCubeSize));
         SharedPreferences.Editor editor = mPref.edit();
         editor.putInt(Constants.CUBE_SIZE, mCubeSize);
-        editor.commit();
+        editor.apply();
     }
 }

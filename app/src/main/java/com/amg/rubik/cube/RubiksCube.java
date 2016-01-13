@@ -36,11 +36,11 @@ import com.amg.rubik.graphics.Direction;
 
 public class RubiksCube extends AbstractCube {
 
-    protected static final String tag = "rubik-cube";
+    static final String tag = "rubik-cube";
 
     // Default value for incrementing angle during rotation
-    protected static final float ANGLE_DELTA_NORMAL = 4f;
-    protected static final float ANGLE_DELTA_FAST = 10f;
+    static final float ANGLE_DELTA_NORMAL = 4f;
+    static final float ANGLE_DELTA_FAST = 10f;
 
     private static final int MAX_UNDO_COUNT = 20;
 
@@ -53,7 +53,7 @@ public class RubiksCube extends AbstractCube {
 
     protected CubeListener mListener = null;
     protected CubeState mState = CubeState.IDLE;
-    protected Rotation mRotation;
+    private Rotation mRotation;
 
     enum RotateMode {
         NONE,
@@ -66,10 +66,10 @@ public class RubiksCube extends AbstractCube {
     private RotateMode rotateMode = RotateMode.NONE;
 
     private Algorithm mCurrentAlgo;
-    protected int mMoveCount;
+    int mMoveCount;
     private ArrayList<Rotation> mUndoStack;
 
-    protected CubeRenderer mRenderer;
+    private CubeRenderer mRenderer;
 
     public RubiksCube(int size) {
         super(size);
@@ -196,7 +196,7 @@ public class RubiksCube extends AbstractCube {
         }
     }
 
-    void updateAlgo() {
+    protected void updateAlgo() {
         rotateMode = RotateMode.NONE;
         mRotation.reset();
         mCurrentAlgo = null;
@@ -205,12 +205,12 @@ public class RubiksCube extends AbstractCube {
         }
     }
 
-    void repeatRotation() {
+    private void repeatRotation() {
         mRotation.angle = 0;
         mRotation.start();
     }
 
-    void rotateRandom() {
+    private void rotateRandom() {
         mRotation.reset();
         Random random = new Random();
         Axis[] axes = new Axis[] {Axis.X_AXIS,
@@ -247,7 +247,7 @@ public class RubiksCube extends AbstractCube {
             return;
         }
 
-        ArrayList<ArrayList<Piece>> faceList = null;
+        ArrayList<ArrayList<Piece>> faceList;
 
         float angle = mRotation.angle;
         float angleX = 0;
@@ -308,7 +308,7 @@ public class RubiksCube extends AbstractCube {
         }
     }
 
-    protected boolean checkFace(ArrayList<Square> squares) {
+    private boolean checkFace(ArrayList<Square> squares) {
         int centerColor = squares.get(squares.size()/2).mColor;
         for (int i = 0; i < squares.size(); i++) {
             if (squares.get(i).mColor != centerColor)

@@ -15,7 +15,7 @@ public class Piece {
         EDGE
     }
 
-    protected ArrayList<Square> mSquares;
+    ArrayList<Square> mSquares;
     private PieceType mType;
 
     public Piece(PieceType type) {
@@ -33,7 +33,7 @@ public class Piece {
         return mType;
     }
 
-    protected void addSquare(Square sq) {
+    void addSquare(Square sq) {
         if (mType == PieceType.CENTER && mSquares.size() != 0 ||
                 mType == PieceType.EDGE && mSquares.size() >= 2 ||
                 mType == PieceType.CORNER && mSquares.size() >= 3) {

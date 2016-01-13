@@ -34,9 +34,9 @@ public class ShaderCache {
         "  gl_FragColor = vColor;" +
         "}";
 
-    int mProgram;
-    int mVertexShader;
-    int mFragmentShader;
+    private int mProgram;
+    private int mVertexShader;
+    private int mFragmentShader;
 
     private ShaderCache() {
         Log.w(tag, "creating shadercache");

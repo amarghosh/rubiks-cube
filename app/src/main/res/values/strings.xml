@@ -1,12 +1,13 @@
 <resources>
     <string name="app_name">Rubiks Cube</string>
     <string name="author">amarghosh</string>
-    <string name="randomize">scramble</string>
-    <string name="stop">stop</string>
-    <string name="solve">solve</string>
-    <string name="cancel">cancel</string>
+    <string name="randomize">Scramble</string>
+    <string name="stop">Stop</string>
+    <string name="solve">Solve</string>
+    <string name="cancel">Cancel</string>
     <string name="reset_settings">Reset</string>
     <string name="play">Play</string>
+    <string name="undo">Undo</string>
 
     <string name="lock_faces">Cube</string>
     <string name="unlock_faces">Face</string>

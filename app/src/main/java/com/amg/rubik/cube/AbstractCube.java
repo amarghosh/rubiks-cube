@@ -21,13 +21,13 @@ public class AbstractCube {
     public static final int FACE_TOP = 4;
     public static final int FACE_BOTTOM = 5;
 
-    protected static String[] faceNames = {
+    private static final String[] faceNames = {
             "front", "right", "back", "left", "top", "bottom"
     };
 
     // We don't support skewed cubes yet.
-    protected static final int CUBE_SIDES = 4;
-    protected static final int FACE_COUNT = 6;
+    static final int CUBE_SIDES = 4;
+    static final int FACE_COUNT = 6;
 
     /**
      * To calculate the square size:
@@ -35,26 +35,26 @@ public class AbstractCube {
      * OpenGl won't draw things close to the frustrum border, hence we add padding and use
      * 1.2f instead of 2.0f as the total size
      * */
-    protected static final float TOTAL_SIZE = 2.0f;
-    protected static final float PADDING = 0.8f;
+    private static final float TOTAL_SIZE = 2.0f;
+    private static final float PADDING = 0.8f;
 
-    protected static final float GAP = 0.01f;
+    private static final float GAP = 0.01f;
 
-    protected int mSize;
-    protected float squareSize;
+    int mSize;
+    private float squareSize;
 
-    protected ArrayList<Square> mAllSquares;
-    protected ArrayList<Square> mFrontSquares;
-    protected ArrayList<Square> mBackSquares;
-    protected ArrayList<Square> mTopSquares;
-    protected ArrayList<Square> mBottomSquares;
-    protected ArrayList<Square> mLeftSquares;
-    protected ArrayList<Square> mRightSquares;
-    protected ArrayList<Square>[] mAllFaces;
+    ArrayList<Square> mAllSquares;
+    ArrayList<Square> mFrontSquares;
+    ArrayList<Square> mBackSquares;
+    ArrayList<Square> mTopSquares;
+    ArrayList<Square> mBottomSquares;
+    ArrayList<Square> mLeftSquares;
+    ArrayList<Square> mRightSquares;
+    ArrayList<Square>[] mAllFaces;
 
-    protected ArrayList<ArrayList<Piece>> mXaxisFaceList;
-    protected ArrayList<ArrayList<Piece>> mYaxisFaceList;
-    protected ArrayList<ArrayList<Piece>> mZaxisFaceList;
+    ArrayList<ArrayList<Piece>> mXaxisFaceList;
+    ArrayList<ArrayList<Piece>> mYaxisFaceList;
+    ArrayList<ArrayList<Piece>> mZaxisFaceList;
 
     public AbstractCube(int size) {
         if (size <= 0) throw new AssertionError();
@@ -88,7 +88,7 @@ public class AbstractCube {
         updateSquareFaces();
     }
 
-    protected void updateSquareFaces() {
+    private void updateSquareFaces() {
         for (int i = 0; i < FACE_COUNT; i++) {
             for (Square sq: mAllFaces[i]) {
                 sq.setFace(i);

@@ -24,7 +24,7 @@ public class CubeRendererImpl extends GLRenderer
     // 3 * size of float
     private static final int VERTEX_STRIDE = 12;
 
-    RubiksCube mCube;
+    private RubiksCube mCube;
 
     private int PROGRAM;
     private int POSITION_HANDLE;
@@ -51,9 +51,9 @@ public class CubeRendererImpl extends GLRenderer
         GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1f);
     }
 
-    boolean highlightFlag = false;
-    Square highlightPoint;
-    float mSize = 0.02f;
+    private boolean highlightFlag = false;
+    private Square highlightPoint;
+    private final float mSize = 0.02f;
 
     public void clearHighlight() {
         highlightFlag = false;
@@ -104,7 +104,7 @@ public class CubeRendererImpl extends GLRenderer
         finishDrawing();
     }
 
-    public void startDrawing()
+    private void startDrawing()
     {
         PROGRAM = ShaderCache.getInstance().getProgram();
         GLES20.glUseProgram(PROGRAM);
@@ -114,14 +114,14 @@ public class CubeRendererImpl extends GLRenderer
         MATRIX_HANDLE = GLES20.glGetUniformLocation(PROGRAM, "uMVPMatrix");
     }
 
-    public void finishDrawing() {
+    private void finishDrawing() {
         GLES20.glDisableVertexAttribArray(POSITION_HANDLE);
     }
 
     // The order in which lines are drawn
-    private static short[] indices = { 0, 1, 2, 0, 2, 3};
+    private static final short[] indices = { 0, 1, 2, 0, 2, 3};
     // Our index buffer.
-    private static ShortBuffer indexBuffer;
+    private static final ShortBuffer indexBuffer;
 
     static {
         /**

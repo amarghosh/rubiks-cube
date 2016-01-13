@@ -289,7 +289,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
             algo.addStep(rot);
             middleRotations = middleEdgeToTopEdge(
                     pos == EDGE_TOP_FAR ? EDGE_MIDDLE_RIGHT_BACK : EDGE_MIDDLE_FRONT_RIGHT,
-                    mTopColor, faceIndex);
+                    faceIndex);
         } else {
             int faceIndex = topColoredSquare.getFace() == FACE_TOP ?
                     FACE_FRONT : topColoredSquare.getFace();
@@ -298,7 +298,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
                     pos == EDGE_TOP_LEFT ? INNER : OUTER);
             algo.addStep(rot);
             middleRotations = middleEdgeToTopEdge(pos == EDGE_TOP_LEFT ?
-                    EDGE_MIDDLE_FRONT_LEFT : EDGE_MIDDLE_FRONT_RIGHT, mTopColor, faceIndex);
+                    EDGE_MIDDLE_FRONT_LEFT : EDGE_MIDDLE_FRONT_RIGHT, faceIndex);
         }
 
         for (int i = 0; i < middleRotations.size(); i++) {
@@ -308,7 +308,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         setAlgo(algo);
     }
 
-    private static ArrayList<Rotation> middleEdgeToTopEdge(int middlePos, int topColor, int faceWithTopColor) {
+    private static ArrayList<Rotation> middleEdgeToTopEdge(int middlePos, int faceWithTopColor) {
         ArrayList<Rotation> rotations = new ArrayList<>();
 
         switch (middlePos) {
@@ -371,7 +371,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         return rotations;
     }
 
-    Square getSquareByColor(ArrayList<ArrayList<Piece>> faceList, int index, int pos, int color) {
+    private Square getSquareByColor(ArrayList<ArrayList<Piece>> faceList, int index, int pos, int color) {
         Piece piece = faceList.get(index).get(pos);
         for (Square sq : piece.mSquares) {
             if (sq.mColor == color) {
@@ -387,7 +387,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         Square topColorSquare = getSquareByColor(mYaxisFaceList, MIDDLE, pos, mTopColor);
         int faceIndex = topColorSquare.getFace();
 
-        ArrayList<Rotation> rotations = middleEdgeToTopEdge(pos, mTopColor, faceIndex);
+        ArrayList<Rotation> rotations = middleEdgeToTopEdge(pos, faceIndex);
         Algorithm algo = new Algorithm();
         for (int i = 0; i < rotations.size(); i++) {
             algo.addStep(rotations.get(i));
@@ -553,13 +553,11 @@ public class RubiksCube3x3x3 extends RubiksCube {
         for (Square sq : piece.mSquares) {
             if (sq.mColor == topColor) {
                 topColorFace = sq.getFace();
-                continue;
             }
         }
 
         int desiredCornerIndex = CORNER_INDEX_FRONT_RIGHT;
         int currentCornerIndex = corner2index(FACE_TOP, corner);
-        int delta = Math.abs(currentCornerIndex - desiredCornerIndex);
 
         if (desiredCornerIndex != currentCornerIndex) {
             /**
@@ -664,7 +662,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
     private void firstFaceCorner(int corner) {
         Piece piece = mYaxisFaceList.get(INNER).get(corner);
-        assert piece.getType() == Piece.PieceType.CORNER;
+        if (piece.getType() != Piece.PieceType.CORNER) throw new AssertionError();
         int topColor = mTopSquares.get(CENTER).mColor;
         int topColorFace = -1;
         int sideColor = -1;
@@ -798,7 +796,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
     }
 
     private ArrayList<Rotation> bringColorToFront(int color) {
-        assert color >= 0 && color <= FACE_COUNT;
+        if (!(color >= 0 && color <= FACE_COUNT)) throw new AssertionError();
         ArrayList<Rotation> rotations = new ArrayList<>();
         if (color == mFrontSquares.get(CENTER).mColor) {
             return rotations;

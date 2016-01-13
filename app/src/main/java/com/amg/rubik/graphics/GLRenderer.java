@@ -4,7 +4,6 @@ package com.amg.rubik.graphics;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import android.graphics.Point;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
@@ -35,7 +34,7 @@ public abstract class GLRenderer implements Renderer {
     private float frustrumFar;
 
 
-    protected final float[] mMVPMatrix = new float[16];
+    final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
 
@@ -155,6 +154,6 @@ public abstract class GLRenderer implements Renderer {
         return frustrumTop - frustrumBottom;
     }
 
-    public abstract void onCreate(int width, int height, boolean contextLost);
-    public abstract void onDrawFrame(boolean firstDraw);
+    protected abstract void onCreate(int width, int height, boolean contextLost);
+    protected abstract void onDrawFrame(boolean firstDraw);
 }
