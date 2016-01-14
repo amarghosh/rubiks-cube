@@ -12,6 +12,6 @@ public final class Constants {
 
     public static final int DEFAULT_CUBE_SIZE = 3;
     public static final int DEFAULT_SCRAMBLE_COUNT = 10;
-    public static final int DEFAULT_SCRAMBLE_MODE_INDEX = 0;
-    public static final int DEFAULT_SPEED_INDEX = 0;
+    public static final int DEFAULT_SCRAMBLE_MODE_INDEX = 1;
+    public static final int DEFAULT_SPEED_INDEX = 1;
 }
