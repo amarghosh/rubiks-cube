@@ -2,16 +2,20 @@ package com.amg.rubik.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amg.rubik.Constants;
 import com.amg.rubik.MainActivity;
 import com.amg.rubik.R;
-import com.amg.rubik.ui.AbstractFragment;
 
 public class SettingsFragment extends AbstractFragment {
 
@@ -19,10 +23,13 @@ public class SettingsFragment extends AbstractFragment {
     private static final int MAX_CUBE_SIZE = 9;
 
     private TextView cubeSizeField;
+    private EditText scramblingCountField;
+    private Spinner speedSpinner;
+    private Spinner scramblingModeSpinner;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
         tag = "rubik-settings";
         mRootView = inflater.inflate(R.layout.fragment_settings, container, false);
         initUI();
@@ -32,6 +39,53 @@ public class SettingsFragment extends AbstractFragment {
     private void initUI() {
         cubeSizeField = (TextView)findViewById(R.id.cube_size);
         cubeSizeField.setText(String.valueOf(cubeSize()));
+        speedSpinner = (Spinner)findViewById(R.id.speed_spinner);
+        speedSpinner.setSelection(getSpeed());
+        speedSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setSpeed(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        scramblingModeSpinner = (Spinner)findViewById(R.id.scrambling_mode_spinner);
+        scramblingModeSpinner.setSelection(getScrambleMode());
+        scramblingModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setScrambleMode(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        scramblingCountField = (EditText)findViewById(R.id.edit_scrambling_count);
+        scramblingCountField.setText(String.valueOf(scrambleCount()));
+        scramblingCountField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (charSequence.length() == 0) return;
+                setScrambleCount(Integer.parseInt(charSequence.toString()));
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
         findViewById(R.id.btn_decrement_size).setOnClickListener(this);
         findViewById(R.id.btn_increment_size).setOnClickListener(this);
         findViewById(R.id.btn_reset).setOnClickListener(this);
@@ -41,9 +95,15 @@ public class SettingsFragment extends AbstractFragment {
     private void reset() {
         // Reset values
         setCubeSize(Constants.DEFAULT_CUBE_SIZE);
+        setScrambleCount(Constants.DEFAULT_SCRAMBLE_COUNT);
+        setScrambleMode(Constants.DEFAULT_SCRAMBLE_MODE_INDEX);
+        setSpeed(Constants.DEFAULT_SPEED_INDEX);
 
         // Update UI
         cubeSizeField.setText(String.valueOf(cubeSize()));
+        scramblingCountField.setText(String.valueOf(scrambleCount()));
+        scramblingModeSpinner.setSelection(getScrambleMode(), true);
+        speedSpinner.setSelection(getSpeed(), true);
     }
 
     // TODO: Can we do this using getActivity.getFragmentManager alone?

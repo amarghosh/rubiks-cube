@@ -57,7 +57,7 @@ public class AbstractCube {
     ArrayList<ArrayList<Piece>> mZaxisFaceList;
 
     public AbstractCube(int size) {
-        if (size <= 0) throw new AssertionError();
+        if (size <= 0) throw new AssertionError("Size is " + size);
         mSize = size;
         squareSize = (TOTAL_SIZE - PADDING - GAP * (mSize + 1)) / mSize;
         cube();

@@ -4,14 +4,14 @@
         <shape android:shape="ring" android:innerRadius="10dp"
             android:thickness="1dp"
             android:useLevel="false">
-            <solid android:color="@android:color/holo_green_light" />
+            <solid android:color="@android:color/holo_blue_light" />
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape android:shape="ring" android:innerRadius="1dp"
             android:thickness="10dp"
             android:useLevel="false">
-            <solid android:color="@android:color/holo_green_dark" />
+            <solid android:color="@android:color/holo_blue_dark" />
         </shape>
     </item>
 </selector>

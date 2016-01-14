@@ -177,7 +177,7 @@ public class RubiksCube extends AbstractCube {
 
     public int solve() {
         if (mSize == 1) {
-            sendMessage(":-)");
+            sendMessage("That was easy..!");
         } else {
             sendMessage("Robots can solve only 3x3 cubes right now");
         }

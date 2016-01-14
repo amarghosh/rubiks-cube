@@ -12,8 +12,15 @@
     <string name="lock_faces">Cube</string>
     <string name="unlock_faces">Face</string>
 
-    <string name="cube_size">Cube Size</string>
-    <string name="speed">Speed</string>
+    <string name="cube_size">Cube size</string>
+    <string name="speed">Speed of animation</string>
+    <string name="scrambling_mode_label">Scrambling mode</string>
+    <string name="scrambling_count_label">Scrambling count</string>
+
+    <string-array name="scrambling_modes">
+        <item>Instantaneous</item>
+        <item>Animated</item>
+    </string-array>
 
     <string-array name="speed_values">
         <item>Slow</item>
