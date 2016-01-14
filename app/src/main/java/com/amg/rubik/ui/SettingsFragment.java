@@ -106,7 +106,10 @@ public class SettingsFragment extends AbstractFragment {
         speedSpinner.setSelection(getSpeed(), true);
     }
 
-    // TODO: Can we do this using getActivity.getFragmentManager alone?
+    /**
+     * TODO: Make this independent of activity holding the fragment
+     * Is it possible using fragment manager?
+     * */
     private void play() {
         MainActivity activity = (MainActivity)getActivity();
         activity.selectItem(0);

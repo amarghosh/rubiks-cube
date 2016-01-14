@@ -685,6 +685,23 @@ public class AbstractCube {
         return faceNames[face];
     }
 
+    /**
+     * Rotate the face specified by @face and @axis.
+     *
+     * Note that the direction is relative to positive direction of the mentioned axis, and not
+     * the visible side of face. This is against the normal cube notation where direction is
+     * usually mentioned relative to the face being rotated.
+     *
+     * For instance, in traditional cube notation, L stands for left face clockwise where the
+     * clock is running on the visible face of the left face. It will rotate left face clockwise
+     * around the negative x axis. In our case, left face is face-0 on X axis and to achieve "L",
+     * we should call this function with values (X, CCW, 0)
+     *
+     * Example mappings from traditional notation to this function (assuming 3x3x3 cube):
+     * Front face clockwise: (Z, CW, 2)
+     * Left face clockwise: (X, CCW, 0)
+     * Bottom face clockwise: (Y, CCW, 0)
+     * */
     protected void rotate(Axis axis, Direction direction, int face) {
         if (face < 0 || face >= mSize) {
             throw new InvalidParameterException(

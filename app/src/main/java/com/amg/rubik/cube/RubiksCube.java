@@ -67,7 +67,19 @@ public class RubiksCube extends AbstractCube {
     private RotateMode rotateMode = RotateMode.NONE;
 
     private Algorithm mCurrentAlgo;
+
+    /**
+     * The value can be used to grade the solving speed during manual and automated modes.
+     * It doesn't mean much during manual solving right now as the user can invoke machine
+     * solving and cancel at the last moment to reset the counter. Once we add
+     * support for autodetecting solved cube during manual rotation, we should
+     * find a way to use this value in a more meaningful way.
+     * */
     int mMoveCount;
+
+    /**
+     * Stores past @MAX_UNDO_COUNT moves to perform undo
+     * */
     private ArrayList<Rotation> mUndoStack;
 
     private CubeRenderer mRenderer;
@@ -93,7 +105,10 @@ public class RubiksCube extends AbstractCube {
         }
     }
 
-    // TODO: Implement these two functions.
+    /**
+     * TODO: Serialize and deserialize the cube state
+     * Implement these two functions
+     * */
     public String getColorString() {
         return  null;
     }
@@ -105,6 +120,11 @@ public class RubiksCube extends AbstractCube {
     /**
      * Rotate randomly for @count moves. This function just updates the state instantaneously
      * without animating the rotations
+     *
+     * Even sized cubes do not have a fixed center piece per face as the center itself consists of
+     * multiple pieces. Odd cubes on the other hand, have a fixed center color for each face.
+     * Most algorithms on solving 3x3 cubes avoid rotating the middle piece as that changes the
+     * perceived orientation of the cube. So we also refrain from rotating such layers in odd cubes.
      *
      * @see public void randomize()
      * */
@@ -118,13 +138,11 @@ public class RubiksCube extends AbstractCube {
                     Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
             int startFace = 0;
 
-            // Do not rotate the center piece in case of odd cubes
             if (mSize != 1 && mSize % 2 == 1) {
                 startFace = Math.abs(random.nextInt(mSize - 1));
                 if (startFace >= mSize / 2) {
                     startFace++;
                 }
-                mRotation.setStartFace(startFace);
             } else {
                 startFace = Math.abs(random.nextInt(mSize));
             }
@@ -191,9 +209,6 @@ public class RubiksCube extends AbstractCube {
     /**
      * So far we changed only the orientation of the pieces. This function updates
      * the colors of squares according to the Rotation in progress.
-     * TODO: Add proper comments.
-     * This function handles rotating the colors and deciding the next move. The logic should be
-     * separated. Pure rotation can be moved to AbstractCube.
      * */
     private void finishRotation() {
         for (int face = mRotation.startFace;
@@ -248,6 +263,9 @@ public class RubiksCube extends AbstractCube {
         mRotation.start();
     }
 
+    /**
+     * @see public void randomize(int count);
+     * */
     private void rotateRandom() {
         mRotation.reset();
         Random random = new Random();
@@ -257,7 +275,6 @@ public class RubiksCube extends AbstractCube {
         mRotation.direction = random.nextBoolean() ?
                 Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
 
-        // Do not rotate the center piece in case of odd cubes
         if (mSize != 1 && mSize % 2 == 1) {
             int startFace = Math.abs(random.nextInt(mSize - 1));
             if (startFace >= mSize / 2) {

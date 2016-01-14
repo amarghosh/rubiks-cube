@@ -1204,8 +1204,8 @@ public class RubiksCube3x3x3 extends RubiksCube {
          *   Rotate the cube once to misalign the currently aligned one and align
          *   one of the other two
          * case 2: They are opposite
-         *   TODO: fix this
          *   Apply algo and hope for the best
+         * TODO: Last face cross align: handle opposite-squares-aligned case efficiently
          * */
         if (alignedCount == 2) {
             if (offsets[(firstAlignedIndex + 1) % CUBE_SIDES] == 0 ||
@@ -1273,7 +1273,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
         Algorithm algorithm = new Algorithm();
 
-        // TODO: this is guess work; needs to be optimized.
+        // TODO: Last face corner position: calculate instead of guessing here.
         if (positionedCorners == 0) {
             algorithm.append(lastFaceCornerPositionAlgo(Direction.CLOCKWISE));
             setAlgo(algorithm);

@@ -56,6 +56,27 @@ public class RubikGLSurfaceView extends GLSurfaceView {
         return true;
     }
 
+    /**
+     * Touches happen on the screen which is a plane normal to the vector
+     * from eye position to the origin. To get the touched point, first we
+     * translate this plane parallel to the near plane of the frustrum. This
+     * makes it easier to calculate the x and y positions in opengl
+     * coordinates. These values are then translated back to the eye plane.
+     *
+     * Imagine a line parallel to the eye vector that passes through this
+     * touched point. Check if this line touches any of the visible planes of
+     * the cube, namely front face, top face and the right face. If the point
+     * of intersection of the line and a plane lies within the boundary
+     * rectangle of the cube, we can assume the user touched that face.
+     *
+     * Currently, we just highlight the touched point.
+     *
+     * TODO: Fix the offset by treating the screen as a sphere instead of plane
+     * Even though this method shows improvement over the previous method,
+     * (directly projecting near plane to the front face),
+     * the estimated touch points are little off from the actual points.
+     * Gotta solve this.
+     * */
     private TouchInfo getTouchedSquare(float originX ,float originY) {
         TouchInfo result = new TouchInfo();
         Point3D eye = mRenderer.getEye();
@@ -76,7 +97,7 @@ public class RubikGLSurfaceView extends GLSurfaceView {
         touchY *= -1;
 
         /**
-         * TODO: adding a correction to the z value here
+         * TODO: fix the calculated z value
          * Reached this value by trial and error on a nexus-4 phone in portrait mode.
          * This seems to adjust the calcuated z value closer to the real point.
          * We gotta figure out the proper way later.

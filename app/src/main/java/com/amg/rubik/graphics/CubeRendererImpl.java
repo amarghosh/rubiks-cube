@@ -60,7 +60,6 @@ public class CubeRendererImpl extends GLRenderer
     }
 
     public void setHighlightPoint(Point3D point, Axis axis) {
-        // TODO: only front face is implemented now
         Point3D[] corners = new Point3D[4];
 
         switch (axis) {
