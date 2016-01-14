@@ -101,6 +101,45 @@ public class RubiksCube extends AbstractCube {
         return mState;
     }
 
+    /**
+     * Rotate randomly for @count moves. This function just updates the state instantaneously
+     * without animating the rotations
+     *
+     * @see public void randomize()
+     * */
+    public void randomize(int count) {
+        Random random = new Random();
+        Axis[] axes = new Axis[] {Axis.X_AXIS, Axis.Y_AXIS, Axis.Z_AXIS};
+
+        for (int i = 0; i < count; i++) {
+            Axis axis = axes[Math.abs(random.nextInt(3))];
+            Direction direction = random.nextBoolean() ?
+                    Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+            int startFace = 0;
+
+            // Do not rotate the center piece in case of odd cubes
+            if (mSize != 1 && mSize % 2 == 1) {
+                startFace = Math.abs(random.nextInt(mSize - 1));
+                if (startFace >= mSize / 2) {
+                    startFace++;
+                }
+                mRotation.setStartFace(startFace);
+            } else {
+                startFace = Math.abs(random.nextInt(mSize));
+            }
+            rotate(axis, direction, startFace);
+        }
+
+        mMoveCount = 0;
+        clearUndoStack();
+    }
+
+    /**
+     * Start scrambling the cube. Random faces will be rotated until stopRandomize is called. This
+     * function animates individual rotations.
+     *
+     * @see public void randomize(int count)
+     * */
     public void randomize() {
         if (mState != CubeState.IDLE) {
             Log.e(tag, "invalid state for randomize " + mState);
