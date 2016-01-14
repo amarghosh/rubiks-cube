@@ -56,6 +56,8 @@ public class CubeFragment extends AbstractFragment
         mRubikView = new RubikGLSurfaceView(getActivity());
         createCube();
         view.addView(mRubikView);
+        mRubikView.setWholeCubeRotation(
+                ((ToggleButton) findViewById(R.id.btn_rotate_mode)).isChecked());
     }
 
     @Override
@@ -96,7 +98,6 @@ public class CubeFragment extends AbstractFragment
             mCube = new RubiksCube(cubeSize());
         }
         mCube.setSpeed(getSpeed());
-        mCube.randomize(scrambleCount());
         mCube.setListener(this);
         mRubikView.setCube(mCube);
         if (cubeState() != null)

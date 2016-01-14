@@ -34,6 +34,7 @@
             android:textOff="@string/unlock_faces"
             android:textOn="@string/lock_faces"
             android:textAllCaps="true"
+            android:checked="true"
             />
 
         <ImageButton
