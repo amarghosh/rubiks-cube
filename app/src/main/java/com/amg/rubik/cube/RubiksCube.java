@@ -39,6 +39,7 @@ public class RubiksCube extends AbstractCube {
     static final String tag = "rubik-cube";
 
     // Default value for incrementing angle during rotation
+    static final float ANGLE_DELTA_SLOW = 2f;
     static final float ANGLE_DELTA_NORMAL = 4f;
     static final float ANGLE_DELTA_FAST = 10f;
 
@@ -148,7 +149,6 @@ public class RubiksCube extends AbstractCube {
         clearUndoStack();
         rotateMode = RotateMode.RANDOM;
         mState = CubeState.RANDOMIZE;
-        mRotation.setAngleDelta(ANGLE_DELTA_FAST);
         mRotation.start();
     }
 
@@ -160,7 +160,6 @@ public class RubiksCube extends AbstractCube {
         rotateMode = RotateMode.NONE;
         finishRotation();
         mRotation.reset();
-        mRotation.setAngleDelta(ANGLE_DELTA_NORMAL);
         mState = CubeState.IDLE;
         mMoveCount = 0;
     }
@@ -343,7 +342,7 @@ public class RubiksCube extends AbstractCube {
         if (Math.abs(mRotation.angle) > 89.9f) {
             finishRotation();
         } else {
-            mRotation.increment();
+            mRotation.increment(mAngleDelta);
         }
     }
 
@@ -440,4 +439,21 @@ public class RubiksCube extends AbstractCube {
         return 0;
     }
 
+    private final int SLOW = 0;
+    private final int MEDIUM = 1;
+    private final int FAST = 2;
+
+    private int mSpeed = MEDIUM;
+    private float mAngleDelta = ANGLE_DELTA_NORMAL;
+    public void setSpeed(int speed) {
+        mSpeed = MEDIUM;
+        switch (speed) {
+            case FAST:
+                mAngleDelta = ANGLE_DELTA_FAST; break;
+            case MEDIUM:
+                mAngleDelta = ANGLE_DELTA_NORMAL; break;
+            case SLOW:
+                mAngleDelta = ANGLE_DELTA_SLOW; break;
+        }
+    }
 }

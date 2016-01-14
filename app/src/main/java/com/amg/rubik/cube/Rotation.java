@@ -26,7 +26,6 @@ public class Rotation {
     int startFace;
     int faceCount;
     float angle;
-    private float angleDelta = RubiksCube.ANGLE_DELTA_NORMAL;
 
     public Rotation() {
         reset();
@@ -47,7 +46,6 @@ public class Rotation {
 
     Rotation duplicate() {
         Rotation dup = new Rotation(axis, direction, startFace, faceCount);
-        dup.setAngleDelta(angleDelta);
         return dup;
     }
 
@@ -80,18 +78,11 @@ public class Rotation {
         this.axis = axis;
     }
 
-    public void setAngleDelta(float angleDelta) {
-        if (angleDelta > 90) {
-            throw new InvalidParameterException("Delta should be less than 90: " + angleDelta);
-        }
-        this.angleDelta = angleDelta;
-    }
-
     public void setStartFace(int startFace) {
         this.startFace = startFace;
     }
 
-    void increment() {
+    void increment(float angleDelta) {
         if (direction == Direction.CLOCKWISE) {
             angle -= angleDelta;
             if (angle < -90) {

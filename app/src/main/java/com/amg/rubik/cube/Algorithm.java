@@ -46,12 +46,6 @@ public class Algorithm {
         steps.add(rotation);
     }
 
-    public void setAngleDelta(float f) {
-        for (Rotation rot: steps) {
-            rot.setAngleDelta(f);
-        }
-    }
-
     public void append(Algorithm algo) {
         if (algo == null) return;
         for (Rotation rot: algo.steps) {

@@ -142,7 +142,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, INNER);
         algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
         algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, INNER, SIZE);
-        algorithm.setAngleDelta(ANGLE_DELTA_FAST);
         setAlgo(algorithm);
     }
 
@@ -152,7 +151,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, INNER);
         algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
         algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, INNER);
-        algorithm.setAngleDelta(ANGLE_DELTA_FAST);
         setAlgo(algorithm);
     }
 
@@ -167,7 +165,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
         algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
         algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, INNER);
         algorithm.addStep(Axis.Y_AXIS, Direction.COUNTER_CLOCKWISE, INNER);
-        algorithm.setAngleDelta(ANGLE_DELTA_FAST);
         setAlgo(algorithm);
     }
 
@@ -1437,13 +1434,5 @@ public class RubiksCube3x3x3 extends RubiksCube {
             default:
                 throw new AssertionError();
         }
-    }
-
-    @Override
-    protected void setAlgo(Algorithm algo) {
-        if (solveState.ordinal() < SolveState.LastFaceCornerAlign.ordinal()) {
-            algo.setAngleDelta(ANGLE_DELTA_NORMAL);
-        }
-        super.setAlgo(algo);
     }
 }
