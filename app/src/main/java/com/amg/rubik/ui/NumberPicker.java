@@ -2,14 +2,11 @@ package com.amg.rubik.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.amg.rubik.R;
@@ -17,17 +14,22 @@ import com.amg.rubik.R;
 /**
  * Horizontal number picker with increment and decrement buttons around the number field.
  */
-public class NumberPicker extends FrameLayout {
+public class NumberPicker extends FrameLayout implements View.OnClickListener {
     private static final String tag = "numpicker";
+
+    public interface ValueChangedListener {
+        void onValueChanged(int value);
+    }
 
     private int mIncrementColor = Color.BLUE;
     private int mDecrementColor = Color.BLUE;
-    private int mMinValue = 0;
-    private int mMaxValue = 100;
+    private int mMinValue = Integer.MIN_VALUE;
+    private int mMaxValue = Integer.MAX_VALUE;
     private int mStep = 1;
     private int mValue = 1;
 
     private TextView textView;
+    private ValueChangedListener mListener;
 
     public NumberPicker(Context context) {
         super(context);
@@ -68,6 +70,9 @@ public class NumberPicker extends FrameLayout {
 
         textView = (TextView)findViewById(R.id.numberField);
         textView.setText(String.valueOf(mValue));
+
+        findViewById(R.id.btn_increment).setOnClickListener(this);
+        findViewById(R.id.btn_decrement).setOnClickListener(this);
     }
 
     /**
@@ -135,6 +140,46 @@ public class NumberPicker extends FrameLayout {
     }
 
     public void setValue(int value) {
-        this.mValue = value;
+        if (mValue != value) {
+            this.mValue = value;
+            textView.setText(String.valueOf(mValue));
+        }
+    }
+
+    private void updateAndNotify() {
+        Log.w(tag, "value " + mValue);
+        textView.setText(String.valueOf(mValue));
+        if (mListener != null) {
+            mListener.onValueChanged(mValue);
+        }
+    }
+
+    private void incrementValue() {
+        if (mValue < mMaxValue) {
+            mValue++;
+            updateAndNotify();
+        }
+    }
+
+    private void decrementValue() {
+        if (mValue > mMinValue) {
+            mValue--;
+            updateAndNotify();
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        Log.w(tag, String.format("clicked %d (dec %d, inc %d)",
+                v.getId(), R.id.btn_decrement, R.id.btn_increment));
+        if (v.getId() == R.id.btn_increment) {
+            incrementValue();
+        } else if (v.getId() == R.id.btn_decrement) {
+            decrementValue();
+        }
+    }
+
+    public void setValueChangedListener(ValueChangedListener listener) {
+        this.mListener = listener;
     }
 }

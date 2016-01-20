@@ -23,7 +23,7 @@ public class SettingsFragment extends AbstractFragment {
     private static final int MAX_CUBE_SIZE = 9;
 
     private TextView cubeSizeField;
-    private EditText scramblingCountField;
+    private NumberPicker scramblingCountPicker;
     private Spinner speedSpinner;
     private Spinner scramblingModeSpinner;
 
@@ -67,25 +67,15 @@ public class SettingsFragment extends AbstractFragment {
             }
         });
 
-        scramblingCountField = (EditText)findViewById(R.id.edit_scrambling_count);
-        scramblingCountField.setText(String.valueOf(scrambleCount()));
-        scramblingCountField.addTextChangedListener(new TextWatcher() {
+        scramblingCountPicker = (NumberPicker)findViewById(R.id.scrambling_count_picker);
+        scramblingCountPicker.setValue(scrambleCount());
+        scramblingCountPicker.setValueChangedListener(new NumberPicker.ValueChangedListener() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() == 0) return;
-                setScrambleCount(Integer.parseInt(charSequence.toString()));
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
+            public void onValueChanged(int value) {
+                setScrambleCount(value);
             }
         });
+
         findViewById(R.id.btn_decrement_size).setOnClickListener(this);
         findViewById(R.id.btn_increment_size).setOnClickListener(this);
         findViewById(R.id.btn_reset).setOnClickListener(this);
@@ -101,7 +91,7 @@ public class SettingsFragment extends AbstractFragment {
 
         // Update UI
         cubeSizeField.setText(String.valueOf(cubeSize()));
-        scramblingCountField.setText(String.valueOf(scrambleCount()));
+        scramblingCountPicker.setValue(scrambleCount());
         scramblingModeSpinner.setSelection(getScrambleMode(), true);
         speedSpinner.setSelection(getSpeed(), true);
     }
