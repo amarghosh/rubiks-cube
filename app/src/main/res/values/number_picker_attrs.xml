@@ -1,0 +1,10 @@
+<resources>
+    <declare-styleable name="NumberPicker">
+        <attr name="incrementColor" format="color" />
+        <attr name="decrementColor" format="color" />
+        <attr name="value" format="integer" />
+        <attr name="minValue" format="integer" />
+        <attr name="maxValue" format="integer" />
+        <attr name="step" format="integer" />
+    </declare-styleable>
+</resources>
