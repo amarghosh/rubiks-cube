@@ -15,7 +15,7 @@ import com.amg.rubik.R;
  * Horizontal number picker with increment and decrement buttons around the number field.
  */
 public class NumberPicker extends FrameLayout implements View.OnClickListener {
-    private static final String tag = "numpicker";
+    private static final String tag = "rubik-numpicker";
 
     public interface ValueChangedListener {
         void onValueChanged(int value);
@@ -57,12 +57,6 @@ public class NumberPicker extends FrameLayout implements View.OnClickListener {
         mMaxValue = a.getInteger(R.styleable.NumberPicker_maxValue, mMaxValue);
         mStep = a.getInteger(R.styleable.NumberPicker_step, mStep);
         mValue = a.getInteger(R.styleable.NumberPicker_value, mValue);
-
-        Log.w(tag, String.format("inited with colors %d %d, range %d %d, step %d, value %d ",
-                mIncrementColor, mDecrementColor,
-                mMinValue, mMaxValue, mStep, mValue
-        ));
-
         a.recycle();
 
         View view = inflate(getContext(), R.layout.number_picker_layout, null);

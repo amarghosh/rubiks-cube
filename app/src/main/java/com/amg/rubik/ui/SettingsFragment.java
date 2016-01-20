@@ -22,6 +22,7 @@ public class SettingsFragment extends AbstractFragment {
     private static final int MIN_CUBE_SIZE = 1;
     private static final int MAX_CUBE_SIZE = 9;
 
+    private NumberPicker cubeSizePicker;
     private TextView cubeSizeField;
     private NumberPicker scramblingCountPicker;
     private Spinner speedSpinner;
@@ -37,8 +38,15 @@ public class SettingsFragment extends AbstractFragment {
     }
 
     private void initUI() {
-        cubeSizeField = (TextView)findViewById(R.id.cube_size);
-        cubeSizeField.setText(String.valueOf(cubeSize()));
+        cubeSizePicker = (NumberPicker)findViewById(R.id.cube_size);
+        cubeSizePicker.setValue(cubeSize());
+        cubeSizePicker.setValueChangedListener(new NumberPicker.ValueChangedListener() {
+            @Override
+            public void onValueChanged(int value) {
+                onCubeSizeChanged(value);
+            }
+        });
+
         speedSpinner = (Spinner)findViewById(R.id.speed_spinner);
         speedSpinner.setSelection(getSpeed());
         speedSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -76,8 +84,6 @@ public class SettingsFragment extends AbstractFragment {
             }
         });
 
-        findViewById(R.id.btn_decrement_size).setOnClickListener(this);
-        findViewById(R.id.btn_increment_size).setOnClickListener(this);
         findViewById(R.id.btn_reset).setOnClickListener(this);
         findViewById(R.id.btn_play).setOnClickListener(this);
     }
@@ -90,7 +96,7 @@ public class SettingsFragment extends AbstractFragment {
         setSpeed(Constants.DEFAULT_SPEED_INDEX);
 
         // Update UI
-        cubeSizeField.setText(String.valueOf(cubeSize()));
+        cubeSizePicker.setValue(cubeSize());
         scramblingCountPicker.setValue(scrambleCount());
         scramblingModeSpinner.setSelection(getScrambleMode(), true);
         speedSpinner.setSelection(getSpeed(), true);
@@ -115,25 +121,10 @@ public class SettingsFragment extends AbstractFragment {
             case R.id.btn_play:
                 play();
                 break;
-
-            case R.id.btn_decrement_size:
-            case R.id.btn_increment_size:
-                onCubeSizeButtonClick(view);
-                break;
         }
     }
 
-    private void onCubeSizeButtonClick(View view) {
-        int size = cubeSize();
-        if (view.getId() == R.id.btn_decrement_size && size > MIN_CUBE_SIZE) {
-            size--;
-        }
-        if (view.getId() == R.id.btn_increment_size) {
-            size++;
-        }
-
-        cubeSizeField.setText(String.valueOf(size));
-
+    private void onCubeSizeChanged(int size) {
         if (size > MAX_CUBE_SIZE) {
             Toast.makeText(getActivity(),
                     "Big cubes may not be rendered properly", Toast.LENGTH_SHORT).show();
