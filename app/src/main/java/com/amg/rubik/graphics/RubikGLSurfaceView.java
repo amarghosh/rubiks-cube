@@ -105,21 +105,16 @@ public class RubikGLSurfaceView extends GLSurfaceView {
          * */
         float touchX = mRenderer.getFrustrumLeft() +
                 (originX * mRenderer.getFrustrumWidth()) / getWidth();
-
         float touchY = mRenderer.getFrustrumBottom() +
                 (originY * mRenderer.getFrustrumHeight()) / getHeight();
         touchY *= -1;
 
+        float touchZ = eye.getZ();
+
         /**
-         * TODO: fix the calculated z value
-         * Reached this value by trial and error on a nexus-4 phone in portrait mode.
-         * This seems to adjust the calcuated z value closer to the real point.
-         * We gotta figure out the proper way later.
+         * Translate touched point to the eye vector.
+         * Z is already at eye.getZ()
          * */
-
-        float touchZ = eye.getZ() + 0.015f;
-
-        // translate touched point to the eye vector (z value remains same)
         touchX += eye.getX();
         touchY += eye.getY();
 
@@ -134,11 +129,27 @@ public class RubikGLSurfaceView extends GLSurfaceView {
          *
          * As we know the value of one of x, y, z for each plane, we can find t from there
          * */
+        float a, b, c, x, y, z, t;
 
-        float a = eye.getX();
-        float b = eye.getY();
-        float c = eye.getZ();
-        float x, y, z, t;
+        boolean useUnProject = false;
+        if (useUnProject) {
+            Point3D vec = mRenderer.getDirectionVector((int) originX, getHeight() - (int) originY,
+                    getWidth(), getHeight());
+            a = vec.getX();
+            b = vec.getY();
+            c = vec.getZ();
+        } else {
+            /**
+             * TODO: fix the calculated z value
+             * Reached this value by trial and error on a nexus-4 phone in portrait mode.
+             * This seems to adjust the calcuated z value closer to the real point.
+             * We gotta figure out the proper way later.
+             * */
+            touchZ += 0.015f;
+            a = eye.getX();
+            b = eye.getY();
+            c = eye.getZ();
+        }
 
         // check for front face
         z = mCube.getFrontFaceZ();

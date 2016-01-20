@@ -2,6 +2,7 @@ package com.amg.rubik.graphics;
 
 import android.graphics.Color;
 import android.opengl.GLES20;
+import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -10,6 +11,7 @@ import com.amg.rubik.cube.Square;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -148,6 +150,7 @@ public class CubeRendererImpl extends GLRenderer
         };
 
         float[] matrix = mHasRotation ? mRotationMatrix : mMVPMatrix;
+
         GLES20.glVertexAttribPointer(POSITION_HANDLE,
                 COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
@@ -175,4 +178,17 @@ public class CubeRendererImpl extends GLRenderer
         mHasRotation = !(angle == 0f &&
                 x == 0f && y == 0f && z == 0f);
     }
+
+    public Point3D getDirectionVector(int x, int y, int w, int h) {
+        int[] view = {0, 0, w, h};
+        float[] obj1 = new float[16];
+        float[] obj2 = new float[16];
+        GLU.gluUnProject(x, y, 1, mViewMatrix, 0, mProjectionMatrix, 0, view, 0, obj1, 0);
+        GLU.gluUnProject(x, y, -1, mViewMatrix, 0, mProjectionMatrix, 0, view, 0, obj2, 0);
+        obj2[0] -= obj1[0];
+        obj2[1] -= obj1[1];
+        obj2[2] -= obj1[2];
+        return new Point3D(obj2[0], obj2[1], obj2[2]);
+    }
+
 }

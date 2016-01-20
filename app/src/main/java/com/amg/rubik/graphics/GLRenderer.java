@@ -35,8 +35,8 @@ public abstract class GLRenderer implements Renderer {
 
 
     final float[] mMVPMatrix = new float[16];
-    private final float[] mProjectionMatrix = new float[16];
-    private final float[] mViewMatrix = new float[16];
+    protected final float[] mProjectionMatrix = new float[16];
+    protected final float[] mViewMatrix = new float[16];
 
 
     public GLRenderer() {
