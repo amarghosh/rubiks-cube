@@ -1,5 +1,7 @@
 package com.amg.rubik.cube;
 
+import android.graphics.Color;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -8,49 +10,9 @@ import com.amg.rubik.graphics.Point3D;
 
 public class Square {
 
-    public static final int YELLOW = 0;
-    public static final int GREEN = 1;
-    public static final int RED = 2;
-    public static final int ORANGE = 3;
-    public static final int BLUE = 4;
-    public static final int WHITE = 5;
-    public static final int HIGHLIGHT_COLOR = 6;
-
-    private static final int COLOR_COUNT = 7;
-
-    // TODO: colors and squares are coupled here. This needs to be cleaned up.
-    private static final float[] green = { 0.2f, 0.7f, 0.2f, 1.0f };
-    private static final float[] red = { 0.7f, 0.2f, 0.2f, 1.0f };
-    private static final float[] blue = { 0.2f, 0.2f, 0.7f, 1.0f };
-    private static final float[] white = { 0.8f, 0.8f, 0.8f, 1.0f };
-    private static final float[] yellow = { 0.8f, 0.8f, 0.2f, 1.0f };
-    private static final float[] orange = { 0.8f, 0.4f, 0.1f, 1.0f };
-    private static final float[] highlight = {0f, 1f, 1f, 1f}; // Cyan
-    private static final Color[] colors;
-
     private int face;
 
-    public static class Color {
-        final float[] rgba;
-        final String name;
-        Color(float[] rgba, String name) {
-            this.rgba = rgba;
-            this.name = name;
-        }
-    }
-
-    static {
-        colors = new Color[COLOR_COUNT];
-        colors[YELLOW] = new Color(yellow, "yellow");
-        colors[RED] = new Color(red, "red");
-        colors[GREEN] = new Color(green, "green");
-        colors[ORANGE] = new Color(orange, "orange");
-        colors[BLUE] = new Color(blue, "blue");
-        colors[WHITE] = new Color(white, "white");
-        colors[COLOR_COUNT - 1] = new Color(highlight, "highlight");
-    }
-
-    int mColor = WHITE;
+    private int mColor;
 
     // Our vertex buffer.
     private FloatBuffer mVertexBuffer;
@@ -75,7 +37,7 @@ public class Square {
         mVertexBuffer = vbb.asFloatBuffer();
         mVertexBuffer.put(vertices);
         mVertexBuffer.position(0);
-        mColor = color % COLOR_COUNT;
+        mColor = color;
     }
 
     public Square(Point3D[] points, int color) {
@@ -92,15 +54,15 @@ public class Square {
         return mVertexBuffer;
     }
 
-    public float[] color() {
-        return colors[mColor].rgba;
-    }
-
     public String colorName() {
-        return colors[mColor].name;
+        return String.format("#%08X",  mColor);
     }
 
-    public static String getColorName(int index) {
-        return colors[index].name;
+    public int getColor() {
+        return mColor;
+    }
+
+    public void setColor(int value) {
+        mColor = value;
     }
 }

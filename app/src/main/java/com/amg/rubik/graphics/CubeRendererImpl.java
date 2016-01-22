@@ -1,5 +1,6 @@
 package com.amg.rubik.graphics;
 
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.util.Log;
@@ -82,7 +83,7 @@ public class CubeRendererImpl extends GLRenderer
                 corners[3] = new Point3D(point.getX() + mSize, point.getY() + mSize, point.getZ());
                 break;
         }
-        this.highlightPoint = new Square(corners, Square.HIGHLIGHT_COLOR);
+        this.highlightPoint = new Square(corners, Color.CYAN);
         highlightFlag = true;
     }
 
@@ -138,13 +139,21 @@ public class CubeRendererImpl extends GLRenderer
     }
 
     public void drawSquare(Square square) {
+        int color = square.getColor();
+        float[] rgba = {
+                Color.red(color) / 255.0f,
+                Color.green(color) / 255.0f,
+                Color.blue(color) / 255.0f,
+                Color.alpha(color) / 255.0f,
+        };
+
         float[] matrix = mHasRotation ? mRotationMatrix : mMVPMatrix;
         GLES20.glVertexAttribPointer(POSITION_HANDLE,
                 COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
                 VERTEX_STRIDE, square.vertexBuffer());
 
-        GLES20.glUniform4fv(COLOR_HANDLE, 1, square.color(), 0);
+        GLES20.glUniform4fv(COLOR_HANDLE, 1, rgba, 0);
         GLES20.glUniformMatrix4fv(MATRIX_HANDLE, 1, false, matrix, 0);
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length,
                 GLES20.GL_UNSIGNED_SHORT, indexBuffer);

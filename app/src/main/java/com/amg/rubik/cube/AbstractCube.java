@@ -1,5 +1,7 @@
 package com.amg.rubik.cube;
 
+import android.graphics.Color;
+
 import com.amg.rubik.graphics.Axis;
 import com.amg.rubik.graphics.Direction;
 
@@ -109,12 +111,12 @@ public class AbstractCube {
 
     private void createAllSquares()
     {
-        createFrontSquares(Square.BLUE);
-        createBackSquares(Square.GREEN);
-        createLeftSquares(Square.RED);
-        createRightSquares(Square.ORANGE);
-        createTopSquares(Square.WHITE);
-        createBottomSquares(Square.YELLOW);
+        createFrontSquares(Color.BLUE);
+        createBackSquares(Color.GREEN);
+        createLeftSquares(Color.RED);
+        createRightSquares(0xFFFF7F10);
+        createTopSquares(Color.WHITE);
+        createBottomSquares(Color.YELLOW);
     }
 
     /**
@@ -564,20 +566,20 @@ public class AbstractCube {
 
         src = workingCopy.get(0);
         for (int i = 0; i < mSize; i++) {
-            tempColors.add(src.get(i).mColor);
+            tempColors.add(src.get(i).getColor());
         }
 
         for (int i = 0; i < CUBE_SIDES - 1; i++) {
             dst = workingCopy.get(i);
             src = workingCopy.get(i + 1);
             for (int j = 0; j < mSize; j++) {
-                dst.get(j).mColor = src.get(j).mColor;
+                dst.get(j).setColor(src.get(j).getColor());
             }
         }
 
         dst = workingCopy.get(CUBE_SIDES-1);
         for (int i = 0; i < mSize; i++) {
-            dst.get(i).mColor = tempColors.get(i);
+            dst.get(i).setColor(tempColors.get(i));
         }
     }
 
@@ -589,40 +591,38 @@ public class AbstractCube {
         ArrayList<Integer> tempColors = new ArrayList<>(size);
         if (direction == Direction.COUNTER_CLOCKWISE) {
             for (int i = 0; i < size - 1; i++) {
-                tempColors.add(squares.get(i).mColor);
-                squares.get(i).mColor = squares.get(i * size + size - 1).mColor;
+                tempColors.add(squares.get(i).getColor());
+                squares.get(i).setColor(squares.get(i * size + size - 1).getColor());
             }
 
             for (int i = 0; i < size - 1; i++) {
-                squares.get(i * size + size - 1).mColor =
-                        squares.get(size * size - 1 - i).mColor;
+                squares.get(i * size + size - 1).setColor(
+                        squares.get(size * size - 1 - i).getColor());
             }
 
             for (int i = 0; i < size - 1; i++) {
-                squares.get(size * size - 1 - i).mColor =
-                        squares.get(size * (size - 1 - i)).mColor;
+                squares.get(size * size - 1 - i).setColor(
+                        squares.get(size * (size - 1 - i)).getColor());
             }
 
             for (int i = 0; i < size - 1; i++) {
-                squares.get(size * (size - 1 - i)).mColor =
-                        tempColors.get(i);
+                squares.get(size * (size - 1 - i)).setColor(tempColors.get(i));
             }
         } else {
             for (int i = 0; i < size - 1; i++) {
-                tempColors.add(squares.get(i).mColor);
-                squares.get(i).mColor = squares.get(size * (size - 1 - i)).mColor;
+                tempColors.add(squares.get(i).getColor());
+                squares.get(i).setColor(squares.get(size * (size - 1 - i)).getColor());
             }
             for (int i = 0; i < size - 1; i++) {
-                squares.get(size * (size - 1 - i)).mColor =
-                        squares.get(size * size - 1 - i).mColor;
+                squares.get(size * (size - 1 - i)).setColor(
+                        squares.get(size * size - 1 - i).getColor());
             }
             for (int i = 0; i < size - 1; i++) {
-                squares.get(size * size - 1 - i).mColor =
-                        squares.get(i * size + size - 1).mColor;
+                squares.get(size * size - 1 - i).setColor(
+                        squares.get(i * size + size - 1).getColor());
             }
             for (int i = 0; i < size - 1; i++) {
-                squares.get(i * size + size - 1).mColor =
-                        tempColors.get(i);
+                squares.get(i * size + size - 1).setColor(tempColors.get(i));
             }
         }
 

@@ -202,8 +202,8 @@ public class RubiksCube3x3x3 extends RubiksCube {
     protected void startSolving() {
         super.startSolving();
         solveState = SolveState.FirstFaceCross;
-        mTopColor = mTopSquares.get(CENTER).mColor;
-        mBottomColor = mBottomSquares.get(CENTER).mColor;
+        mTopColor = mTopSquares.get(CENTER).getColor();
+        mBottomColor = mBottomSquares.get(CENTER).getColor();
         sendMessage("Top is " + mTopSquares.get(CENTER).colorName() +
                 " and bottom is " + mBottomSquares.get(CENTER).colorName());
         firstFaceCross();
@@ -220,8 +220,8 @@ public class RubiksCube3x3x3 extends RubiksCube {
                 continue;
             }
             ArrayList<Square> sideFace = sideFaces[i / 2];
-            if (mTopSquares.get(i).mColor == mTopColor &&
-                    sideFace.get(FIRST_ROW_CENTER).mColor == sideFace.get(CENTER).mColor) {
+            if (mTopSquares.get(i).getColor() == mTopColor &&
+                    sideFace.get(FIRST_ROW_CENTER).getColor() == sideFace.get(CENTER).getColor()) {
                 continue;
             }
 
@@ -234,7 +234,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
                         i == EDGE_TOP_FAR ? 2 : 1);
                 setAlgo(algo);
             } else {
-                fixFirstFaceEdge(mTopColor, sideFace.get(CENTER).mColor);
+                fixFirstFaceEdge(mTopColor, sideFace.get(CENTER).getColor());
             }
             return;
         }
@@ -254,11 +254,11 @@ public class RubiksCube3x3x3 extends RubiksCube {
         }
 
         Log.w(tag, "Found " +
-                Square.getColorName(topColor) + '-' +
-                Square.getColorName(sideColor) + " at " + row + "-" + pos);
+                topColor + '-' +
+                sideColor + " at " + row + "-" + pos);
 
         // White on bottom face
-        if (row == INNER && mBottomSquares.get(pos).mColor == topColor) {
+        if (row == INNER && mBottomSquares.get(pos).getColor() == topColor) {
             firstFaceEdge_fromBottomFace(pos);
         } else if (row == INNER) {
             firstFaceEdge_fromLowerLayer(pos);
@@ -368,10 +368,12 @@ public class RubiksCube3x3x3 extends RubiksCube {
         return rotations;
     }
 
-    private Square getSquareByColor(ArrayList<ArrayList<Piece>> faceList, int index, int pos, int color) {
+    private Square getSquareByColor(ArrayList<ArrayList<Piece>> faceList,
+                                    int index, int pos, int color) {
+
         Piece piece = faceList.get(index).get(pos);
         for (Square sq : piece.mSquares) {
-            if (sq.mColor == color) {
+            if (sq.getColor() == color) {
                 return sq;
             }
         }
@@ -408,15 +410,17 @@ public class RubiksCube3x3x3 extends RubiksCube {
         if (pos <= EDGE_BOTTOM_LEFT) {
             algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, INNER);
             algorithm.addStep(Axis.Z_AXIS, Direction.CLOCKWISE, OUTER);
-            if (mTopSquares.get(EDGE_TOP_LEFT).mColor == mTopColor &&
-                    mLeftSquares.get(FIRST_ROW_CENTER).mColor == mLeftSquares.get(CENTER).mColor) {
+            if (mTopSquares.get(EDGE_TOP_LEFT).getColor() == mTopColor &&
+                    mLeftSquares.get(FIRST_ROW_CENTER).getColor() ==
+                            mLeftSquares.get(CENTER).getColor()) {
                 algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, INNER);
             }
         } else {
             algorithm.addStep(Axis.X_AXIS, Direction.CLOCKWISE, OUTER);
             algorithm.addStep(Axis.Z_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
-            if (mTopSquares.get(EDGE_TOP_RIGHT).mColor == mTopColor &&
-                    mRightSquares.get(FIRST_ROW_CENTER).mColor == mRightSquares.get(CENTER).mColor) {
+            if (mTopSquares.get(EDGE_TOP_RIGHT).getColor() == mTopColor &&
+                    mRightSquares.get(FIRST_ROW_CENTER).getColor() ==
+                            mRightSquares.get(CENTER).getColor()) {
 
                 algorithm.addStep(Axis.X_AXIS, Direction.COUNTER_CLOCKWISE, OUTER);
             }
@@ -455,7 +459,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
     private boolean isCornerAligned(Piece piece) {
         if (piece.mSquares.size() != 3) throw new AssertionError();
         for (Square sq : piece.mSquares) {
-            if (sq.mColor != mAllFaces[sq.getFace()].get(CENTER).mColor) {
+            if (sq.getColor() != mAllFaces[sq.getFace()].get(CENTER).getColor()) {
                 return false;
             }
         }
@@ -545,10 +549,10 @@ public class RubiksCube3x3x3 extends RubiksCube {
         Algorithm algorithm = new Algorithm();
         Piece piece = mYaxisFaceList.get(OUTER).get(corner);
         if (piece.getType() != Piece.PieceType.CORNER) throw new AssertionError();
-        final int topColor = mTopSquares.get(CENTER).mColor;
+        final int topColor = mTopSquares.get(CENTER).getColor();
         int topColorFace = -1;
         for (Square sq : piece.mSquares) {
-            if (sq.mColor == topColor) {
+            if (sq.getColor() == topColor) {
                 topColorFace = sq.getFace();
             }
         }
@@ -597,18 +601,18 @@ public class RubiksCube3x3x3 extends RubiksCube {
         Direction direction;
         Piece piece = mYaxisFaceList.get(INNER).get(corner);
         if (piece.getType() != Piece.PieceType.CORNER) throw new AssertionError();
-        final int topColor = mTopSquares.get(CENTER).mColor;
+        final int topColor = mTopSquares.get(CENTER).getColor();
         int sideColor1 = -1;
         int sideColor2 = -1;
         for (Square sq : piece.mSquares) {
-            if (sq.mColor == topColor) {
+            if (sq.getColor() == topColor) {
                 if (sq.getFace() != FACE_BOTTOM) throw new AssertionError();
                 continue;
             }
             if (sideColor1 == -1) {
-                sideColor1 = sq.mColor;
+                sideColor1 = sq.getColor();
             } else if (sideColor2 == -1) {
-                sideColor2 = sq.mColor;
+                sideColor2 = sq.getColor();
             }
         }
 
@@ -660,21 +664,21 @@ public class RubiksCube3x3x3 extends RubiksCube {
     private void firstFaceCorner(int corner) {
         Piece piece = mYaxisFaceList.get(INNER).get(corner);
         if (piece.getType() != Piece.PieceType.CORNER) throw new AssertionError();
-        int topColor = mTopSquares.get(CENTER).mColor;
+        int topColor = mTopSquares.get(CENTER).getColor();
         int topColorFace = -1;
         int sideColor = -1;
         int bottomColor = -1;
         int sideFace = -1;
         for (Square sq : piece.mSquares) {
-            if (sq.mColor == topColor) {
+            if (sq.getColor() == topColor) {
                 topColorFace = sq.getFace();
                 if (topColorFace == FACE_BOTTOM) throw new AssertionError();
                 continue;
             }
             if (sq.getFace() == FACE_BOTTOM) {
-                bottomColor = sq.mColor;
+                bottomColor = sq.getColor();
             } else {
-                sideColor = sq.mColor;
+                sideColor = sq.getColor();
                 sideFace = sq.getFace();
             }
         }
@@ -718,7 +722,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
     private int getColorFace(int color) {
         for (int i = 0; i < FACE_COUNT; i++) {
-            if (mAllFaces[i].get(CENTER).mColor == color) {
+            if (mAllFaces[i].get(CENTER).getColor() == color) {
                 return i;
             }
         }
@@ -733,7 +737,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
                 continue;
             int[] pieceColors = new int[piece.mSquares.size()];
             for (int j = 0; j < pieceColors.length; j++) {
-                pieceColors[j] = piece.mSquares.get(j).mColor;
+                pieceColors[j] = piece.mSquares.get(j).getColor();
             }
             Arrays.sort(pieceColors);
             boolean found = true;
@@ -793,23 +797,22 @@ public class RubiksCube3x3x3 extends RubiksCube {
     }
 
     private ArrayList<Rotation> bringColorToFront(int color) {
-        if (!(color >= 0 && color <= FACE_COUNT)) throw new AssertionError();
         ArrayList<Rotation> rotations = new ArrayList<>();
-        if (color == mFrontSquares.get(CENTER).mColor) {
+        if (color == mFrontSquares.get(CENTER).getColor()) {
             return rotations;
         }
         Axis axis = Axis.Y_AXIS;
         Direction dir = Direction.CLOCKWISE;
-        if (color == mTopSquares.get(CENTER).mColor) {
+        if (color == mTopSquares.get(CENTER).getColor()) {
             axis = Axis.X_AXIS;
             dir = Direction.COUNTER_CLOCKWISE;
-        } else if (color == mBottomSquares.get(CENTER).mColor) {
+        } else if (color == mBottomSquares.get(CENTER).getColor()) {
             axis = Axis.X_AXIS;
-        } else if (color == mLeftSquares.get(CENTER).mColor) {
+        } else if (color == mLeftSquares.get(CENTER).getColor()) {
             dir = Direction.COUNTER_CLOCKWISE;
         }
         rotations.add(new Rotation(axis, dir, 0, SIZE));
-        if (color == mBackSquares.get(CENTER).mColor) {
+        if (color == mBackSquares.get(CENTER).getColor()) {
             rotations.add(new Rotation(axis, dir, 0, SIZE));
         }
         return rotations;
@@ -899,26 +902,26 @@ public class RubiksCube3x3x3 extends RubiksCube {
         int outerColor = -1;
         int outerFace = -1;
         for (Square sq : piece.mSquares) {
-            if (sq.mColor == mBottomColor) {
+            if (sq.getColor() == mBottomColor) {
                 throw new InvalidParameterException("Yellow shouldn't be there");
             }
             if (sq.getFace() != FACE_TOP) {
-                outerColor = sq.mColor;
+                outerColor = sq.getColor();
                 outerFace = sq.getFace();
             }
             if (color1 == -1) {
-                color1 = sq.mColor;
+                color1 = sq.getColor();
             } else if (color2 == -1) {
-                color2 = sq.mColor;
+                color2 = sq.getColor();
             }
         }
 
         // TODO: Do this in the same cycle and avoid redundant moves
-        if (outerFace == FACE_RIGHT && mRightSquares.get(CENTER).mColor == outerColor) {
+        if (outerFace == FACE_RIGHT && mRightSquares.get(CENTER).getColor() == outerColor) {
             alignPiece = fixMiddleLayerFromRightFace();
             setAlgo(alignPiece);
             return;
-        } else if (outerFace == FACE_FRONT && mFrontSquares.get(CENTER).mColor == outerColor) {
+        } else if (outerFace == FACE_FRONT && mFrontSquares.get(CENTER).getColor() == outerColor) {
             alignPiece = fixMiddleLayerFromFrontFace();
             setAlgo(alignPiece);
             return;
@@ -991,7 +994,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
     private boolean isEdgeAligned(Piece piece) {
         if (piece.getType() != Piece.PieceType.EDGE) throw new AssertionError();
         for (Square sq : piece.mSquares) {
-            if (sq.mColor != mAllFaces[sq.getFace()].get(CENTER).mColor) {
+            if (sq.getColor() != mAllFaces[sq.getFace()].get(CENTER).getColor()) {
                 return false;
             }
         }
@@ -999,22 +1002,22 @@ public class RubiksCube3x3x3 extends RubiksCube {
     }
 
     private void lastFaceCross() {
-        int lastFaceColor = mTopSquares.get(CENTER).mColor;
+        int lastFaceColor = mTopSquares.get(CENTER).getColor();
         int[] edges = new int[]{
                 EDGE_TOP_NEAR, EDGE_TOP_RIGHT, EDGE_TOP_FAR, EDGE_TOP_LEFT
         };
         int[] colors = new int[CUBE_SIDES];
         int yellowCount = 0;
 
-        int front = mTopSquares.get(LAST_ROW_MIDDLE).mColor;
-        int right = mTopSquares.get(MID_ROW_RIGHT).mColor;
-        int back = mTopSquares.get(FIRST_ROW_CENTER).mColor;
-        int left = mTopSquares.get(MID_ROW_LEFT).mColor;
+        int front = mTopSquares.get(LAST_ROW_MIDDLE).getColor();
+        int right = mTopSquares.get(MID_ROW_RIGHT).getColor();
+        int back = mTopSquares.get(FIRST_ROW_CENTER).getColor();
+        int left = mTopSquares.get(MID_ROW_LEFT).getColor();
         Algorithm algo = new Algorithm();
 
         for (int i = 0; i < edges.length; i++) {
             Square sq = mTopSquares.get(edges[i]);
-            colors[i] = sq.mColor;
+            colors[i] = sq.getColor();
             if (colors[i] == lastFaceColor) {
                 yellowCount++;
             }
@@ -1135,10 +1138,10 @@ public class RubiksCube3x3x3 extends RubiksCube {
             if (sideSquare == null) {
                 throw new AssertionError("side square null at " + i + " for piece: " + piece);
             }
-            int face = getColorFace(sideSquare.mColor);
+            int face = getColorFace(sideSquare.getColor());
             if (face == FACE_TOP || face == FACE_BOTTOM) {
                 throw new AssertionError("color and face mismatch: " +
-                        Square.getColorName(sideSquare.mColor) + ", face: " + face);
+                        sideSquare.getColor() + ", face: " + face);
             }
             offsets[i] = face - i;
             offsets[i] = (offsets[i] + CUBE_SIDES) % CUBE_SIDES;
@@ -1226,10 +1229,11 @@ public class RubiksCube3x3x3 extends RubiksCube {
          * appropriate algorithm
          * */
         if (alignedCount == 1) {
-            int color = mAllFaces[firstAlignedIndex].get(CENTER).mColor;
-            if (mAllFaces[firstAlignedIndex].get(FIRST_ROW_CENTER).mColor != color) {
+            int color = mAllFaces[firstAlignedIndex].get(CENTER).getColor();
+            if (mAllFaces[firstAlignedIndex].get(FIRST_ROW_CENTER).getColor() != color) {
                 throw new AssertionError("color mismatch at " + firstAlignedIndex + ": " +
-                        color + " - " + mAllFaces[firstAlignedIndex].get(FIRST_ROW_CENTER).mColor);
+                        color + " - " +
+                        mAllFaces[firstAlignedIndex].get(FIRST_ROW_CENTER).getColor());
             }
             if (firstAlignedIndex != FACE_FRONT) {
                 direction = firstAlignedIndex == FACE_LEFT ? Direction.COUNTER_CLOCKWISE :
@@ -1332,7 +1336,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         for (Square sq: piece.mSquares) {
             boolean found = false;
             for (int face: faces) {
-                if (sq.mColor == mAllFaces[face].get(CENTER).mColor) {
+                if (sq.getColor() == mAllFaces[face].get(CENTER).getColor()) {
                     found = true;
                     break;
                 }
@@ -1362,9 +1366,9 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
 
     private void lastFaceCornerAlign() {
-        int lastColor = mTopSquares.get(CENTER).mColor;
+        int lastColor = mTopSquares.get(CENTER).getColor();
         Algorithm algorithm = new Algorithm();
-        if (mTopSquares.get(LAST_ROW_RIGHT).mColor == lastColor) {
+        if (mTopSquares.get(LAST_ROW_RIGHT).getColor() == lastColor) {
             if (checkTopCorners()) {
                 proceedToNextState();
             }

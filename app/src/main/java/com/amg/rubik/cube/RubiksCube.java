@@ -364,9 +364,9 @@ public class RubiksCube extends AbstractCube {
     }
 
     private boolean checkFace(ArrayList<Square> squares) {
-        int centerColor = squares.get(squares.size()/2).mColor;
+        int centerColor = squares.get(squares.size()/2).getColor();
         for (int i = 0; i < squares.size(); i++) {
-            if (squares.get(i).mColor != centerColor)
+            if (squares.get(i).getColor() != centerColor)
                 return false;
         }
         return true;

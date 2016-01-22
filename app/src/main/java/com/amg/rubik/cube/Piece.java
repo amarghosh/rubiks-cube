@@ -45,7 +45,7 @@ public class Piece {
 
     public boolean hasColor(int color) {
         for (Square sq: mSquares) {
-            if (sq.mColor == color) {
+            if (sq.getColor() == color) {
                 return true;
             }
         }
@@ -54,7 +54,7 @@ public class Piece {
 
     public Square getSquare(int color) {
         for (Square sq: mSquares) {
-            if (sq.mColor == color) {
+            if (sq.getColor() == color) {
                 return sq;
             }
         }
