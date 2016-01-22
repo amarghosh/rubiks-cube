@@ -13,8 +13,11 @@ import java.security.InvalidParameterException;
 
 /**
  * Created by amar on 6/1/16.
+ *
+ * Base fragment that takes care of initializing preferences so that individual classes need not
+ * worry about it.
  */
-public abstract class AbstractFragment extends Fragment
+public abstract class BaseFragment extends Fragment
         implements View.OnClickListener {
 
     String tag = "rubik-fragment";

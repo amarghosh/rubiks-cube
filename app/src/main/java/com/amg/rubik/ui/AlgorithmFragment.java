@@ -9,16 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.amg.rubik.R;
-import com.amg.rubik.cube.AbstractCube;
+import com.amg.rubik.cube.Cube;
 import com.amg.rubik.cube.RubiksCube;
 import com.amg.rubik.cube.RubiksCube3x3x3;
-import com.amg.rubik.graphics.Axis;
 import com.amg.rubik.graphics.RubikGLSurfaceView;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class AlgorithmFragment extends AbstractFragment {
+public class AlgorithmFragment extends BaseFragment {
 
     private RubiksCube mCube = null;
     private RubikGLSurfaceView mRubikView = null;
@@ -55,13 +54,13 @@ public class AlgorithmFragment extends AbstractFragment {
         }
         mCube.setColor(Color.GRAY);
         mCube.setColor(RubiksCube.FACE_TOP, Color.WHITE);
-        mCube.setRowColor(AbstractCube.FACE_FRONT, 0, AbstractCube.Color_RED);
-        mCube.setRowColor(AbstractCube.FACE_RIGHT, 0, Color.BLUE);
-        mCube.setRowColor(AbstractCube.FACE_BACK, 0, AbstractCube.Color_ORANGE);
-        mCube.setRowColor(AbstractCube.FACE_LEFT, 0, AbstractCube.Color_GREEN);
-        mCube.setColumnColor(AbstractCube.FACE_BOTTOM, 0, Color.YELLOW);
+        mCube.setRowColor(Cube.FACE_FRONT, 0, Cube.Color_RED);
+        mCube.setRowColor(Cube.FACE_RIGHT, 0, Color.BLUE);
+        mCube.setRowColor(Cube.FACE_BACK, 0, Cube.Color_ORANGE);
+        mCube.setRowColor(Cube.FACE_LEFT, 0, Cube.Color_GREEN);
+        mCube.setColumnColor(Cube.FACE_BOTTOM, 0, Color.YELLOW);
 
-        mCube.setColor(AbstractCube.FACE_FRONT, size - 1, size - 1, Color.DKGRAY);
+        mCube.setColor(Cube.FACE_FRONT, size - 1, size - 1, Color.DKGRAY);
 
 
         mCube.setSpeed(getSpeed());

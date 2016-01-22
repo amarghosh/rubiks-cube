@@ -3,8 +3,6 @@ package com.amg.rubik.cube;
 import com.amg.rubik.graphics.Axis;
 import com.amg.rubik.graphics.Direction;
 
-import java.security.InvalidParameterException;
-
 /**
  * Created by amar on 11/12/15.
  */
@@ -14,7 +12,7 @@ import java.security.InvalidParameterException;
  * the visible side of face. This is against the normal cube notation where direction is
  * usually mentioned relative to the face being rotated.
  *
- * @see AbstractCube:: rotate(Axis axis, Direction direction, int face)
+ * @see Cube :: rotate(Axis axis, Direction direction, int face)
  * */
 public class Rotation {
 

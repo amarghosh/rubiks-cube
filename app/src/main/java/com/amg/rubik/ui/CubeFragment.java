@@ -9,14 +9,13 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.amg.rubik.Constants;
 import com.amg.rubik.cube.CubeListener;
 import com.amg.rubik.R;
 import com.amg.rubik.graphics.RubikGLSurfaceView;
 import com.amg.rubik.cube.RubiksCube;
 import com.amg.rubik.cube.RubiksCube3x3x3;
 
-public class CubeFragment extends AbstractFragment
+public class CubeFragment extends BaseFragment
         implements CubeListener {
 
     private int SCR_MODE_INSTANT = 0;

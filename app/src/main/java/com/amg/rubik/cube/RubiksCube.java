@@ -34,7 +34,7 @@ import com.amg.rubik.graphics.Direction;
  * The solve, cancel, randomize etc need to be synchronized with the draw function.
  * */
 
-public class RubiksCube extends AbstractCube {
+public class RubiksCube extends Cube {
 
     static final String tag = "rubik-cube";
 

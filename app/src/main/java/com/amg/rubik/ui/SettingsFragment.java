@@ -2,13 +2,10 @@ package com.amg.rubik.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,7 +14,7 @@ import com.amg.rubik.Constants;
 import com.amg.rubik.MainActivity;
 import com.amg.rubik.R;
 
-public class SettingsFragment extends AbstractFragment {
+public class SettingsFragment extends BaseFragment {
 
     private static final int MIN_CUBE_SIZE = 1;
     private static final int MAX_CUBE_SIZE = 9;

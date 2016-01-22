@@ -11,10 +11,12 @@ import java.util.ArrayList;
 /**
  * Created by amar on 12/1/16.
  *
- * This class handles cubes definition. It creates all squares, faces and puts them in appropriate
- * lists for each axes. It doesn't care about drawing the cube.
+ * This class handles cube's definition. It creates all squares, faces and puts them in appropriate
+ * lists for each axes. It also takes care of updating the colors of squares according to user
+ * specified rotation. It doesn't care about drawing the cube. You should extend this class
+ * rather than using it directly.
  */
-public class AbstractCube {
+public class Cube {
     // Do not change these values. They are used in many places.
     public static final int FACE_FRONT = 0;
     public static final int FACE_RIGHT = 1;
@@ -62,7 +64,7 @@ public class AbstractCube {
     ArrayList<ArrayList<Piece>> mYaxisFaceList;
     ArrayList<ArrayList<Piece>> mZaxisFaceList;
 
-    public AbstractCube(int size) {
+    public Cube(int size) {
         if (size <= 0) throw new AssertionError("Size is " + size);
         mSize = size;
         squareSize = (TOTAL_SIZE - PADDING - GAP * (mSize + 1)) / mSize;
