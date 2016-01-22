@@ -54,6 +54,7 @@ public class CubeFragment extends AbstractFragment
     private void initializeRubikView() {
         ViewGroup view = (ViewGroup)findViewById(R.id.cube_holder);
         mRubikView = new RubikGLSurfaceView(getActivity());
+        mRubikView.enableRotations();
         createCube();
         view.addView(mRubikView);
         mRubikView.setWholeCubeRotation(

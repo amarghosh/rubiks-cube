@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.amg.rubik.ui.AlgorithmFragment;
 import com.amg.rubik.ui.CubeFragment;
 import com.amg.rubik.ui.SettingsFragment;
 
@@ -28,6 +29,7 @@ public class MainActivity extends Activity implements  ListView.OnItemClickListe
     private static final String tag = "rubik-main";
 
     private static final int FRAGMENT_INDEX_HOME = 0;
+    private static final int FRAGMENT_INDEX_ALGO = 1;
     private static final int FRAGMENT_INDEX_SETTINGS = 3;
 
     private String[] mFragmentNames;
@@ -91,6 +93,8 @@ public class MainActivity extends Activity implements  ListView.OnItemClickListe
             fragment = new CubeFragment();
         } else if (pos == FRAGMENT_INDEX_SETTINGS) {
             fragment = new SettingsFragment();
+        } else if (pos == FRAGMENT_INDEX_ALGO) {
+            fragment = new AlgorithmFragment();
         } else {
             fragment = new PlaceholderFragment();
         }

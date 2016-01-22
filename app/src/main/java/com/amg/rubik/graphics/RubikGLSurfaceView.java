@@ -25,6 +25,16 @@ public class RubikGLSurfaceView extends GLSurfaceView {
     private PointF mStartPoint;
     private PointF mEndPoint;
 
+    private boolean touchEnabled;
+
+    public void enableRotations() {
+        touchEnabled = true;
+    }
+
+    public void disableRotation() {
+        touchEnabled = false;
+    }
+
     public RubikGLSurfaceView(Context context) {
         super(context);
         Log.w(tag, "creating glsurfaceview");
@@ -36,12 +46,16 @@ public class RubikGLSurfaceView extends GLSurfaceView {
     }
 
     void init() {
+        touchEnabled = false;
         mStartPoint = new PointF();
         mEndPoint = new PointF();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
+        if (!touchEnabled) {
+            return super.onTouchEvent(e);
+        }
 
         switch (e.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -276,8 +290,6 @@ public class RubikGLSurfaceView extends GLSurfaceView {
         }
 
         void update(int face, int row, int col) {
-            Log.d(tag, String.format("touched %s face at %d, %d",
-                    RubiksCube.faceName(face), row, col));
             if (!(col >= 0 && row >= 0)) throw new AssertionError(row + ", " + col);
             status = true;
             this.face = face;

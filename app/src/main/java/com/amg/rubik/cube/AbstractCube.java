@@ -23,6 +23,10 @@ public class AbstractCube {
     public static final int FACE_TOP = 4;
     public static final int FACE_BOTTOM = 5;
 
+    public static final int Color_RED = 0xFFDD2211;
+    public static final int Color_GREEN = 0xFF22DD11;
+    public static final int Color_ORANGE = 0xFFFF7F10;
+
     private static final String[] faceNames = {
             "front", "right", "back", "left", "top", "bottom"
     };
@@ -112,9 +116,9 @@ public class AbstractCube {
     private void createAllSquares()
     {
         createFrontSquares(Color.BLUE);
-        createBackSquares(Color.GREEN);
-        createLeftSquares(Color.RED);
-        createRightSquares(0xFFFF7F10);
+        createBackSquares(Color_GREEN);
+        createLeftSquares(Color_RED);
+        createRightSquares(Color_ORANGE);
         createTopSquares(Color.WHITE);
         createBottomSquares(Color.YELLOW);
     }

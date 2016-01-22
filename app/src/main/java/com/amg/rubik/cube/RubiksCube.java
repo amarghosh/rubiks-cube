@@ -473,4 +473,67 @@ public class RubiksCube extends AbstractCube {
                 mAngleDelta = ANGLE_DELTA_SLOW; break;
         }
     }
+
+    /**
+     * Sets the color of the whole cube
+     * */
+    public void setColor(int color) {
+        for (Square sq: mAllSquares) {
+            sq.setColor(color);
+        }
+    }
+
+    /**
+     * Sets the color of squares on the given face
+     * @face One of the FACE_* values
+     * */
+    public void setColor(int face, int color) {
+        if (!(face >= 0 && face < FACE_COUNT)) throw new AssertionError("Face " + face);
+        for (Square sq: mAllFaces[face]) {
+            sq.setColor(color);
+        }
+    }
+
+    /**
+     * Sets the color of all pieces on given side (face squares + side squares)
+     * */
+    public void setColor(Axis axis, int layer, int color) {
+        if (!(layer >= 0 && layer < mSize)) throw new AssertionError();
+        ArrayList<Piece> pieces;
+        switch (axis) {
+            case X_AXIS: pieces = mXaxisFaceList.get(layer); break;
+            case Y_AXIS: pieces = mYaxisFaceList.get(layer); break;
+            case Z_AXIS: pieces = mZaxisFaceList.get(layer); break;
+            default:throw new AssertionError();
+        }
+        for (Piece p: pieces) {
+            for (Square sq: p.mSquares) {
+                sq.setColor(color);
+            }
+        }
+    }
+
+    public void setColor(int face, int row, int column, int color) {
+        if (!(face < FACE_COUNT && row < mSize && column < mSize))
+            throw new AssertionError(String.format("%d %d %d", face, row, column));
+        mAllFaces[face].get(row * mSize + column).setColor(color);
+    }
+
+    public void setRowColor(int face, int row, int color) {
+        if (!(face < FACE_COUNT && row < mSize))
+            throw new AssertionError(String.format("%d %d", face, row));
+        ArrayList<Square> squares = mAllFaces[face];
+        for (int i = row; i < row + mSize; i++) {
+            squares.get(i).setColor(color);
+        }
+    }
+
+    public void setColumnColor(int face, int column, int color) {
+        if (!(face < FACE_COUNT && column < mSize))
+            throw new AssertionError(String.format("%d %d", face, column));
+        ArrayList<Square> squares = mAllFaces[face];
+        for (int i = 0; i < mSize; i++) {
+            squares.get(i * mSize + column).setColor(color);
+        }
+    }
 }
