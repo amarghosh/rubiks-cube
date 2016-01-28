@@ -93,15 +93,6 @@ public class Cube {
         mYaxisFaceList = new ArrayList<>(mSize);
         mZaxisFaceList = new ArrayList<>(mSize);
         createFaces();
-        updateSquareFaces();
-    }
-
-    private void updateSquareFaces() {
-        for (int i = 0; i < FACE_COUNT; i++) {
-            for (Square sq: mAllFaces[i]) {
-                sq.setFace(i);
-            }
-        }
     }
 
     private static Piece.PieceType getPieceType(int row, int col, int totalRows, int totalCols) {
@@ -155,7 +146,7 @@ public class Cube {
                 vertices[5] = vertices[2];
                 vertices[8] = vertices[2] + squareSize;
                 vertices[11] = vertices[2] + squareSize;
-                Square sq = new Square(vertices, color);
+                Square sq = new Square(vertices, color, FACE_LEFT);
                 mAllSquares.add(sq);
                 mLeftSquares.add(sq);
             }
@@ -192,7 +183,7 @@ public class Cube {
                 vertices[5] = vertices[2];
                 vertices[8] = vertices[2] - squareSize;
                 vertices[11] = vertices[2] - squareSize;
-                Square sq = new Square(vertices, color);
+                Square sq = new Square(vertices, color, FACE_RIGHT);
                 mAllSquares.add(sq);
                 mRightSquares.add(sq);
             }
@@ -229,7 +220,7 @@ public class Cube {
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] + squareSize;
                 vertices[9] = vertices[0] + squareSize;
-                Square sq = new Square(vertices, color);
+                Square sq = new Square(vertices, color, FACE_TOP);
                 mAllSquares.add(sq);
                 mTopSquares.add(sq);
             }
@@ -266,7 +257,7 @@ public class Cube {
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] + squareSize;
                 vertices[9] = vertices[0] + squareSize;
-                Square sq = new Square(vertices, color);
+                Square sq = new Square(vertices, color, FACE_BOTTOM);
                 mAllSquares.add(sq);
                 mBottomSquares.add(sq);
             }
@@ -302,7 +293,7 @@ public class Cube {
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] + squareSize;
                 vertices[9] = vertices[0] + squareSize;
-                Square sq = new Square(vertices, color);
+                Square sq = new Square(vertices, color, FACE_FRONT);
                 mAllSquares.add(sq);
                 mFrontSquares.add(sq);
             }
@@ -338,7 +329,7 @@ public class Cube {
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] - squareSize;
                 vertices[9] = vertices[0] - squareSize;
-                Square sq = new Square(vertices, color);
+                Square sq = new Square(vertices, color, FACE_BACK);
                 mAllSquares.add(sq);
                 mBackSquares.add(sq);
             }
@@ -782,7 +773,5 @@ public class Cube {
                     direction == Direction.CLOCKWISE ?
                             Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE, mSize);
         }
-
-        updateSquareFaces();
     }
 }

@@ -10,7 +10,7 @@ import com.amg.rubik.graphics.Point3D;
 
 public class Square {
 
-    private int face;
+    private int mFace;
 
     private int mColor;
 
@@ -18,18 +18,22 @@ public class Square {
     private FloatBuffer mVertexBuffer;
 
     public int getFace() {
-        return face;
+        return mFace;
     }
 
-    public void setFace(int face) {
-        this.face = face;
+    public Square(float[] vertices, int color, int face) {
+        init(vertices, color, face);
     }
 
     public Square(float[] vertices, int color) {
-        init(vertices, color);
+        this(vertices, color, -1);
     }
 
-    private void init(float[] vertices, int color) {
+    public Square(float[] vertices) {
+        this(vertices, Color.GRAY);
+    }
+
+    private void init(float[] vertices, int color, int face) {
         // a float is 4 bytes, therefore we multiply the number if
         // vertices with 4.
         ByteBuffer vbb = ByteBuffer.allocateDirect(vertices.length * 4);
@@ -38,6 +42,7 @@ public class Square {
         mVertexBuffer.put(vertices);
         mVertexBuffer.position(0);
         mColor = color;
+        mFace = face;
     }
 
     public Square(Point3D[] points, int color) {
@@ -47,7 +52,7 @@ public class Square {
             vertices[i*3 + 1] = points[i].getY();
             vertices[i*3 + 2] = points[i].getZ();
         }
-        init(vertices, color);
+        init(vertices, color, -1);
     }
 
     public FloatBuffer vertexBuffer() {
