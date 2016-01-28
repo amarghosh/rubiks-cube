@@ -536,4 +536,19 @@ public class RubiksCube extends Cube {
             squares.get(i * mSize + column).setColor(color);
         }
     }
+
+    public void reset() {
+        if (mState != CubeState.IDLE) {
+            sendMessage("cube is in state " + mState);
+            return;
+        }
+        setColor(FACE_FRONT, COLOR_FRONT);
+        setColor(FACE_BACK, COLOR_BACK);
+        setColor(FACE_BOTTOM, COLOR_BOTTOM);
+        setColor(FACE_TOP, COLOR_TOP);
+        setColor(FACE_LEFT, COLOR_LEFT);
+        setColor(FACE_RIGHT, COLOR_RIGHT);
+        clearUndoStack();
+        mMoveCount = 0;
+    }
 }

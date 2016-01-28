@@ -25,9 +25,20 @@ public class Cube {
     public static final int FACE_TOP = 4;
     public static final int FACE_BOTTOM = 5;
 
+    /**
+     * Default colors don't look nice on cube.
+     * */
     public static final int Color_RED = 0xFFDD2211;
     public static final int Color_GREEN = 0xFF22DD11;
     public static final int Color_ORANGE = 0xFFFF7F10;
+
+    public static int COLOR_TOP = Color.WHITE;
+    public static int COLOR_BOTTOM = Color.YELLOW;
+    public static int COLOR_LEFT = Color_ORANGE;
+    public static int COLOR_RIGHT = Color_RED;
+    public static int COLOR_FRONT = Color.BLUE;
+    public static int COLOR_BACK = Color_GREEN;
+
 
     private static final String[] faceNames = {
             "front", "right", "back", "left", "top", "bottom"
@@ -108,12 +119,12 @@ public class Cube {
 
     private void createAllSquares()
     {
-        createFrontSquares(Color.BLUE);
-        createBackSquares(Color_GREEN);
-        createLeftSquares(Color_RED);
-        createRightSquares(Color_ORANGE);
-        createTopSquares(Color.WHITE);
-        createBottomSquares(Color.YELLOW);
+        createFrontSquares(COLOR_FRONT);
+        createBackSquares(COLOR_BACK);
+        createLeftSquares(COLOR_LEFT);
+        createRightSquares(COLOR_RIGHT);
+        createTopSquares(COLOR_TOP);
+        createBottomSquares(COLOR_BOTTOM);
     }
 
     /**

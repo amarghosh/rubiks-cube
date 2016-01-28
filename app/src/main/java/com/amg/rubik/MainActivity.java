@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -129,6 +130,10 @@ public class MainActivity extends Activity implements  ListView.OnItemClickListe
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void openDrawer() {
+        mDrawerLayout.openDrawer(Gravity.LEFT);
     }
 
     public static class PlaceholderFragment extends Fragment {

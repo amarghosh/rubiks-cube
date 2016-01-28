@@ -4,11 +4,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.amg.rubik.MainActivity;
 import com.amg.rubik.cube.CubeListener;
 import com.amg.rubik.R;
 import com.amg.rubik.graphics.RubikGLSurfaceView;
@@ -34,6 +35,7 @@ public class CubeFragment extends BaseFragment
         findViewById(R.id.randomizeButton).setOnClickListener(this);
         findViewById(R.id.solveButton).setOnClickListener(this);
         findViewById(R.id.btn_undo).setOnClickListener(this);
+        findViewById(R.id.btn_more_settings).setOnClickListener(this);
         ToggleButton btn = (ToggleButton)findViewById(R.id.btn_rotate_mode);
         btn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -57,12 +59,14 @@ public class CubeFragment extends BaseFragment
     public void onResume() {
         super.onResume();
         mRubikView.onResume();
+        getActivity().getActionBar().hide();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mRubikView.onPause();
+        getActivity().getActionBar().show();
     }
 
     @Override
@@ -81,6 +85,10 @@ public class CubeFragment extends BaseFragment
             case R.id.btn_undo:
                 mCube.undo();
                 break;
+
+            case R.id.btn_more_settings:
+                ((MainActivity)getActivity()).openDrawer();
+                break;
         }
     }
 
@@ -98,27 +106,24 @@ public class CubeFragment extends BaseFragment
     }
 
     private void resetButtons() {
-        Button btn = (Button)findViewById(R.id.randomizeButton);
+        ImageButton btn = (ImageButton)findViewById(R.id.randomizeButton);
         btn.setEnabled(true);
-        btn.setText(R.string.randomize);
-        btn = (Button)findViewById(R.id.solveButton);
+        btn = (ImageButton)findViewById(R.id.solveButton);
         btn.setEnabled(true);
-        btn.setText(R.string.solve);
     }
 
     private void solve() {
-        Button btn = (Button)findViewById(R.id.solveButton);
+        ImageButton btn = (ImageButton)findViewById(R.id.solveButton);
         if (mCube.getState() == RubiksCube.CubeState.IDLE) {
             int solveRet = mCube.solve();
             if (solveRet == 0) {
-                btn.setText(R.string.cancel);
-                btn = (Button)findViewById(R.id.randomizeButton);
+                btn = (ImageButton)findViewById(R.id.randomizeButton);
                 btn.setEnabled(false);
             }
         } else if (mCube.getState() == RubiksCube.CubeState.SOLVING) {
             mCube.cancelSolving();
-            btn.setText(R.string.solve);
-            btn = (Button)findViewById(R.id.randomizeButton);
+            showToast("Cancelled solving");
+            btn = (ImageButton)findViewById(R.id.randomizeButton);
             btn.setEnabled(true);
         }
     }
@@ -127,6 +132,7 @@ public class CubeFragment extends BaseFragment
         if (mCube.getState() != RubiksCube.CubeState.IDLE) {
             return;
         }
+        mCube.reset();
         mCube.randomize(scrambleCount());
     }
 

@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.amg.rubik.ui.AlgorithmFragment"
+    tools:context="com.amg.rubik.MainActivity"
     android:orientation="vertical">
 
     <RelativeLayout
