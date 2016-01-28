@@ -87,11 +87,11 @@ public abstract class BaseFragment extends Fragment
         this.mScrambleCount = count;
     }
 
-    public void setScrambleMode(int mode) {
+    private void setScrambleMode(int mode) {
         this.mScrambleMode = mode;
     }
 
-    public int getScrambleMode() {
+    private int getScrambleMode() {
         return mScrambleMode;
     }
 

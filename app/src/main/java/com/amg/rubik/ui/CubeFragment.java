@@ -18,13 +18,6 @@ import com.amg.rubik.cube.RubiksCube3x3x3;
 public class CubeFragment extends BaseFragment
         implements CubeListener {
 
-    private int SCR_MODE_INSTANT = 0;
-    private int SCR_MODE_ANIMATED = 1;
-
-    private int SPEED_SLOW = 0;
-    private int SPEED_MEDIUM = 1;
-    private int SPEED_FAST = 2;
-
     private RubiksCube mCube = null;
     private RubikGLSurfaceView mRubikView = null;
 
@@ -131,24 +124,10 @@ public class CubeFragment extends BaseFragment
     }
 
     private void randomizeOnclick() {
-        Button btn = (Button)findViewById(R.id.randomizeButton);
-        if (mCube.getState() == RubiksCube.CubeState.IDLE) {
-            if (getScrambleMode() == SCR_MODE_INSTANT) {
-                mCube.randomize(scrambleCount());
-                return;
-            }
-            mRubikView.printDebugInfo();
-            mCube.randomize();
-            btn.setText(R.string.stop);
-            btn = (Button)findViewById(R.id.solveButton);
-            btn.setEnabled(false);
-        } else if (mCube.getState() == RubiksCube.CubeState.RANDOMIZE) {
-            mCube.stopRandomize();
-            mRubikView.printDebugInfo();
-            btn.setText(R.string.randomize);
-            btn = (Button)findViewById(R.id.solveButton);
-            btn.setEnabled(true);
+        if (mCube.getState() != RubiksCube.CubeState.IDLE) {
+            return;
         }
+        mCube.randomize(scrambleCount());
     }
 
     private Toast currentToast;
@@ -156,11 +135,15 @@ public class CubeFragment extends BaseFragment
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (currentToast != null) currentToast.cancel();
-                currentToast = Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT);
-                currentToast.show();
+                showToast(msg);
             }
         });
+    }
+
+    private void showToast(String txt) {
+        if (currentToast != null) currentToast.cancel();
+        currentToast = Toast.makeText(getActivity(), txt, Toast.LENGTH_SHORT);
+        currentToast.show();
     }
 
     @Override

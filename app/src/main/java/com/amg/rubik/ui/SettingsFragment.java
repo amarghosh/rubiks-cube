@@ -20,10 +20,8 @@ public class SettingsFragment extends BaseFragment {
     private static final int MAX_CUBE_SIZE = 9;
 
     private NumberPicker cubeSizePicker;
-    private TextView cubeSizeField;
     private NumberPicker scramblingCountPicker;
     private Spinner speedSpinner;
-    private Spinner scramblingModeSpinner;
 
     @Nullable
     @Override
@@ -58,20 +56,6 @@ public class SettingsFragment extends BaseFragment {
             }
         });
 
-        scramblingModeSpinner = (Spinner)findViewById(R.id.scrambling_mode_spinner);
-        scramblingModeSpinner.setSelection(getScrambleMode());
-        scramblingModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setScrambleMode(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
         scramblingCountPicker = (NumberPicker)findViewById(R.id.scrambling_count_picker);
         scramblingCountPicker.setValue(scrambleCount());
         scramblingCountPicker.setValueChangedListener(new NumberPicker.ValueChangedListener() {
@@ -89,13 +73,11 @@ public class SettingsFragment extends BaseFragment {
         // Reset values
         setCubeSize(Constants.DEFAULT_CUBE_SIZE);
         setScrambleCount(Constants.DEFAULT_SCRAMBLE_COUNT);
-        setScrambleMode(Constants.DEFAULT_SCRAMBLE_MODE_INDEX);
         setSpeed(Constants.DEFAULT_SPEED_INDEX);
 
         // Update UI
         cubeSizePicker.setValue(cubeSize());
         scramblingCountPicker.setValue(scrambleCount());
-        scramblingModeSpinner.setSelection(getScrambleMode(), true);
         speedSpinner.setSelection(getSpeed(), true);
     }
 

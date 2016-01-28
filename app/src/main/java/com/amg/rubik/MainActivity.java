@@ -46,7 +46,7 @@ public class MainActivity extends Activity implements  ListView.OnItemClickListe
         setContentView(R.layout.activity_main);
         mTitle = mDrawerTitle = getTitle();
         setupNavigation();
-        selectItem(1);
+        selectItem(0);
     }
 
     private void setupNavigation() {
