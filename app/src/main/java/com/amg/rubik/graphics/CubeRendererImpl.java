@@ -140,15 +140,46 @@ public class CubeRendererImpl extends GLRenderer
         indexBuffer.position(0);
     }
 
-    public void drawSquare(Square square) {
-        int color = square.getColor();
-        float[] rgba = {
+    private float[] color2rgba(int color) {
+        return new float[] {
                 Color.red(color) / 255.0f,
                 Color.green(color) / 255.0f,
                 Color.blue(color) / 255.0f,
                 Color.alpha(color) / 255.0f,
         };
+    }
 
+    private void drawLine(Point3D f, Point3D t, int color) {
+        float[] rgba = color2rgba(color);
+        float[] matrix = mMVPMatrix;
+        float[] vertices = new float[6];
+        vertices[0] = f.getX();
+        vertices[1] = f.getY();
+        vertices[2] = f.getZ();
+        vertices[3] = t.getX();
+        vertices[4] = t.getY();
+        vertices[5] = t.getZ();
+
+        FloatBuffer fb = ByteBuffer.allocateDirect(4 * 6)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+        for (int i = 0; i < 6; i++) fb.put(vertices[i]);
+        fb.position(0);
+
+        GLES20.glVertexAttribPointer(POSITION_HANDLE,
+                COORDS_PER_VERTEX,
+                GLES20.GL_FLOAT, false,
+                VERTEX_STRIDE, fb);
+
+        GLES20.glUniform4fv(COLOR_HANDLE, 1, rgba, 0);
+        GLES20.glUniformMatrix4fv(MATRIX_HANDLE, 1, false, matrix, 0);
+        GLES20.glDrawElements(GLES20.GL_LINES, 2,
+                GLES20.GL_UNSIGNED_SHORT, indexBuffer);
+    }
+
+    public void drawSquare(Square square) {
+        int color = square.getColor();
+        float[] rgba = color2rgba(color);
         float[] matrix = mHasRotation ? mRotationMatrix : mMVPMatrix;
 
         GLES20.glVertexAttribPointer(POSITION_HANDLE,

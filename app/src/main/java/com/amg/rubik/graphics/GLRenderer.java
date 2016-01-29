@@ -68,14 +68,23 @@ public abstract class GLRenderer implements Renderer {
         frustrumRight = ratio;
 
         Log.w(tag, String.format("width %d, height %d, ratio %f", width, height, ratio));
-        // this projection matrix is applied to object coordinates
-        // in the onDrawFrame() method
+
         Matrix.frustumM(mProjectionMatrix, 0,
                 frustrumLeft, frustrumRight,
                 frustrumBottom, frustrumTop,
                 frustrumNear, frustrumFar);
         mWidth = width;
         mHeight = height;
+
+        // Set the camera position (View matrix)
+        Matrix.setLookAtM(mViewMatrix, 0,
+                mEye.getX(), mEye.getY(), mEye.getZ(),
+                0f, 0f, 0f, // center
+                0f, 1.0f, 0f // up
+        );
+
+        // Calculate the projection and view transformation
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         GLES20.glEnable(GLES20.GL_CULL_FACE);
 
@@ -91,18 +100,7 @@ public abstract class GLRenderer implements Renderer {
     }
 
     public void onDrawFrame(GL10 arg0) {
-        // Set the camera position (View matrix)
-        Matrix.setLookAtM(mViewMatrix, 0,
-                mEye.getX(), mEye.getY(), mEye.getZ(),
-                0f, 0f, 0f, // center
-                0f, 1.0f, 0f // up
-        );
-
-        // Calculate the projection and view transformation
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-
         onDrawFrame(mFirstDraw);
-
         mFrameCount++;
         mFirstDraw = false;
     }

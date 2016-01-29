@@ -18,6 +18,14 @@ public class Point3D {
         this.z = z;
     }
 
+    public Point3D(float[] xyz, int offset) {
+        this(xyz[offset], xyz[offset+1], xyz[offset+2]);
+    }
+
+    public Point3D(float[] xyz) {
+        this(xyz, 0);
+    }
+
     public Point3D(Point3D that) {
         this(that.x, that.y, that.z);
     }
@@ -50,6 +58,22 @@ public class Point3D {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    public float dist(float ptx, float pty, float ptz) {
+        return (float)Math.sqrt((x - ptx)*(x - ptx) +
+                (y - pty)*(y - pty) +
+                (z - ptz)*(z - ptz)
+        );
+    }
+
+    public float dist(Point3D pt) {
+        return dist(pt.x, pt.y, pt.z);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%f, %f, %f)", x, y, z);
     }
 }
 

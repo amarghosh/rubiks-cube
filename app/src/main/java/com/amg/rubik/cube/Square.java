@@ -11,6 +11,7 @@ import com.amg.rubik.graphics.Point3D;
 public class Square {
 
     private int mFace;
+    Point3D mCenter;
 
     private int mColor;
 
@@ -29,6 +30,10 @@ public class Square {
         this(vertices, color, -1);
     }
 
+    public Point3D getCenter() {
+        return mCenter;
+    }
+
     public Square(float[] vertices) {
         this(vertices, Color.GRAY);
     }
@@ -43,6 +48,10 @@ public class Square {
         mVertexBuffer.position(0);
         mColor = color;
         mFace = face;
+        mCenter = new Point3D();
+        mCenter.setX((vertices[0] + vertices[3] + vertices[6] + vertices[9]) / 4);
+        mCenter.setY((vertices[1] + vertices[4] + vertices[7] + vertices[10]) / 4);
+        mCenter.setZ((vertices[2] + vertices[5] + vertices[8] + vertices[11]) / 4);
     }
 
     public Square(Point3D[] points, int color) {

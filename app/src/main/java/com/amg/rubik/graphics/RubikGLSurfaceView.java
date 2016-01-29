@@ -131,7 +131,7 @@ public class RubikGLSurfaceView extends GLSurfaceView {
          * */
         float a, b, c, x, y, z, t;
 
-        boolean useUnProject = false;
+        boolean useUnProject = true;
         if (useUnProject) {
             Point3D vec = mRenderer.getDirectionVector((int) originX, getHeight() - (int) originY,
                     getWidth(), getHeight());
@@ -233,16 +233,9 @@ public class RubikGLSurfaceView extends GLSurfaceView {
         if (Math.abs(dx) + Math.abs(dy) < TAP_SENSITIVITY_FACTOR) {
             return;
         }
-        if (dx == 0) dx = 1;
+        if (dx == 0) dx = 1; // avoid divide by zero
 
         float slope = ((float)dy) / dx;
-
-        /*
-        Log.w(tag, String.format("From %f,%f to %f,%f: slope %f",
-                mStartPoint.x, mStartPoint.y,
-                mEndPoint.x, mEndPoint.y, slope));
-        */
-
         int face;
 
         if (slope > SLOPE_CUTOFF_MIN_X && slope < SLOPE_CUTOFF_MAX_X) {
