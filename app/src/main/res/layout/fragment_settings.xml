@@ -71,7 +71,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textStyle="italic"
-                    android:text="during instant scrambling"
+                    android:text="@string/scrambling_count_details"
                     />
 
             </LinearLayout>

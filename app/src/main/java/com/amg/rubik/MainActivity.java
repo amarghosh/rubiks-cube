@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.amg.rubik.ui.AlgorithmFragment;
 import com.amg.rubik.ui.CubeFragment;
+import com.amg.rubik.ui.HelpFragment;
 import com.amg.rubik.ui.SettingsFragment;
 
 public class MainActivity extends Activity implements  ListView.OnItemClickListener {
@@ -32,6 +33,7 @@ public class MainActivity extends Activity implements  ListView.OnItemClickListe
     private static final int FRAGMENT_INDEX_HOME = 0;
     private static final int FRAGMENT_INDEX_ALGO = 1;
     private static final int FRAGMENT_INDEX_SETTINGS = 3;
+    private static final int FRAGMENT_INDEX_HELP = 4;
 
     private String[] mFragmentNames;
     private DrawerLayout mDrawerLayout;
@@ -90,14 +92,26 @@ public class MainActivity extends Activity implements  ListView.OnItemClickListe
     public void selectItem(int pos) {
         FragmentManager manager = getFragmentManager();
         Fragment fragment;
-        if (pos == FRAGMENT_INDEX_HOME) {
-            fragment = new CubeFragment();
-        } else if (pos == FRAGMENT_INDEX_SETTINGS) {
-            fragment = new SettingsFragment();
-        } else if (pos == FRAGMENT_INDEX_ALGO) {
-            fragment = new AlgorithmFragment();
-        } else {
-            fragment = new PlaceholderFragment();
+        switch (pos) {
+            case FRAGMENT_INDEX_ALGO:
+                fragment = new AlgorithmFragment();
+                break;
+
+            case FRAGMENT_INDEX_HOME:
+                fragment = new CubeFragment();
+                break;
+
+            case FRAGMENT_INDEX_SETTINGS:
+                fragment = new SettingsFragment();
+                break;
+
+            case FRAGMENT_INDEX_HELP:
+                fragment = new HelpFragment();
+                break;
+
+            default:
+                fragment = new PlaceholderFragment();
+                break;
         }
 
         manager.beginTransaction().replace(R.id.content_frame, fragment).commit();
@@ -149,7 +163,7 @@ public class MainActivity extends Activity implements  ListView.OnItemClickListe
             rootView.setLayoutParams(lp);
 
             TextView textView = new TextView(getActivity());
-            textView.setText("Not implemented");
+            textView.setText("coming soon");
 
             RelativeLayout.LayoutParams tv_lp = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.WRAP_CONTENT,

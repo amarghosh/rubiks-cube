@@ -14,8 +14,8 @@
 
     <string name="cube_size">Cube size</string>
     <string name="speed">Speed of animation</string>
-    <string name="scrambling_mode_label">Scrambling mode</string>
-    <string name="scrambling_count_label">Scrambling count</string>
+    <string name="scrambling_count_label">Level</string>
+    <string name="scrambling_count_details">Number of initial rotations</string>
 
     <string-array name="scrambling_modes">
         <item>Instantaneous</item>
@@ -31,10 +31,32 @@
     <string-array name="fragment_names">
         <item>Play</item>
         <item>Algorithms</item>
-        <item>My cube</item>
+        <item>Fix my cube</item>
         <item>Settings</item>
+        <item>Help</item>
     </string-array>
+
+    <string name="disclaimer">
+        The touch detection is not proper as you go deeper on Z axis.
+        So if you want to rotate the back face, it would be easier to first bring it
+        to the right or front and then rotate it.
+        \n\nI am working on this issue and a fix should be available in the next release
+    </string>
+
+    <string name="help_title">Buttons and their functions</string>
 
     <string name="drawer_open">Navigation open</string>
     <string name="drawer_close">Navigation close</string>
+
+    <string name="new_game">New Game</string>
+    <string name="new_game_details">
+        The number of initial rotations can be updated in the settings page
+    </string>
+
+    <string name="auto_solve">Let the app solve it</string>
+    <string name="auto_solve_details">The &quot;app&quot; once saw a YouTube video of solving the cube.
+        It is very basic approach and takes forever to finish</string>
+
+    <string name="rotate_mode">Rotate mode</string>
+    <string name="rotate_mode_details">Toggle between rotating the whole cube or the touched face</string>
 </resources>

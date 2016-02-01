@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/abc_text_size_title_material"
+            android:text="@string/help_title"
+            />
+
+        <LinearLayout style="@style/help_row">
+
+            <ImageView
+                style="@style/help_left_col"
+                android:src="@mipmap/ic_launcher_rubik"
+                />
+
+            <LinearLayout style="@style/help_right_col">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/abc_text_size_title_material"
+                    android:text="@string/new_game"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/new_game_details"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/help_row">
+
+            <ImageView
+                style="@style/help_left_col"
+                android:src="@mipmap/ic_solved_cube"
+                />
+
+            <LinearLayout style="@style/help_right_col">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/abc_text_size_title_material"
+                    android:text="@string/auto_solve"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/auto_solve_details"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/help_row">
+
+            <ToggleButton
+                style="@style/help_left_col"
+                android:textOff="@string/lock_faces"
+                android:textOn="@string/unlock_faces"
+                />
+
+            <LinearLayout style="@style/help_right_col">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/abc_text_size_title_material"
+                    android:text="@string/rotate_mode"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rotate_mode_details"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/disclaimer"
+            />
+
+    </LinearLayout>
+</ScrollView>

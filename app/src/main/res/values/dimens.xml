@@ -3,6 +3,7 @@
     <dimen name="activity_horizontal_margin">10dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="settings_row_vertical_padding">8dp</dimen>
+    <dimen name="help_item_margin">8dp</dimen>
 
     <color name="surface_background">#191919</color>
 </resources>
