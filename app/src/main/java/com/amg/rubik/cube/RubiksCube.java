@@ -43,7 +43,7 @@ public class RubiksCube extends Cube {
     static final float ANGLE_DELTA_NORMAL = 4f;
     static final float ANGLE_DELTA_FAST = 10f;
 
-    private static final int MAX_UNDO_COUNT = 20;
+    private static final int MAX_UNDO_COUNT = 40;
 
     public enum CubeState {
         IDLE,
@@ -81,6 +81,7 @@ public class RubiksCube extends Cube {
      * Stores past @MAX_UNDO_COUNT moves to perform undo
      * */
     private ArrayList<Rotation> mUndoStack;
+    private boolean mUndoingFlag = false;
 
     private CubeRenderer mRenderer;
 
@@ -220,7 +221,12 @@ public class RubiksCube extends Cube {
         /**
          * Exclude whole cube rotations from the count
          * */
-        if (mRotation.faceCount != mSize) mMoveCount++;
+        if (mUndoingFlag == false && mRotation.faceCount != mSize) mMoveCount++;
+
+        if (mUndoingFlag) {
+            mUndoingFlag = false;
+            if (mRotation.faceCount != mSize) mMoveCount--;
+        }
 
         switch (rotateMode) {
             case ALGORITHM:
@@ -246,6 +252,14 @@ public class RubiksCube extends Cube {
                 rotateMode = RotateMode.NONE;
                 mState = CubeState.IDLE;
                 break;
+        }
+
+        if (mListener != null) {
+            mListener.handleRotationCompleted();
+        }
+
+        if (mState == CubeState.IDLE && isSolved() && mListener != null) {
+            mListener.handleCubeSolved();
         }
     }
 
@@ -432,6 +446,7 @@ public class RubiksCube extends Cube {
             return;
         }
         rotateMode = RotateMode.MANUAL;
+        mUndoingFlag = true;
         int index = mUndoStack.size() - 1;
         Rotation rotation = mUndoStack.get(index);
         mUndoStack.remove(index);
@@ -550,5 +565,9 @@ public class RubiksCube extends Cube {
         setColor(FACE_RIGHT, COLOR_RIGHT);
         clearUndoStack();
         mMoveCount = 0;
+    }
+
+    public int getMoveCount() {
+        return mMoveCount;
     }
 }

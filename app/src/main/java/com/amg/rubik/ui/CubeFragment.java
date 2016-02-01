@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -21,6 +22,8 @@ public class CubeFragment extends BaseFragment
 
     private RubiksCube mCube = null;
     private RubikGLSurfaceView mRubikView = null;
+    private TextView mMovesField = null;
+    private boolean mGameInProgress = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -43,6 +46,7 @@ public class CubeFragment extends BaseFragment
                 mRubikView.setWholeCubeRotation(b);
             }
         });
+        mMovesField = (TextView)findViewById(R.id.tv_movecount);
     }
 
     private void initializeRubikView() {
@@ -134,6 +138,8 @@ public class CubeFragment extends BaseFragment
         }
         mCube.reset();
         mCube.randomize(scrambleCount());
+        updateCount();
+        mGameInProgress = true;
     }
 
     private Toast currentToast;
@@ -157,8 +163,32 @@ public class CubeFragment extends BaseFragment
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                resetButtons();
-                mRubikView.printDebugInfo();
+                _handleCubeSolved();
+            }
+        });
+    }
+
+    private void _handleCubeSolved() {
+        resetButtons();
+        mRubikView.printDebugInfo();
+        if (mGameInProgress) {
+            int moves = mCube.getMoveCount();
+            mGameInProgress = false;
+            showToast(String.format("Solved in %d move%c",
+                    moves, moves == 1 ? ' ' : 's'));
+        }
+    }
+
+    private void updateCount() {
+        mMovesField.setText(String.valueOf(mCube.getMoveCount()));
+    }
+
+    @Override
+    public void handleRotationCompleted() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateCount();
             }
         });
     }

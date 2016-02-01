@@ -55,6 +55,16 @@
             android:checked="true"
             />
 
+        <TextView
+            android:id="@+id/tv_movecount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:minEms="2"
+            android:gravity="end"
+            android:text="0"
+            />
+
         <ImageButton
             android:contentDescription="@string/undo"
             android:id="@+id/btn_undo"

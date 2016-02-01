@@ -1429,8 +1429,6 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
             case LastFaceCornerAlign:
                 solveState = SolveState.None;
-                sendMessage(String.format("Solved in %d move%c",
-                        mMoveCount, mMoveCount == 1 ? ' ' : 's'));
                 mListener.handleCubeSolved();
                 mState = CubeState.IDLE;
                 break;
