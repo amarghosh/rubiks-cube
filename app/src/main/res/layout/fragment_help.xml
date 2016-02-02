@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    >
 
     <LinearLayout
         android:orientation="vertical"
@@ -69,11 +69,17 @@
 
         <LinearLayout style="@style/help_row">
 
-            <ToggleButton
-                style="@style/help_left_col"
-                android:textOff="@string/lock_faces"
-                android:textOn="@string/unlock_faces"
-                />
+            <FrameLayout style="@style/help_left_col">
+
+                <ToggleButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textOff="@string/lock_faces"
+                    android:textOn="@string/unlock_faces"
+                    />
+
+            </FrameLayout>
 
             <LinearLayout style="@style/help_right_col">
 
@@ -100,8 +106,10 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:autoLink="web|email"
             android:text="@string/disclaimer"
             />
 
     </LinearLayout>
+
 </ScrollView>

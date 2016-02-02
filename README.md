@@ -4,7 +4,7 @@ This is an android app for playing with Rubiks cube. It uses OpenGL for drawing 
     - [x] Rotate the cube as a whole to see the overall state
     - [x] Rotate individual faces (using dedicated buttons)
     - [x] Undo moves
-    - [ ] Detect if the cube is solved yet
+    - [x] Detect if the cube is solved yet
     - [x] Control the cube by touching/swiping on its faces
     - [ ] Publish beta version on Play store
   - Algorithms
@@ -14,7 +14,7 @@ This is an android app for playing with Rubiks cube. It uses OpenGL for drawing 
   - Solve cubes programmatically
     - [x] Solve a scrambled 3x3 cube
     - [ ] Let the user specify the state of a scrambled cube
-    - [ ] Read cube colors using the camera (ambitious?)
+    - [ ] Read cube colors using the camera
     - [ ] User should be able to trace through the steps
     - [ ] Handle non-standard cubes (deviations from the default color scheme)
     - Higher order cubes use the logic of 3x3 cube. Current solution is not reusable.
@@ -23,4 +23,3 @@ This is an android app for playing with Rubiks cube. It uses OpenGL for drawing 
     - And I am not familiar with cubes bigger than 4x4 in real life
   - How about skewed puzzles like 3x3x2 etc?
     - Current code does not support them
-  - The icon is taken from Wikipedia
