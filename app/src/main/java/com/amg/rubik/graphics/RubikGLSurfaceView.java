@@ -9,9 +9,6 @@ import android.view.MotionEvent;
 import com.amg.rubik.cube.Rotation;
 import com.amg.rubik.cube.RubiksCube;
 
-/**
- * Created by amar on 9/12/15.
- */
 public class RubikGLSurfaceView extends GLSurfaceView {
 
     private static final String tag = "rubik-view";

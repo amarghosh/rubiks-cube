@@ -7,9 +7,6 @@ import com.amg.rubik.graphics.Direction;
 
 import java.util.ArrayList;
 
-/**
- * Created by amar on 11/12/15.
- */
 public class Algorithm {
 
     private static final String tag = "rubik-algo";

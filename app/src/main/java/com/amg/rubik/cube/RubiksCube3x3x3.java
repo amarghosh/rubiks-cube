@@ -10,10 +10,6 @@ import com.amg.rubik.graphics.Direction;
 import com.amg.rubik.graphics.Axis;
 
 /**
- * Created by amar on 9/12/15.
- */
-
-/**
  * An algorithm can't be smarter than the human who devised it.
  *
  * This is a beginner's approach to solving 3x3 cube. You will see many easy to think of

@@ -1,8 +1,5 @@
 package com.amg.rubik.graphics;
 
-/**
- * Created by amar on 7/1/16.
- */
 public class Point3D {
     private float x;
     private float y;

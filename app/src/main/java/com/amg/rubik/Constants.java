@@ -1,8 +1,5 @@
 package com.amg.rubik;
 
-/**
- * Created by amar on 6/1/16.
- */
 public final class Constants {
     public static final String CUBE_SIZE = "cube_size";
     public static final String ROTATION_SPEED = "rotation_speed";

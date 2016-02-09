@@ -14,9 +14,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-/**
- * Created by amar on 30/11/15.
- */
 public class CubeRendererImpl extends GLRenderer
     implements CubeRenderer {
 

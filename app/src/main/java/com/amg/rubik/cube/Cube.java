@@ -9,8 +9,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 
 /**
- * Created by amar on 12/1/16.
- *
  * This class handles cube's definition. It creates all squares, faces and puts them in appropriate
  * lists for each axes. It also takes care of updating the colors of squares according to user
  * specified rotation. It doesn't care about drawing the cube. You should extend this class
@@ -786,3 +784,4 @@ public class Cube {
         }
     }
 }
+

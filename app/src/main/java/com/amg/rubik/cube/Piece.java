@@ -4,9 +4,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-/**
- * Created by amar on 30/11/15.
- */
 public class Piece {
 
     public enum PieceType {

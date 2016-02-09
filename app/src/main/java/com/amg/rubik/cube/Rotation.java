@@ -4,10 +4,6 @@ import com.amg.rubik.graphics.Axis;
 import com.amg.rubik.graphics.Direction;
 
 /**
- * Created by amar on 11/12/15.
- */
-
-/**
  * Note that the direction is relative to positive direction of the mentioned axis, and not
  * the visible side of face. This is against the normal cube notation where direction is
  * usually mentioned relative to the face being rotated.

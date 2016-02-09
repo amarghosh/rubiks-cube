@@ -12,8 +12,6 @@ import com.amg.rubik.Constants;
 import java.security.InvalidParameterException;
 
 /**
- * Created by amar on 6/1/16.
- *
  * Base fragment that takes care of initializing preferences so that individual classes need not
  * worry about it.
  */
