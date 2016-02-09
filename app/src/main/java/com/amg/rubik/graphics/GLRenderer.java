@@ -107,10 +107,13 @@ public abstract class GLRenderer implements Renderer {
 
     /**
      * Get the FPS (frames per second). This function resets the timer and frame count.
+     * currentTimeMillis sometime returns old value resulting in divide-by-zero error.
+     * Avoid that by hardcoding it to 100 milliseconds in such cases.
      * */
     public int getFps() {
-        long currentTime = System.currentTimeMillis();
-        int fps = (int)((mFrameCount * 1000) / (currentTime - mStartTime));
+        long delta = System.currentTimeMillis() - mStartTime;
+        delta = delta == 0 ? 100 : delta;
+        int fps = (int) ((mFrameCount * 1000) / delta);
         mStartTime = System.currentTimeMillis();
         mFrameCount = 0;
         return fps;
