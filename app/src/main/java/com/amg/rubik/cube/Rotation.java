@@ -78,16 +78,16 @@ public class Rotation {
         this.startFace = startFace;
     }
 
-    void increment(float angleDelta) {
+    void increment(float angleDelta, float max_angle) {
         if (direction == Direction.CLOCKWISE) {
             angle -= angleDelta;
-            if (angle < -90) {
-                angle = -90;
+            if (angle < -max_angle) {
+                angle = -max_angle;
             }
         } else {
             angle += angleDelta;
-            if (angle > 90) {
-                angle = 90;
+            if (angle > max_angle) {
+                angle = max_angle;
             }
         }
     }

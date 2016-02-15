@@ -1,6 +1,7 @@
 package com.amg.rubik.cube;
 
 import android.graphics.Color;
+import android.util.Log;
 
 import com.amg.rubik.graphics.Axis;
 import com.amg.rubik.graphics.Direction;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
  * rather than using it directly.
  */
 public class Cube {
+    private static final String tag = "rubik-abstract";
+
     // Do not change these values. They are used in many places.
     public static final int FACE_FRONT = 0;
     public static final int FACE_RIGHT = 1;
@@ -57,7 +60,9 @@ public class Cube {
 
     private static final float GAP = 0.01f;
 
-    int mSize;
+    private int mSizeX;
+    private int mSizeY;
+    private int mSizeZ;
     private float squareSize;
 
     ArrayList<Square> mAllSquares;
@@ -73,10 +78,13 @@ public class Cube {
     ArrayList<ArrayList<Piece>> mYaxisFaceList;
     ArrayList<ArrayList<Piece>> mZaxisFaceList;
 
-    public Cube(int size) {
-        if (size <= 0) throw new AssertionError("Size is " + size);
-        mSize = size;
-        squareSize = (TOTAL_SIZE - PADDING - GAP * (mSize + 1)) / mSize;
+    public Cube(int sizeX, int sizeY, int sizeZ) {
+        mSizeX = sizeX;
+        mSizeY = sizeY;
+        mSizeZ = sizeZ;
+        Log.w(tag, String.format("Cube Dimen: %d %d %d", sizeX, sizeY, sizeZ));
+        int maxSize = Math.max(Math.max(sizeX, sizeY), sizeZ);
+        squareSize = (TOTAL_SIZE - PADDING - GAP * (maxSize + 1)) / maxSize;
         cube();
     }
 
@@ -98,9 +106,9 @@ public class Cube {
         mAllFaces[FACE_BOTTOM] = mBottomSquares;
         createAllSquares();
 
-        mXaxisFaceList = new ArrayList<>(mSize);
-        mYaxisFaceList = new ArrayList<>(mSize);
-        mZaxisFaceList = new ArrayList<>(mSize);
+        mXaxisFaceList = new ArrayList<>(mSizeX);
+        mYaxisFaceList = new ArrayList<>(mSizeY);
+        mZaxisFaceList = new ArrayList<>(mSizeZ);
         createFaces();
     }
 
@@ -134,8 +142,8 @@ public class Cube {
     private void createLeftSquares(int color)
     {
         float startX = getLeftFaceX();
-        float startY = (squareSize + GAP) * (mSize / 2.0f);
-        float startZ = 0 - (squareSize + GAP) * (mSize / 2.0f);
+        float startY = (squareSize + GAP) * (mSizeY / 2.0f);
+        float startZ = 0 - (squareSize + GAP) * (mSizeZ / 2.0f);
 
         float vertices[] = {
                 startX,  startY, startZ,
@@ -144,13 +152,13 @@ public class Cube {
                 startX,  startY, startZ + squareSize
         };
 
-        for (int i = 0; i < mSize; i++) {
+        for (int i = 0; i < mSizeY; i++) {
             vertices[1] = startY - i * (squareSize + GAP);
             vertices[4] = vertices[1] - squareSize;
             vertices[7] = vertices[1] - squareSize;
             vertices[10] = vertices[1];
 
-            for (int j = 0; j < mSize; j++) {
+            for (int j = 0; j < mSizeZ; j++) {
                 vertices[2] = startZ + j * (squareSize + GAP);
                 vertices[5] = vertices[2];
                 vertices[8] = vertices[2] + squareSize;
@@ -171,8 +179,8 @@ public class Cube {
     private void createRightSquares(int color)
     {
         float startX = getRightFaceX();
-        float startY = (squareSize + GAP) * (mSize / 2.0f);
-        float startZ = (squareSize + GAP) * (mSize / 2.0f);
+        float startY = (squareSize + GAP) * (mSizeY / 2.0f);
+        float startZ = (squareSize + GAP) * (mSizeZ / 2.0f);
 
         float vertices[] = {
                 startX,  startY, startZ,
@@ -181,13 +189,13 @@ public class Cube {
                 startX,  startY, startZ - squareSize
         };
 
-        for (int i = 0; i < mSize; i++) {
+        for (int i = 0; i < mSizeY; i++) {
             vertices[1] = startY - i * (squareSize + GAP);
             vertices[4] = vertices[1] - squareSize;
             vertices[7] = vertices[1] - squareSize;
             vertices[10] = vertices[1];
 
-            for (int j = 0; j < mSize; j++) {
+            for (int j = 0; j < mSizeZ; j++) {
                 vertices[2] = startZ - j * (squareSize + GAP);
                 vertices[5] = vertices[2];
                 vertices[8] = vertices[2] - squareSize;
@@ -207,9 +215,9 @@ public class Cube {
      * */
     private void createTopSquares(int color)
     {
-        float startX = - (squareSize + GAP) * (mSize / 2.0f);
+        float startX = - (squareSize + GAP) * (mSizeX / 2.0f);
         float startY = getTopFaceY();
-        float startZ = - (squareSize + GAP) * (mSize / 2.0f);
+        float startZ = - (squareSize + GAP) * (mSizeZ / 2.0f);
 
         float vertices[] = {
                 startX,  startY, startZ,
@@ -218,13 +226,13 @@ public class Cube {
                 startX + squareSize,  startY, startZ
         };
 
-        for (int i = 0; i < mSize; i++) {
+        for (int i = 0; i < mSizeZ; i++) {
             vertices[2] = startZ + i * (squareSize + GAP);
             vertices[5] = vertices[2] + squareSize;
             vertices[8] = vertices[2] + squareSize;
             vertices[11] = vertices[2];
 
-            for (int j = 0; j < mSize; j++) {
+            for (int j = 0; j < mSizeX; j++) {
                 vertices[0] = startX + j * (squareSize + GAP);
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] + squareSize;
@@ -244,9 +252,9 @@ public class Cube {
      * */
     private void createBottomSquares(int color)
     {
-        float startX = - (squareSize + GAP) * (mSize / 2.0f);
+        float startX = - (squareSize + GAP) * (mSizeX / 2.0f);
         float startY = getBottomFaceY();
-        float startZ = (squareSize + GAP) * (mSize / 2.0f);
+        float startZ = (squareSize + GAP) * (mSizeZ / 2.0f);
 
         float vertices[] = {
                 startX,  startY, startZ,
@@ -255,13 +263,13 @@ public class Cube {
                 startX + squareSize,  startY, startZ
         };
 
-        for (int i = 0; i < mSize; i++) {
+        for (int i = 0; i < mSizeZ; i++) {
             vertices[2] = startZ - i * (squareSize + GAP);
             vertices[5] = vertices[2] - squareSize;
             vertices[8] = vertices[2] - squareSize;
             vertices[11] = vertices[2];
 
-            for (int j = 0; j < mSize; j++) {
+            for (int j = 0; j < mSizeX; j++) {
                 vertices[0] = startX + j * (squareSize + GAP);
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] + squareSize;
@@ -280,8 +288,8 @@ public class Cube {
      * On positive z (near plane).
      * */
     private void createFrontSquares(int color) {
-        float startX = 0 - (squareSize + GAP) * (mSize / 2.0f);
-        float startY = (squareSize + GAP) * (mSize / 2.0f);
+        float startX = 0 - (squareSize + GAP) * (mSizeX / 2.0f);
+        float startY = (squareSize + GAP) * (mSizeY / 2.0f);
         float startZ = getFrontFaceZ();
 
         float vertices[] = {
@@ -291,13 +299,13 @@ public class Cube {
                 startX + squareSize,  startY, startZ
         };
 
-        for (int i = 0; i < mSize; i++) {
+        for (int i = 0; i < mSizeY; i++) {
             vertices[1] = startY - i * (squareSize + GAP);
             vertices[4] = vertices[1] - squareSize;
             vertices[7] = vertices[1] - squareSize;
             vertices[10] = vertices[1];
 
-            for (int j = 0; j < mSize; j++) {
+            for (int j = 0; j < mSizeX; j++) {
                 vertices[0] = startX + j * (squareSize + GAP);
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] + squareSize;
@@ -316,8 +324,8 @@ public class Cube {
      * On negative z (far plane).
      * */
     private void createBackSquares(int color) {
-        float startX = (squareSize + GAP) * (mSize / 2.0f);
-        float startY = (squareSize + GAP) * (mSize / 2.0f);
+        float startX = (squareSize + GAP) * (mSizeX / 2.0f);
+        float startY = (squareSize + GAP) * (mSizeY / 2.0f);
         float startZ = getBackFaceZ();
 
         float vertices[] = {
@@ -327,13 +335,13 @@ public class Cube {
                 startX - squareSize,  startY, startZ
         };
 
-        for (int i = 0; i < mSize; i++) {
+        for (int i = 0; i < mSizeY; i++) {
             vertices[1] = startY - i * (squareSize + GAP);
             vertices[4] = vertices[1] - squareSize;
             vertices[7] = vertices[1] - squareSize;
             vertices[10] = vertices[1];
 
-            for (int j = 0; j < mSize; j++) {
+            for (int j = 0; j < mSizeX; j++) {
                 vertices[0] = startX - j * (squareSize + GAP);
                 vertices[3] = vertices[0];
                 vertices[6] = vertices[0] - squareSize;
@@ -353,197 +361,213 @@ public class Cube {
         ArrayList<Piece> bottomFace = new ArrayList<>();
         ArrayList<Piece> backFace = new ArrayList<>();
 
-        for (int i = 0; i < mSize; i++) {
-            for (int j = 0; j < mSize; j++) {
-                Piece.PieceType type = getPieceType(i, j, mSize, mSize);
+        for (int i = 0; i < mSizeY; i++) {
+            for (int j = 0; j < mSizeX; j++) {
+                Piece.PieceType type = getPieceType(i, j, mSizeY, mSizeX);
                 Piece piece = new Piece(type);
-                piece.addSquare(mFrontSquares.get(i * mSize + j));
+                piece.addSquare(mFrontSquares.get(i * mSizeX + j));
                 if (i == 0) {
-                    piece.addSquare(mTopSquares.get(mSize * (mSize - 1) + j));
+                    piece.addSquare(mTopSquares.get(mSizeX * (mSizeZ - 1) + j));
                 }
-                if (i == mSize - 1) {
+                if (i == mSizeY - 1) {
                     piece.addSquare(mBottomSquares.get(j));
                 }
                 if (j == 0) {
-                    piece.addSquare(mLeftSquares.get(mSize * (i + 1) - 1));
+                    piece.addSquare(mLeftSquares.get(mSizeZ * (i + 1) - 1));
                 }
-                if (j == mSize - 1) {
-                    piece.addSquare(mRightSquares.get(mSize * i));
+                if (j == mSizeX - 1) {
+                    piece.addSquare(mRightSquares.get(mSizeZ * i));
                 }
                 frontFace.add(piece);
             }
         }
 
-        for (int i = 0; i < mSize; i++) {
-            for (int j = 0; j < mSize; j++) {
+        for (int i = 0; i < mSizeY; i++) {
+            for (int j = 0; j < mSizeZ; j++) {
                 if (j == 0) {
-                    rightFace.add(frontFace.get((i + 1) * mSize - 1));
+                    rightFace.add(frontFace.get((i + 1) * mSizeX - 1));
                     continue;
                 }
-                Piece.PieceType type = getPieceType(i, j, mSize, mSize);
+                Piece.PieceType type = getPieceType(i, j, mSizeY, mSizeZ);
                 Piece piece = new Piece(type);
-                piece.addSquare(mRightSquares.get(i * mSize + j));
+                piece.addSquare(mRightSquares.get(i * mSizeZ + j));
                 if (i == 0) {
-                    piece.addSquare(mTopSquares.get((mSize - j) * mSize - 1));
+                    piece.addSquare(mTopSquares.get((mSizeZ - j) * mSizeX - 1));
                 }
-                if (i == mSize - 1) {
-                    piece.addSquare(mBottomSquares.get((j + 1) * mSize - 1));
+                if (i == mSizeY - 1) {
+                    piece.addSquare(mBottomSquares.get((j + 1) * mSizeX - 1));
                 }
-                if (j == mSize - 1) {
-                    piece.addSquare(mBackSquares.get(i * mSize));
+                if (j == mSizeZ - 1) {
+                    piece.addSquare(mBackSquares.get(i * mSizeX));
                 }
                 rightFace.add(piece);
             }
         }
 
-        for (int i = 0; i < mSize; i++) {
-            for (int j = 0; j < mSize; j++) {
-                if (j == mSize - 1) {
-                    leftFace.add(frontFace.get(i * mSize));
+        for (int i = 0; i < mSizeY; i++) {
+            for (int j = 0; j < mSizeZ; j++) {
+                if (j == mSizeZ - 1) {
+                    leftFace.add(frontFace.get(i * mSizeX));
                     continue;
                 }
-                Piece.PieceType type = getPieceType(i, j, mSize, mSize);
+                Piece.PieceType type = getPieceType(i, j, mSizeY, mSizeZ);
                 Piece piece = new Piece(type);
-                piece.addSquare(mLeftSquares.get(i * mSize + j));
+                piece.addSquare(mLeftSquares.get(i * mSizeZ + j));
                 if (i == 0) {
-                    piece.addSquare(mTopSquares.get(j * mSize));
+                    piece.addSquare(mTopSquares.get(j * mSizeX));
                 }
-                if (i == mSize - 1) {
-                    piece.addSquare(mBottomSquares.get(mSize * (mSize - j - 1)));
+                if (i == mSizeY - 1) {
+                    piece.addSquare(mBottomSquares.get(mSizeX * (mSizeZ - j - 1)));
                 }
                 if (j == 0) {
-                    piece.addSquare(mBackSquares.get(mSize * (i + 1) - 1));
+                    piece.addSquare(mBackSquares.get(mSizeX * (i + 1) - 1));
                 }
                 leftFace.add(piece);
             }
         }
 
-        for (int i = 0; i < mSize; i++) {
-            for (int j = 0; j < mSize; j++) {
+        for (int i = 0; i < mSizeZ; i++) {
+            for (int j = 0; j < mSizeX; j++) {
                 if (j == 0) {
                     topFace.add(leftFace.get(i));
                     continue;
                 }
-                if (j == mSize - 1) {
-                    topFace.add(rightFace.get(mSize - 1 - i));
+                if (j == mSizeX - 1) {
+                    topFace.add(rightFace.get(mSizeZ - 1 - i));
                     continue;
                 }
-                if (i == mSize - 1) {
+                if (i == mSizeZ - 1) {
                     topFace.add(frontFace.get(j));
                     continue;
                 }
-                Piece.PieceType type = getPieceType(i, j, mSize, mSize);
+                Piece.PieceType type = getPieceType(i, j, mSizeZ, mSizeX);
                 Piece piece = new Piece(type);
-                piece.addSquare(mTopSquares.get(i * mSize + j));
+                piece.addSquare(mTopSquares.get(i * mSizeX + j));
                 if (i == 0) {
-                    piece.addSquare(mBackSquares.get(mSize - 1 - j));
+                    piece.addSquare(mBackSquares.get(mSizeX - 1 - j));
                 }
                 topFace.add(piece);
             }
         }
 
-        for (int i = 0; i < mSize; i++) {
-            for (int j = 0; j < mSize; j++) {
+        for (int i = 0; i < mSizeZ; i++) {
+            for (int j = 0; j < mSizeX; j++) {
                 if (i == 0) {
-                    bottomFace.add(frontFace.get(mSize * (mSize - 1) + j));
+                    bottomFace.add(frontFace.get(mSizeX * (mSizeY - 1) + j));
                     continue;
                 }
                 if (j == 0) {
-                    bottomFace.add(leftFace.get(mSize * mSize - 1 - i));
+                    bottomFace.add(leftFace.get(mSizeZ * mSizeY - 1 - i));
                     continue;
                 }
-                if (j == mSize - 1) {
-                    bottomFace.add(rightFace.get(mSize * (mSize - 1) + i));
+                if (j == mSizeX - 1) {
+                    bottomFace.add(rightFace.get(mSizeZ * (mSizeY - 1) + i));
                     continue;
                 }
-                Piece.PieceType type = getPieceType(i, j, mSize, mSize);
+                Piece.PieceType type = getPieceType(i, j, mSizeZ, mSizeX);
                 Piece piece = new Piece(type);
-                piece.addSquare(mBottomSquares.get(i * mSize + j));
-                if (i == mSize - 1) {
+                piece.addSquare(mBottomSquares.get(i * mSizeX + j));
+                if (i == mSizeZ - 1) {
                     piece.addSquare(
-                            mBackSquares.get(mSize * (mSize - 1) + mSize - 1 - j));
+                            mBackSquares.get(mSizeX * (mSizeY - 1) + mSizeX - 1 - j));
                 }
                 bottomFace.add(piece);
             }
         }
 
-        for (int i = 0; i < mSize; i++) {
-            for (int j = 0; j < mSize; j++) {
+        for (int i = 0; i < mSizeY; i++) {
+            for (int j = 0; j < mSizeX; j++) {
                 if (i == 0) {
-                    backFace.add(topFace.get(mSize - 1 - j));
+                    backFace.add(topFace.get(mSizeX - 1 - j));
                     continue;
                 }
-                if (i == mSize - 1) {
-                    backFace.add(bottomFace.get(mSize * (mSize - 1) + mSize - 1 - j));
+                if (i == mSizeY - 1) {
+                    backFace.add(bottomFace.get(mSizeX * (mSizeZ - 1) + mSizeX - 1 - j));
                     continue;
                 }
                 if (j == 0) {
-                    backFace.add(rightFace.get(mSize * (i + 1) - 1));
+                    backFace.add(rightFace.get(mSizeZ * (i + 1) - 1));
                     continue;
                 }
-                if (j == mSize - 1) {
-                    backFace.add(leftFace.get(i * mSize));
+                if (j == mSizeX - 1) {
+                    backFace.add(leftFace.get(i * mSizeZ));
                     continue;
                 }
-                Piece.PieceType type = getPieceType(i, j, mSize, mSize);
+                Piece.PieceType type = getPieceType(i, j, mSizeY, mSizeX);
                 Piece piece = new Piece(type);
-                piece.addSquare(mBackSquares.get(i * mSize + j));
+                piece.addSquare(mBackSquares.get(i * mSizeX + j));
                 backFace.add(piece);
             }
         }
 
+        if (mSizeX == 1) {
+            for (int i = 0 ; i < mSizeZ; i++) {
+                topFace.get(i).addSquare(mRightSquares.get(mSizeZ - 1 - i));
+                bottomFace.get(i).addSquare(mRightSquares.get(mSizeZ * (mSizeY - 1) + i));
+            }
+        }
+
+        // TODO: mSizeY == 1 ?
+
+        if (mSizeZ == 1) {
+            for (int i = 0 ; i < mSizeY; i++) {
+                rightFace.get(i).addSquare(mBackSquares.get(i * mSizeX));
+                leftFace.get(i).addSquare(mBackSquares.get(mSizeX * (i + 1) -1));
+            }
+        }
+
         mXaxisFaceList.add(leftFace);
-        for (int i = 1; i < mSize - 1; i++) {
+        for (int i = 1; i < mSizeX - 1; i++) {
             ArrayList<Piece> pieces = new ArrayList<>();
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(topFace.get(j * mSize + i));
+            for (int j = 0; j < mSizeZ - 1; j++) {
+                pieces.add(topFace.get(j * mSizeX + i));
             }
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(frontFace.get(j * mSize + i));
+            for (int j = 0; j < mSizeY - 1; j++) {
+                pieces.add(frontFace.get(j * mSizeX + i));
             }
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(bottomFace.get(j * mSize + i));
+            for (int j = 0; j < mSizeZ - 1; j++) {
+                pieces.add(bottomFace.get(j * mSizeX + i));
             }
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(backFace.get(mSize * (mSize - 1 - j) + mSize - 1 - i));
+            for (int j = 0; j < mSizeY - 1; j++) {
+                pieces.add(backFace.get(mSizeX * (mSizeY - 1 - j) + mSizeX - 1 - i));
             }
             mXaxisFaceList.add(pieces);
         }
         mXaxisFaceList.add(rightFace);
 
         mYaxisFaceList.add(bottomFace);
-        for (int i = 1; i < mSize - 1; i++) {
+        for (int i = 1; i < mSizeY - 1; i++) {
             ArrayList<Piece> pieces = new ArrayList<>();
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(frontFace.get((mSize - 1 - i) * mSize + j));
+            for (int j = 0; j < mSizeX - 1; j++) {
+                pieces.add(frontFace.get((mSizeY - 1 - i) * mSizeX + j));
             }
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(rightFace.get((mSize - 1 - i) * mSize + j));
+            for (int j = 0; j < mSizeZ - 1; j++) {
+                pieces.add(rightFace.get((mSizeY - 1 - i) * mSizeZ + j));
             }
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(backFace.get((mSize - 1 - i) * mSize + j));
+            for (int j = 0; j < mSizeX - 1; j++) {
+                pieces.add(backFace.get((mSizeY - 1 - i) * mSizeX + j));
             }
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(leftFace.get((mSize - 1 - i) * mSize + j));
+            for (int j = 0; j < mSizeZ - 1; j++) {
+                pieces.add(leftFace.get((mSizeY - 1 - i) * mSizeZ + j));
             }
             mYaxisFaceList.add(pieces);
         }
         mYaxisFaceList.add(topFace);
 
         mZaxisFaceList.add(backFace);
-        for (int i = 1; i < mSize - 1; i++) {
+        for (int i = 1; i < mSizeZ - 1; i++) {
             ArrayList<Piece> pieces = new ArrayList<>();
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(topFace.get(i * mSize + j));
+            for (int j = 0; j < mSizeX - 1; j++) {
+                pieces.add(topFace.get(i * mSizeX + j));
             }
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(rightFace.get(mSize * j + mSize - 1 - i));
+            for (int j = 0; j < mSizeY - 1; j++) {
+                pieces.add(rightFace.get(mSizeZ * j + mSizeZ - 1 - i));
             }
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(bottomFace.get((mSize - 1 - i) * mSize + mSize - 1 - j));
+            for (int j = 0; j < mSizeX - 1; j++) {
+                pieces.add(bottomFace.get((mSizeZ - 1 - i) * mSizeX + mSizeX - 1 - j));
             }
-            for (int j = 0; j < mSize - 1; j++) {
-                pieces.add(leftFace.get((mSize - 1 - j) * mSize + i));
+            for (int j = 0; j < mSizeY - 1; j++) {
+                pieces.add(leftFace.get((mSizeY - 1 - j) * mSizeZ + i));
             }
             mZaxisFaceList.add(pieces);
         }
@@ -553,9 +577,9 @@ public class Cube {
     /**
      * Rotate the colors in the border. This is the first part of rotating a layer.
      * */
-    private void rotateRingColors(ArrayList<ArrayList<Square>> squareList, Direction dir) {
+    private static void rotateRingColors(ArrayList<ArrayList<Square>> squareList, Direction dir, int size) {
         ArrayList<ArrayList<Square>> workingCopy;
-        ArrayList<Integer> tempColors = new ArrayList<>(mSize);
+        ArrayList<Integer> tempColors = new ArrayList<>(size);
         ArrayList<Square> dst;
         ArrayList<Square> src;
 
@@ -564,27 +588,27 @@ public class Cube {
             workingCopy = squareList;
         } else {
             // reverse and rotate
-            workingCopy = new ArrayList<>(mSize);
+            workingCopy = new ArrayList<>(size);
             for (int i = 0; i < CUBE_SIDES; i++) {
                 workingCopy.add(squareList.get(CUBE_SIDES - 1 - i));
             }
         }
 
         src = workingCopy.get(0);
-        for (int i = 0; i < mSize; i++) {
+        for (int i = 0; i < size; i++) {
             tempColors.add(src.get(i).getColor());
         }
 
         for (int i = 0; i < CUBE_SIDES - 1; i++) {
             dst = workingCopy.get(i);
             src = workingCopy.get(i + 1);
-            for (int j = 0; j < mSize; j++) {
+            for (int j = 0; j < size; j++) {
                 dst.get(j).setColor(src.get(j).getColor());
             }
         }
 
         dst = workingCopy.get(CUBE_SIDES-1);
-        for (int i = 0; i < mSize; i++) {
+        for (int i = 0; i < size; i++) {
             dst.get(i).setColor(tempColors.get(i));
         }
     }
@@ -644,32 +668,29 @@ public class Cube {
     }
 
     public float getFrontFaceZ() {
-        return (squareSize + GAP) * (mSize / 2.0f);
+        return (squareSize + GAP) * (mSizeZ / 2.0f);
     }
 
     public float getBackFaceZ() {
-        return - (squareSize + GAP) * (mSize / 2.0f);
+        return - (squareSize + GAP) * (mSizeZ / 2.0f);
     }
 
     public float getLeftFaceX() {
-        return  - (squareSize + GAP) * (mSize / 2.0f);
+        return  - (squareSize + GAP) * (mSizeX / 2.0f);
     }
 
     public float getRightFaceX() {
-        return (squareSize + GAP) * (mSize / 2.0f);
+        return (squareSize + GAP) * (mSizeX / 2.0f);
     }
 
     public float getTopFaceY() {
-        return (squareSize + GAP) * (mSize / 2.0f);
+        return (squareSize + GAP) * (mSizeY / 2.0f);
     }
 
     public float getBottomFaceY() {
-        return - (squareSize + GAP) * (mSize / 2.0f);
+        return - (squareSize + GAP) * (mSizeY / 2.0f);
     }
 
-    public int size() {
-        return mSize;
-    }
 
     public static Axis face2axis(int face) {
         switch (face) {
@@ -691,6 +712,15 @@ public class Cube {
         return faceNames[face];
     }
 
+    protected int getAxisSize(Axis axis) {
+        switch (axis) {
+            case X_AXIS: return mSizeX;
+            case Y_AXIS: return mSizeY;
+            case Z_AXIS: return mSizeZ;
+            default: throw new InvalidParameterException();
+        }
+    }
+
     /**
      * Rotate the face specified by @face and @axis.
      *
@@ -709,79 +739,173 @@ public class Cube {
      * Bottom face clockwise: (Y, CCW, 0)
      * */
     protected void rotate(Axis axis, Direction direction, int face) {
-        if (face < 0 || face >= mSize) {
-            throw new InvalidParameterException(
-                    String.format("Value %d is invalid for face (size is %d)", face, mSize));
-        }
+        /**
+         * TODO: Check the value of face
+         * */
 
+        Log.w(tag, "R: " + axis + " " + direction + " " + face);
+
+        int w = 0, h = 0;
         ArrayList<Square> faceSquares = null;
         ArrayList<ArrayList<Square>> squareList = new ArrayList<>(CUBE_SIDES);
         for (int i = 0; i < CUBE_SIDES; i++) {
-            squareList.add(new ArrayList<Square>(mSize));
+            squareList.add(new ArrayList<Square>());
         }
         switch (axis) {
             case X_AXIS:
-                for (int i = 0; i < mSize; i++) {
-                    squareList.get(0).add(mFrontSquares.get(mSize * i + face));
-                    squareList.get(1).add(mTopSquares.get(mSize * i + face));
-                    squareList.get(2).add(mBackSquares.get((mSize - 1 - i) * mSize +
-                            (mSize - 1 - face)));
-                    squareList.get(3).add(mBottomSquares.get(mSize * i + face));
+                for (int i = 0; i < mSizeY; i++) {
+                    squareList.get(0).add(mFrontSquares.get(mSizeX * i + face));
+                    squareList.get(2).add(mBackSquares.get((mSizeY - 1 - i) * mSizeX +
+                            (mSizeX - 1 - face)));
                 }
+                for (int i = 0; i < mSizeZ; i++) {
+                    squareList.get(1).add(mTopSquares.get(mSizeX * i + face));
+                    squareList.get(3).add(mBottomSquares.get(mSizeX * i + face));
+                }
+
                 if (face == 0) {
                     faceSquares = mLeftSquares;
-                } else if (face == mSize - 1) {
+                } else if (face == mSizeX - 1) {
                     faceSquares = mRightSquares;
                 }
+                w = mSizeZ;
+                h = mSizeY;
                 break;
 
             case Y_AXIS:
-                for (int i = 0; i < mSize; i++) {
+                for (int i = 0; i < mSizeX; i++) {
                     squareList.get(0).add(
-                            mFrontSquares.get((mSize - 1 - face) * mSize + i));
-                    squareList.get(1).add(
-                            mLeftSquares.get((mSize - 1 - face) * mSize + i));
+                            mFrontSquares.get((mSizeY - 1 - face) * mSizeX + i));
                     squareList.get(2).add(
-                            mBackSquares.get((mSize - 1 - face) * mSize + i));
-                    squareList.get(3).add(
-                            mRightSquares.get((mSize - 1 - face) * mSize + i));
+                            mBackSquares.get((mSizeY - 1 - face) * mSizeX + i));
                 }
+                for (int i = 0; i < mSizeZ; i++) {
+                    squareList.get(1).add(
+                            mLeftSquares.get((mSizeY - 1 - face) * mSizeZ + i));
+                    squareList.get(3).add(
+                            mRightSquares.get((mSizeY - 1 - face) * mSizeZ + i));
+                }
+
                 if (face == 0) {
                     faceSquares = mBottomSquares;
-                } else if (face == mSize - 1) {
+                } else if (face == mSizeY - 1) {
                     faceSquares = mTopSquares;
                 }
+                w = mSizeX;
+                h = mSizeZ;
                 break;
 
             case Z_AXIS:
-                for (int i = 0; i < mSize; i++) {
-                    squareList.get(0).add(mTopSquares.get(mSize * face + i));
-                    squareList.get(1).add(
-                            mRightSquares.get(mSize * i + mSize - 1 - face));
+                for (int i = 0; i < mSizeX; i++) {
+                    squareList.get(0).add(mTopSquares.get(mSizeX * face + i));
                     squareList.get(2).add(mBottomSquares.get(
-                            mSize * (mSize - 1 - face) + mSize - 1 - i));
-                    squareList.get(3).add(
-                            mLeftSquares.get(mSize * (mSize - 1 - i) + face));
+                            mSizeX * (mSizeZ - 1 - face) + mSizeX - 1 - i));
                 }
+                for (int i = 0; i < mSizeY; i++) {
+                    squareList.get(1).add(
+                            mRightSquares.get(mSizeZ * i + mSizeZ - 1 - face));
+                    squareList.get(3).add(
+                            mLeftSquares.get(mSizeZ * (mSizeY - 1 - i) + face));
+                }
+
                 if (face == 0) {
                     faceSquares = mBackSquares;
-                } else if (face == mSize - 1) {
+                } else if (face == mSizeZ - 1) {
                     faceSquares = mFrontSquares;
                 }
+                w = mSizeX;
+                h = mSizeY;
                 break;
         }
-        rotateRingColors(squareList, direction);
 
-        if (face == mSize - 1) {
-            // Rotate a face that is on the positive edge of the
-            // corresponding axis (front, top or right).
-            // As squares are stored in clockwise order, rotation is straightforward.
-            rotateFaceColors(faceSquares, direction, mSize);
-        } else if (face == 0) {
-            rotateFaceColors(faceSquares,
-                    direction == Direction.CLOCKWISE ?
-                            Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE, mSize);
+        boolean issquare = axis == Axis.X_AXIS && mSizeZ == mSizeY ||
+                axis == Axis.Y_AXIS && mSizeZ == mSizeX ||
+                axis == Axis.Z_AXIS && mSizeX == mSizeY;
+        int maxSize = getAxisSize(axis);
+
+        if (issquare) {
+            int size = axis == Axis.X_AXIS ? mSizeY : mSizeX;
+            rotateRingColors(squareList, direction, size);
+
+            if (face == maxSize - 1) {
+                // Rotate a face that is on the positive edge of the
+                // corresponding axis (front, top or right).
+                // As squares are stored in clockwise order, rotation is straightforward.
+                rotateFaceColors(faceSquares, direction, size);
+            } else if (face == 0) {
+                rotateFaceColors(faceSquares,
+                        direction == Direction.CLOCKWISE ?
+                                Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE, size);
+            }
+        } else {
+            skewedRotateRingColors(squareList);
+            if (faceSquares != null)
+                skewedRotateFaceColors(faceSquares, w, h);
         }
+    }
+
+    private static void skewedRotateFaceColors(ArrayList<Square> squares, int w, int h) {
+        for (int i = 0; i < w - 1; i++) {
+            Square src = squares.get(i);
+            Square dst = squares.get(w*h - 1 - i);
+            int color = src.getColor();
+            src.setColor(dst.getColor());
+            dst.setColor(color);
+        }
+        for (int i = 1; i < h; i++) {
+            Square src = squares.get(i*w);
+            Square dst = squares.get(w* (h-i) - 1);
+            int color = src.getColor();
+            src.setColor(dst.getColor());
+            dst.setColor(color);
+        }
+        if (w <= 3 || h <= 3) return;
+        ArrayList<Square> subset = new ArrayList<>();
+        for (int i = 1; i < w - 1; i++) {
+            for (int j = 1; j < h -1; j++) {
+                subset.add(squares.get(i*w + j));
+            }
+        }
+        skewedRotateFaceColors(subset, w-2, h-2);
+    }
+
+    private static void skewedRotateRingColors(ArrayList<ArrayList<Square>> squareList) {
+        ArrayList<ArrayList<Square>> workingCopy;
+        ArrayList<Integer> tempColors = new ArrayList<>();
+        ArrayList<Square> dst;
+        ArrayList<Square> src;
+
+        src = squareList.get(0);
+        dst = squareList.get(2);
+        for (int i = 0; i < src.size(); i++) {
+            int color = src.get(i).getColor();
+            src.get(i).setColor(dst.get(i).getColor());
+            dst.get(i).setColor(color);
+        }
+
+        src = squareList.get(1);
+        dst = squareList.get(3);
+        for (int i = 0; i < src.size(); i++) {
+            int color = src.get(i).getColor();
+            src.get(i).setColor(dst.get(i).getColor());
+            dst.get(i).setColor(color);
+        }
+    }
+
+    public int size() {
+        return Math.max(Math.max(mSizeX, mSizeY), mSizeZ);
+    }
+
+    protected boolean canRotate90Degree(Axis axis) {
+        switch (axis) {
+            case X_AXIS:
+                return mSizeY == mSizeZ;
+            case Y_AXIS:
+                return mSizeX == mSizeZ;
+            case Z_AXIS:
+                return mSizeX == mSizeY;
+        }
+        throw new InvalidParameterException();
     }
 }
 
