@@ -1,7 +1,9 @@
 package com.amg.rubik;
 
 public final class Constants {
-    public static final String CUBE_SIZE = "cube_size";
+    public static final String CUBE_SIZEX = "cube_size_x";
+    public static final String CUBE_SIZEY = "cube_size_y";
+    public static final String CUBE_SIZEZ = "cube_size_z";
     public static final String ROTATION_SPEED = "rotation_speed";
     public static final String CUBE_STATE = "cube_state";
     public static final String SCRAMBLE_COUNT = "scramble_count";

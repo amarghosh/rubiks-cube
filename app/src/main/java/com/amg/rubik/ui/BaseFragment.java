@@ -22,7 +22,9 @@ public abstract class BaseFragment extends Fragment
 
     View mRootView;
     private SharedPreferences mPref;
-    private int mCubeSize;
+    private int mCubeSize_X;
+    private int mCubeSize_Y;
+    private int mCubeSize_Z;
     private int mScrambleCount;
     private String mCubeState;
     private int mScrambleMode;
@@ -42,7 +44,9 @@ public abstract class BaseFragment extends Fragment
     }
 
     protected void reloadPrefs() {
-        mCubeSize = mPref.getInt(Constants.CUBE_SIZE, Constants.DEFAULT_CUBE_SIZE);
+        mCubeSize_X = mPref.getInt(Constants.CUBE_SIZEX, Constants.DEFAULT_CUBE_SIZE);
+        mCubeSize_Y = mPref.getInt(Constants.CUBE_SIZEY, Constants.DEFAULT_CUBE_SIZE);
+        mCubeSize_Z = mPref.getInt(Constants.CUBE_SIZEZ, Constants.DEFAULT_CUBE_SIZE);
         mCubeState = mPref.getString(Constants.CUBE_STATE, null);
         mScrambleCount = mPref.getInt(Constants.SCRAMBLE_COUNT, Constants.DEFAULT_SCRAMBLE_COUNT);
         mScrambleMode = mPref.getInt(Constants.SCRAMBLE_MODE,
@@ -62,15 +66,30 @@ public abstract class BaseFragment extends Fragment
         return mSpeed;
     }
 
-    int cubeSize() {
-        return mCubeSize;
+    int cubeSizeX() {
+        return mCubeSize_X;
     }
 
-    void setCubeSize(int value) {
+    int cubeSizeY() {
+        return mCubeSize_Y;
+    }
+    int cubeSizeZ() {
+        return mCubeSize_Z;
+    }
+
+    void setCubeSizeX(int value) {
         if (value <= 0) {
             throw new InvalidParameterException("Invalid cube size: " + value);
         }
-        mCubeSize = value;
+        mCubeSize_X = value;
+    }
+
+    public void setCubeSizeY(int v) {
+        this.mCubeSize_Y = v;
+    }
+
+    public void setCubeSizeZ(int v) {
+        this.mCubeSize_Z = v;
     }
 
     String cubeState() {
@@ -97,8 +116,8 @@ public abstract class BaseFragment extends Fragment
     public void onPause() {
         super.onPause();
         boolean isDirty = false;
-        int size = mPref.getInt(Constants.CUBE_SIZE, Constants.DEFAULT_CUBE_SIZE);
-        isDirty = size != mCubeSize;
+        int size = mPref.getInt(Constants.CUBE_SIZEX, Constants.DEFAULT_CUBE_SIZE);
+        isDirty = size != mCubeSize_X;
         int scrCount = mPref.getInt(Constants.SCRAMBLE_COUNT, Constants.DEFAULT_SCRAMBLE_COUNT);
         isDirty |= scrCount != mScrambleCount;
 
@@ -107,17 +126,20 @@ public abstract class BaseFragment extends Fragment
 
         int speed = mPref.getInt(Constants.ROTATION_SPEED, Constants.DEFAULT_SPEED_INDEX);
         isDirty |= speed != mSpeed;
+        isDirty = true;
 
-        Log.w(tag, String.format("onPause size %d, mCubeSize %d", size, mCubeSize));
+        Log.w(tag, String.format("onPause size %d, mCubeSize_X %d", size, mCubeSize_X));
         if (isDirty) {
             updateParams();
         }
     }
 
     private void updateParams() {
-        Log.w(tag, String.format("Saving cube size %d", mCubeSize));
+        Log.w(tag, String.format("Saving cube size %d", mCubeSize_X));
         SharedPreferences.Editor editor = mPref.edit();
-        editor.putInt(Constants.CUBE_SIZE, mCubeSize);
+        editor.putInt(Constants.CUBE_SIZEX, mCubeSize_X);
+        editor.putInt(Constants.CUBE_SIZEY, mCubeSize_Y);
+        editor.putInt(Constants.CUBE_SIZEZ, mCubeSize_Z);
         editor.putInt(Constants.SCRAMBLE_COUNT, mScrambleCount);
         editor.putInt(Constants.SCRAMBLE_MODE, mScrambleMode);
         editor.putInt(Constants.ROTATION_SPEED, mSpeed);

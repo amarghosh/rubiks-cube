@@ -13,6 +13,9 @@
     <string name="unlock_faces">Face</string>
 
     <string name="cube_size">Cube size</string>
+    <string name="cube_sizex">Cube width</string>
+    <string name="cube_sizey">Cube height</string>
+    <string name="cube_sizez">Cube depth</string>
     <string name="speed">Speed of animation</string>
     <string name="scrambling_count_label">Level</string>
     <string name="scrambling_count_details">number of scrambling rotations</string>

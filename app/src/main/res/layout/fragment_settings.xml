@@ -29,10 +29,70 @@
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/abc_text_size_subhead_material"
                 android:layout_weight="1"
-                android:text="@string/cube_size" />
+                android:text="@string/cube_sizex" />
 
             <com.amg.rubik.ui.NumberPicker
-                android:id="@+id/cube_size"
+                android:id="@+id/cube_size_x"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:value="3"
+                app:minValue="1"
+                app:maxValue="15"
+                />
+
+        </LinearLayout>
+
+        <View style="@style/Divider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/settings_row_vertical_padding"
+            android:paddingBottom="@dimen/settings_row_vertical_padding"
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/abc_text_size_subhead_material"
+                android:layout_weight="1"
+                android:text="@string/cube_sizey" />
+
+            <com.amg.rubik.ui.NumberPicker
+                android:id="@+id/cube_size_y"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:value="3"
+                app:minValue="1"
+                app:maxValue="15"
+                />
+
+        </LinearLayout>
+
+        <View style="@style/Divider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/settings_row_vertical_padding"
+            android:paddingBottom="@dimen/settings_row_vertical_padding"
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/abc_text_size_subhead_material"
+                android:layout_weight="1"
+                android:text="@string/cube_sizez" />
+
+            <com.amg.rubik.ui.NumberPicker
+                android:id="@+id/cube_size_z"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
