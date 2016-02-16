@@ -91,8 +91,7 @@ public class RubikGLSurfaceView extends GLSurfaceView {
     private TouchInfo getTouchedSquare(float originX ,float originY) {
         TouchInfo result = new TouchInfo();
         Point3D eye = mRenderer.getEye();
-        int cubeSize = mCube.size();
-        float squareSize = (mCube.getRightFaceX() - mCube.getLeftFaceX()) / cubeSize;
+        float squareSize = mCube.getSquareSize();
         int row, col;
 
         /**
@@ -209,7 +208,9 @@ public class RubikGLSurfaceView extends GLSurfaceView {
     private static final float SLOPE_CUTOFF_MAX_Z = 10.0f;
 
     private void handleMovementEnd(MotionEvent e) {
-        int cubeSize = mCube.size();
+        int sizex = mCube.getSizeX();
+        int sizey = mCube.getSizeY();
+        int sizez = mCube.getSizeZ();
         TouchInfo touch = getTouchedSquare(mStartPoint.x, mStartPoint.y);
         Axis axis;
         if (!touch.status) {
@@ -233,23 +234,26 @@ public class RubikGLSurfaceView extends GLSurfaceView {
         if (dx == 0) dx = 1; // avoid divide by zero
 
         float slope = ((float)dy) / dx;
-        int face;
+        int face, wholeSize=0;
 
         if (slope > SLOPE_CUTOFF_MIN_X && slope < SLOPE_CUTOFF_MAX_X) {
             axis = Axis.X_AXIS;
+            wholeSize = sizex;
             direction = dy > 0 ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
-            face = touch.face == RubiksCube.FACE_RIGHT ? cubeSize - 1 : touch.col;
+            face = touch.face == RubiksCube.FACE_RIGHT ? sizex - 1 : touch.col;
             rot = new Rotation(axis, direction, face);
         } else if (slope > SLOPE_CUTOFF_MIN_Y && slope < SLOPE_CUTOFF_MAX_Y) {
             axis = Axis.Y_AXIS;
+            wholeSize = sizey;
             direction = dx > 0 ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
-            face = touch.face == RubiksCube.FACE_TOP ? cubeSize - 1 : touch.row;
+            face = touch.face == RubiksCube.FACE_TOP ? sizey - 1 : touch.row;
             rot = new Rotation(axis, direction, face);
         } else if (slope > SLOPE_CUTOFF_MIN_Z && slope < SLOPE_CUTOFF_MAX_Z) {
             axis = Axis.Z_AXIS;
+            wholeSize = sizez;
             direction = dy > 0 ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
             if (touch.face == RubiksCube.FACE_FRONT) {
-                face = cubeSize - 1;
+                face = sizez - 1;
             } else if (touch.face == RubiksCube.FACE_TOP) {
                 face = touch.row;
             } else {
@@ -261,7 +265,7 @@ public class RubikGLSurfaceView extends GLSurfaceView {
         if (rot != null) {
             if (mRotateWholeCube) {
                 rot.setStartFace(0);
-                rot.setFaceCount(cubeSize);
+                rot.setFaceCount(wholeSize);
             }
             mCube.rotate(rot);
         }

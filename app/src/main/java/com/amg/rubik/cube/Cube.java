@@ -921,8 +921,20 @@ public class Cube {
         }
     }
 
-    public int size() {
-        return Math.max(Math.max(mSizeX, mSizeY), mSizeZ);
+    public int getSizeX() {
+        return mSizeX;
+    }
+
+    public int getSizeY() {
+        return mSizeY;
+    }
+
+    public int getSizeZ() {
+        return mSizeZ;
+    }
+
+    public float getSquareSize() {
+        return squareSize;
     }
 
     protected boolean isSymmetricAroundAxis(Axis axis) {
