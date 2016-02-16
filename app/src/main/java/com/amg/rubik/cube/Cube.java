@@ -742,12 +742,17 @@ public class Cube {
         /**
          * TODO: Check the value of face
          * */
-
-        Log.w(tag, "R: " + axis + " " + direction + " " + face);
-
         int w = 0, h = 0;
+
+        // The face to be rotated (in case we are rotating an edge layer.
         ArrayList<Square> faceSquares = null;
+
+        // Additional face to be rotated if the dimension along the axis of rotation is 1
+        ArrayList<Square> oppositeFace = null;
+
+        // This list holds the squares from the sides of the layer being rotated
         ArrayList<ArrayList<Square>> squareList = new ArrayList<>(CUBE_SIDES);
+
         for (int i = 0; i < CUBE_SIDES; i++) {
             squareList.add(new ArrayList<Square>());
         }
@@ -768,6 +773,8 @@ public class Cube {
                 } else if (face == mSizeX - 1) {
                     faceSquares = mRightSquares;
                 }
+                if (mSizeX == 1)
+                    oppositeFace = mRightSquares;
                 w = mSizeZ;
                 h = mSizeY;
                 break;
@@ -791,6 +798,8 @@ public class Cube {
                 } else if (face == mSizeY - 1) {
                     faceSquares = mTopSquares;
                 }
+                if (mSizeY == 1)
+                    oppositeFace = mTopSquares;
                 w = mSizeX;
                 h = mSizeZ;
                 break;
@@ -813,6 +822,8 @@ public class Cube {
                 } else if (face == mSizeZ - 1) {
                     faceSquares = mFrontSquares;
                 }
+                if (mSizeZ == 1)
+                    oppositeFace = mFrontSquares;
                 w = mSizeX;
                 h = mSizeY;
                 break;
@@ -837,10 +848,19 @@ public class Cube {
                         direction == Direction.CLOCKWISE ?
                                 Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE, size);
             }
+
+            /**
+             * Opposite face will be always on the positive edge of the axis
+             * */
+            if (oppositeFace != null) {
+                rotateFaceColors(oppositeFace, direction, size);
+            }
         } else {
             skewedRotateRingColors(squareList);
             if (faceSquares != null)
                 skewedRotateFaceColors(faceSquares, w, h);
+            if (oppositeFace != null)
+                skewedRotateFaceColors(oppositeFace, w, h);
         }
     }
 
