@@ -741,9 +741,9 @@ public class Cube {
      * Bottom face clockwise: (Y, CCW, 0)
      * */
     protected void rotate(Axis axis, Direction direction, int face) {
-        /**
-         * TODO: Check the value of face
-         * */
+        int maxSize = getAxisSize(axis);
+        if (face >= maxSize) throw new AssertionError();
+
         int w = 0, h = 0;
 
         // The face to be rotated (in case we are rotating an edge layer.
@@ -831,12 +831,8 @@ public class Cube {
                 break;
         }
 
-        boolean issquare = axis == Axis.X_AXIS && mSizeZ == mSizeY ||
-                axis == Axis.Y_AXIS && mSizeZ == mSizeX ||
-                axis == Axis.Z_AXIS && mSizeX == mSizeY;
-        int maxSize = getAxisSize(axis);
-
-        if (issquare) {
+        boolean symmetric = isSymmetricAroundAxis(axis);
+        if (symmetric) {
             int size = axis == Axis.X_AXIS ? mSizeY : mSizeX;
             rotateRingColors(squareList, direction, size);
 
@@ -864,6 +860,9 @@ public class Cube {
                 rotateFaceColors(oppositeFace, direction, size);
             }
         } else {
+            /**
+             * If not symmetric, rotate 180' along the given axis
+             * */
             skewedRotateRingColors(squareList);
             if (faceSquares != null)
                 skewedRotateFaceColors(faceSquares, w, h);
@@ -887,11 +886,11 @@ public class Cube {
             src.setColor(dst.getColor());
             dst.setColor(color);
         }
-        if (w <= 3 || h <= 3) return;
+        if (w + h <= 6 || w < 3 || h < 3) return;
         ArrayList<Square> subset = new ArrayList<>();
         for (int i = 1; i < w - 1; i++) {
             for (int j = 1; j < h -1; j++) {
-                subset.add(squares.get(i*w + j));
+                subset.add(squares.get(j*w + i));
             }
         }
         skewedRotateFaceColors(subset, w-2, h-2);
@@ -943,17 +942,29 @@ public class Cube {
      * This function basically reorganizes the cube
      * */
     protected void rotate(Axis axis, Direction direction) {
-        // TOO lazy to write reverse functions; just rotate thrice for CCW
-        int count = direction == Direction.CLOCKWISE ? 1 : 3;
+        int x = 0, y = 0, z = 0;
+        int count = 1;
+        int angle = -90;
+        if (direction == Direction.COUNTER_CLOCKWISE) {
+            angle = 90;
+            // TOO lazy to write reverse functions; just rotate thrice for CCW
+            count = 3;
+        }
+
         for (int i = 0; i < count; i++) {
             switch (axis) {
                 case X_AXIS:
+                    x = 1;
                     rotateCubeX();
                     break;
+
                 case Y_AXIS:
+                    y = 1;
                     rotateCubeY();
                     break;
+
                 case Z_AXIS:
+                    z = 1;
                     rotateCubeZ();
                     break;
             }
@@ -964,13 +975,6 @@ public class Cube {
          * Rotate the coordinates of squares
          * */
         float[] rotmatrix = new float[16];
-        int x = 0, y = 0, z = 0;
-        switch (axis) {
-            case X_AXIS: x = 1; break;
-            case Y_AXIS: y = 1; break;
-            case Z_AXIS: z = 1; break;
-        }
-        int angle = direction == Direction.COUNTER_CLOCKWISE ? 90 : -90;
         Matrix.setRotateM(rotmatrix, 0, angle, x, y, z);
 
         for (Square sq: mAllSquares) {
