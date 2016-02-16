@@ -982,7 +982,7 @@ public class Cube {
         }
     }
 
-    private static ArrayList<Square> getInverse(ArrayList<Square> squares, int w, int h) {
+    private static ArrayList<Square> rotateMatrix(ArrayList<Square> squares, int w, int h) {
         ArrayList<Square> tempFace = new ArrayList<>();
         for (int i = 0; i < w; i++) {
             for (int j = h; j > 0; j--) {
@@ -992,7 +992,7 @@ public class Cube {
         return tempFace;
     }
 
-    private static ArrayList<Square> getInverseCCW(ArrayList<Square> squares, int w, int h) {
+    private static ArrayList<Square> rotateMatrixCCW(ArrayList<Square> squares, int w, int h) {
         ArrayList<Square> tempFace = new ArrayList<>();
         for (int i = w - 1; i >= 0; i--) {
             for (int j = 0; j < h; j++) {
@@ -1032,8 +1032,8 @@ public class Cube {
         }
 
 
-        mRightSquares = getInverse(mRightSquares, mSizeZ, mSizeY);
-        mLeftSquares = getInverseCCW(mLeftSquares, mSizeZ, mSizeY);
+        mRightSquares = rotateMatrix(mRightSquares, mSizeZ, mSizeY);
+        mLeftSquares = rotateMatrixCCW(mLeftSquares, mSizeZ, mSizeY);
 
         int temp = mSizeY;
         mSizeY = mSizeZ;
@@ -1046,8 +1046,8 @@ public class Cube {
         mRightSquares = mBackSquares;
         mBackSquares = mLeftSquares;
         mLeftSquares = tempFace;
-        mTopSquares = getInverse(mTopSquares, mSizeX, mSizeZ);
-        mBottomSquares = getInverseCCW(mBottomSquares, mSizeX, mSizeZ);
+        mTopSquares = rotateMatrix(mTopSquares, mSizeX, mSizeZ);
+        mBottomSquares = rotateMatrixCCW(mBottomSquares, mSizeX, mSizeZ);
 
         int temp = mSizeX;
         mSizeX = mSizeZ;
@@ -1056,12 +1056,12 @@ public class Cube {
 
     protected void rotateCubeZ() {
         ArrayList<Square> tempFace = new ArrayList<>(mTopSquares);
-        mTopSquares = getInverseCCW(mLeftSquares, mSizeZ, mSizeY);
-        mLeftSquares = getInverseCCW(mBottomSquares, mSizeX, mSizeZ);
-        mBottomSquares = getInverseCCW(mRightSquares, mSizeZ, mSizeY);
-        mRightSquares = getInverseCCW(tempFace, mSizeX, mSizeZ);
-        mFrontSquares = getInverse(mFrontSquares, mSizeX, mSizeY);
-        mBackSquares = getInverseCCW(mBackSquares, mSizeX, mSizeY);
+        mTopSquares = rotateMatrix(mLeftSquares, mSizeZ, mSizeY);
+        mLeftSquares = rotateMatrix(mBottomSquares, mSizeX, mSizeZ);
+        mBottomSquares = rotateMatrix(mRightSquares, mSizeZ, mSizeY);
+        mRightSquares = rotateMatrix(tempFace, mSizeX, mSizeZ);
+        mFrontSquares = rotateMatrix(mFrontSquares, mSizeX, mSizeY);
+        mBackSquares = rotateMatrixCCW(mBackSquares, mSizeX, mSizeY);
 
         int temp = mSizeY;
         mSizeY = mSizeX;
