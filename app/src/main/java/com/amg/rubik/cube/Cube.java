@@ -838,19 +838,25 @@ public class Cube {
             int size = axis == Axis.X_AXIS ? mSizeY : mSizeX;
             rotateRingColors(squareList, direction, size);
 
-            if (face == maxSize - 1) {
-                // Rotate a face that is on the positive edge of the
-                // corresponding axis (front, top or right).
-                // As squares are stored in clockwise order, rotation is straightforward.
-                rotateFaceColors(faceSquares, direction, size);
-            } else if (face == 0) {
-                rotateFaceColors(faceSquares,
-                        direction == Direction.CLOCKWISE ?
-                                Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE, size);
+            if (faceSquares != null) {
+                if (face == 0) {
+                    /**
+                     * Lower layers store colors in opposite direction, and needs to be rotated
+                     * in the opposite direction
+                     * */
+                    rotateFaceColors(faceSquares,
+                            direction == Direction.CLOCKWISE ?
+                                    Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE, size);
+                } else {
+                    // Rotate a face that is on the positive edge of the
+                    // corresponding axis (front, top or right).
+                    // As squares are stored in clockwise order, rotation is straightforward.
+                    rotateFaceColors(faceSquares, direction, size);
+                }
             }
 
             /**
-             * Opposite face will be always on the positive edge of the axis
+             * "Opposite face" will be always on the positive edge of the axis
              * */
             if (oppositeFace != null) {
                 rotateFaceColors(oppositeFace, direction, size);
