@@ -502,19 +502,34 @@ public class Cube {
             }
         }
 
+        /**
+         * If the cube height is one, then the squares on the bottom and top faces are
+         * part of the same Piece (and so on for other axes).
+         * */
         if (mSizeX == 1) {
-            for (int i = 0 ; i < mSizeZ; i++) {
-                topFace.get(i).addSquare(mRightSquares.get(mSizeZ - 1 - i));
-                bottomFace.get(i).addSquare(mRightSquares.get(mSizeZ * (mSizeY - 1) + i));
+            for (int i = 0; i < mSizeY; i++) {
+                for (int j = 0; j < mSizeZ; j++) {
+                    leftFace.get(i*mSizeZ + j)
+                            .addSquare(mRightSquares.get((i + 1) * mSizeZ - 1 - j));
+                }
             }
         }
 
-        // TODO: mSizeY == 1 ?
+        if (mSizeY == 1) {
+            for (int i = 0; i < mSizeZ; i++) {
+                for (int j = 0; j < mSizeX; j++) {
+                    bottomFace.get(i*mSizeX + j)
+                            .addSquare(mTopSquares.get((mSizeZ - 1- i) * mSizeX + j));
+                }
+            }
+        }
 
         if (mSizeZ == 1) {
-            for (int i = 0 ; i < mSizeY; i++) {
-                rightFace.get(i).addSquare(mBackSquares.get(i * mSizeX));
-                leftFace.get(i).addSquare(mBackSquares.get(mSizeX * (i + 1) -1));
+            for (int i = 0; i < mSizeY; i++) {
+                for (int j = 0; j < mSizeX; j++) {
+                    backFace.get(i*mSizeX + j)
+                            .addSquare(mFrontSquares.get((i+1) * mSizeX - 1 - j));
+                }
             }
         }
 
