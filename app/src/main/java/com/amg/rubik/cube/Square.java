@@ -20,6 +20,10 @@ public class Square {
     // Our vertex buffer.
     private FloatBuffer mVertexBuffer;
 
+    public void setFace(int face) {
+        this.mFace = face;
+    }
+
     public int getFace() {
         return mFace;
     }

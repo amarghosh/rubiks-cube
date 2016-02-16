@@ -972,6 +972,7 @@ public class Cube {
             }
         }
         createFaces();
+        updateSquareFaces();
 
         /**
          * Rotate the coordinates of squares
@@ -1068,6 +1069,15 @@ public class Cube {
         int temp = mSizeY;
         mSizeY = mSizeX;
         mSizeX = temp;
+    }
+
+    private void updateSquareFaces() {
+        for (int i = 0; i < FACE_COUNT; i++) {
+            ArrayList<Square> face = mAllFaces[i];
+            for (Square sq: face) {
+                sq.setFace(i);
+            }
+        }
     }
 }
 
