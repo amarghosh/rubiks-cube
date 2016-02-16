@@ -618,6 +618,8 @@ public class Cube {
     /**
      * Rotate colors of a given face. This is the second part of rotating a face.
      * This function calls itself recursively to rotate inner squares.
+     *
+     * We cannot use rotateMatrix functions here as we need an in-place update of colors.
      * */
     private void rotateFaceColors(ArrayList<Square> squares, Direction direction, int size) {
         ArrayList<Integer> tempColors = new ArrayList<>(size);
@@ -982,24 +984,24 @@ public class Cube {
         }
     }
 
-    private static ArrayList<Square> rotateMatrix(ArrayList<Square> squares, int w, int h) {
-        ArrayList<Square> tempFace = new ArrayList<>();
+    private static <T> ArrayList<T> rotateMatrix(ArrayList<T> matrix, int w, int h) {
+        ArrayList<T> rotatedMatrix = new ArrayList<>();
         for (int i = 0; i < w; i++) {
             for (int j = h; j > 0; j--) {
-                tempFace.add(squares.get((j - 1) * w + i));
+                rotatedMatrix.add(matrix.get((j - 1) * w + i));
             }
         }
-        return tempFace;
+        return rotatedMatrix;
     }
 
-    private static ArrayList<Square> rotateMatrixCCW(ArrayList<Square> squares, int w, int h) {
-        ArrayList<Square> tempFace = new ArrayList<>();
+    private static <T> ArrayList<T> rotateMatrixCCW(ArrayList<T> matrix, int w, int h) {
+        ArrayList<T> rotatedMatrix = new ArrayList<>();
         for (int i = w - 1; i >= 0; i--) {
             for (int j = 0; j < h; j++) {
-                tempFace.add(squares.get(j * w + i));
+                rotatedMatrix.add(matrix.get(j * w + i));
             }
         }
-        return tempFace;
+        return rotatedMatrix;
     }
 
     private void debugfacesizes() {
