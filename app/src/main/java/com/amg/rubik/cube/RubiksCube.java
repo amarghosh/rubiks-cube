@@ -1,6 +1,5 @@
 package com.amg.rubik.cube;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -205,10 +204,19 @@ public class RubiksCube extends Cube {
      * the colors of squares according to the Rotation in progress.
      * */
     private void finishRotation() {
-        for (int face = mRotation.startFace;
+        /**
+         * If 90' rotation of a single face is not possible along the given axis, and we are
+         * rotating all layers along that axis, just reorient the cube.
+         * */
+        boolean symmetryFlag = isSymmetricAroundAxis(mRotation.axis);
+        if (symmetryFlag == false && mRotation.faceCount == getAxisSize(mRotation.axis)) {
+            rotate(mRotation.axis, mRotation.direction);
+        } else {
+            for (int face = mRotation.startFace;
                  face < mRotation.startFace + mRotation.faceCount;
                  face++) {
-            rotate(mRotation.axis, mRotation.direction, face);
+                rotate(mRotation.axis, mRotation.direction, face);
+            }
         }
 
         /**
@@ -302,6 +310,7 @@ public class RubiksCube extends Cube {
         }
 
         ArrayList<ArrayList<Piece>> faceList;
+        int axisSize = getAxisSize(mRotation.axis);
 
         float angle = mRotation.angle;
         float angleX = 0;
@@ -347,8 +356,7 @@ public class RubiksCube extends Cube {
             }
 
             mRenderer.setRotation(0, 0, 0, 0);
-            int size = getAxisSize(mRotation.axis);
-            for (int i = mRotation.startFace + mRotation.faceCount; i < size; i++) {
+            for (int i = mRotation.startFace + mRotation.faceCount; i < axisSize; i++) {
                 ArrayList<Piece> pieces = faceList.get(i);
                 for (Piece piece : pieces) {
                     for (Square square : piece.mSquares) {
@@ -361,7 +369,15 @@ public class RubiksCube extends Cube {
             throw e;
         }
 
-        float max_angle = canRotate90Degree(mRotation.axis) ? 90f : 180f;
+        boolean symmetric = isSymmetricAroundAxis(mRotation.axis);
+        float max_angle = symmetric ? 90f : 180f;
+        if (mRotation.faceCount == axisSize) {
+            /**
+             * Even if it isn't symmetric, we can do half rotations if
+             * we are rotating the whole cube. @finishRotation takes care of this.
+             * */
+            max_angle = 90f;
+        }
 
         if (Math.abs(mRotation.angle) > max_angle - 0.01f) {
             finishRotation();

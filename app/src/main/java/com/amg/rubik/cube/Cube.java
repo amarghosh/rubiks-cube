@@ -1,6 +1,7 @@
 package com.amg.rubik.cube;
 
 import android.graphics.Color;
+import android.opengl.Matrix;
 import android.util.Log;
 
 import com.amg.rubik.graphics.Axis;
@@ -98,17 +99,8 @@ public class Cube {
         mLeftSquares = new ArrayList<>();
         mRightSquares = new ArrayList<>();
         mAllFaces = new ArrayList[FACE_COUNT];
-        mAllFaces[FACE_FRONT] = mFrontSquares;
-        mAllFaces[FACE_RIGHT] = mRightSquares;
-        mAllFaces[FACE_BACK] = mBackSquares;
-        mAllFaces[FACE_LEFT] = mLeftSquares;
-        mAllFaces[FACE_TOP] = mTopSquares;
-        mAllFaces[FACE_BOTTOM] = mBottomSquares;
         createAllSquares();
 
-        mXaxisFaceList = new ArrayList<>(mSizeX);
-        mYaxisFaceList = new ArrayList<>(mSizeY);
-        mZaxisFaceList = new ArrayList<>(mSizeZ);
         createFaces();
     }
 
@@ -123,8 +115,7 @@ public class Cube {
         }
     }
 
-    private void createAllSquares()
-    {
+    private void createAllSquares() {
         createFrontSquares(COLOR_FRONT);
         createBackSquares(COLOR_BACK);
         createLeftSquares(COLOR_LEFT);
@@ -354,6 +345,17 @@ public class Cube {
     }
 
     private void createFaces() {
+        mAllFaces[FACE_FRONT] = mFrontSquares;
+        mAllFaces[FACE_RIGHT] = mRightSquares;
+        mAllFaces[FACE_BACK] = mBackSquares;
+        mAllFaces[FACE_LEFT] = mLeftSquares;
+        mAllFaces[FACE_TOP] = mTopSquares;
+        mAllFaces[FACE_BOTTOM] = mBottomSquares;
+
+        mXaxisFaceList = new ArrayList<>(mSizeX);
+        mYaxisFaceList = new ArrayList<>(mSizeY);
+        mZaxisFaceList = new ArrayList<>(mSizeZ);
+
         ArrayList<Piece> frontFace = new ArrayList<>();
         ArrayList<Piece> rightFace = new ArrayList<>();
         ArrayList<Piece> leftFace = new ArrayList<>();
@@ -922,7 +924,7 @@ public class Cube {
         return Math.max(Math.max(mSizeX, mSizeY), mSizeZ);
     }
 
-    protected boolean canRotate90Degree(Axis axis) {
+    protected boolean isSymmetricAroundAxis(Axis axis) {
         switch (axis) {
             case X_AXIS:
                 return mSizeY == mSizeZ;
@@ -932,6 +934,134 @@ public class Cube {
                 return mSizeX == mSizeY;
         }
         throw new InvalidParameterException();
+    }
+
+    /**
+     * Rotate the whole cube along the given axis.
+     * Can be used for 90' rotations in skewed cubes
+     *
+     * This function basically reorganizes the cube
+     * */
+    protected void rotate(Axis axis, Direction direction) {
+        // TOO lazy to write reverse functions; just rotate thrice for CCW
+        int count = direction == Direction.CLOCKWISE ? 1 : 3;
+        for (int i = 0; i < count; i++) {
+            switch (axis) {
+                case X_AXIS:
+                    rotateCubeX();
+                    break;
+                case Y_AXIS:
+                    rotateCubeY();
+                    break;
+                case Z_AXIS:
+                    rotateCubeZ();
+                    break;
+            }
+        }
+        createFaces();
+
+        /**
+         * Rotate the coordinates of squares
+         * */
+        float[] rotmatrix = new float[16];
+        int x = 0, y = 0, z = 0;
+        switch (axis) {
+            case X_AXIS: x = 1; break;
+            case Y_AXIS: y = 1; break;
+            case Z_AXIS: z = 1; break;
+        }
+        int angle = direction == Direction.COUNTER_CLOCKWISE ? 90 : -90;
+        Matrix.setRotateM(rotmatrix, 0, angle, x, y, z);
+
+        for (Square sq: mAllSquares) {
+            sq.rotateCoordinates(rotmatrix);
+        }
+    }
+
+    private static ArrayList<Square> getInverse(ArrayList<Square> squares, int w, int h) {
+        ArrayList<Square> tempFace = new ArrayList<>();
+        for (int i = 0; i < w; i++) {
+            for (int j = h; j > 0; j--) {
+                tempFace.add(squares.get((j - 1) * w + i));
+            }
+        }
+        return tempFace;
+    }
+
+    private static ArrayList<Square> getInverseCCW(ArrayList<Square> squares, int w, int h) {
+        ArrayList<Square> tempFace = new ArrayList<>();
+        for (int i = w - 1; i >= 0; i--) {
+            for (int j = 0; j < h; j++) {
+                tempFace.add(squares.get(j * w + i));
+            }
+        }
+        return tempFace;
+    }
+
+    private void debugfacesizes() {
+        Log.w(tag, String.format("%d-%d-%d Front %d, Right %d, Back %d, Left %d, Top %d, Bottom %d",
+                mSizeX, mSizeY, mSizeZ,
+                mFrontSquares.size(),
+                mRightSquares.size(),
+                mBackSquares.size(),
+                mLeftSquares.size(),
+                mTopSquares.size(),
+                mBottomSquares.size()
+                ));
+    }
+
+    protected void rotateCubeX() {
+        ArrayList<Square> tempFace = new ArrayList<>(mTopSquares);
+        mTopSquares = mFrontSquares;
+        mFrontSquares = mBottomSquares;
+        mBottomSquares = new ArrayList<>();
+        for (int i = mSizeY - 1; i >= 0; i--) {
+            for (int j = mSizeX - 1; j >= 0; j--) {
+                mBottomSquares.add(mBackSquares.get(i*mSizeX + j));
+            }
+        }
+        mBackSquares.clear();
+        for (int i = mSizeZ - 1; i >= 0; i--) {
+            for (int j = mSizeX - 1; j >= 0; j--) {
+                mBackSquares.add(tempFace.get(i*mSizeX + j));
+            }
+        }
+
+
+        mRightSquares = getInverse(mRightSquares, mSizeZ, mSizeY);
+        mLeftSquares = getInverseCCW(mLeftSquares, mSizeZ, mSizeY);
+
+        int temp = mSizeY;
+        mSizeY = mSizeZ;
+        mSizeZ = temp;
+    }
+
+    protected void rotateCubeY() {
+        ArrayList<Square> tempFace = mFrontSquares;
+        mFrontSquares = mRightSquares;
+        mRightSquares = mBackSquares;
+        mBackSquares = mLeftSquares;
+        mLeftSquares = tempFace;
+        mTopSquares = getInverse(mTopSquares, mSizeX, mSizeZ);
+        mBottomSquares = getInverseCCW(mBottomSquares, mSizeX, mSizeZ);
+
+        int temp = mSizeX;
+        mSizeX = mSizeZ;
+        mSizeZ = temp;
+    }
+
+    protected void rotateCubeZ() {
+        ArrayList<Square> tempFace = new ArrayList<>(mTopSquares);
+        mTopSquares = getInverseCCW(mLeftSquares, mSizeZ, mSizeY);
+        mLeftSquares = getInverseCCW(mBottomSquares, mSizeX, mSizeZ);
+        mBottomSquares = getInverseCCW(mRightSquares, mSizeZ, mSizeY);
+        mRightSquares = getInverseCCW(tempFace, mSizeX, mSizeZ);
+        mFrontSquares = getInverse(mFrontSquares, mSizeX, mSizeY);
+        mBackSquares = getInverseCCW(mBackSquares, mSizeX, mSizeY);
+
+        int temp = mSizeY;
+        mSizeY = mSizeX;
+        mSizeX = temp;
     }
 }
 
