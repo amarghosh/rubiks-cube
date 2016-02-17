@@ -139,11 +139,24 @@ public class RubiksCube extends Cube {
         randomize(count);
     }
 
+    /**
+     * I give up; how did you do it?
+     *
+     * 1. Bring the cube to its base state
+     * 2. Apply the moves made during scrambling
+     * 3. Create an Algorithm with those moves reversed
+     * 4. Start executing the algorithm
+     * */
     public void helpMe() {
+        if (mRandomizedMoves.size() == 0) {
+            return;
+        }
+
         reset();
         for (Rotation r: mRandomizedMoves) {
             rotate(r.axis, r.direction, r.startFace);
         }
+
         Algorithm algorithm = new Algorithm();
         for (int i = mRandomizedMoves.size() - 1; i >= 0; i--) {
             algorithm.addStep(mRandomizedMoves.get(i).getReverse());
@@ -304,7 +317,7 @@ public class RubiksCube extends Cube {
         rotateMode = RotateMode.NONE;
         mRotation.reset();
         mCurrentAlgo = null;
-        if (mState == CubeState.TESTING) {
+        if (mState == CubeState.TESTING || mState == CubeState.HELPING) {
             mState = CubeState.IDLE;
         }
     }

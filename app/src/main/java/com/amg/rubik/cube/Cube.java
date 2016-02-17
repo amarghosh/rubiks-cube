@@ -597,8 +597,6 @@ public class Cube {
             mZaxisFaceList.add(pieces);
         }
         mZaxisFaceList.add(frontFace);
-        Log.w(tag, String.format("sizes: %d %d %d: Pieces %d",
-                mSizeX, mSizeY, mSizeZ, mAllPieces.size()));
     }
 
     /**
