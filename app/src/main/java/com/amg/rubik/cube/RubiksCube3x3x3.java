@@ -789,7 +789,8 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
             default:
                 mState = CubeState.IDLE;
-                sendMessage("Thats all I can do now");
+                Log.w(tag, "STATE: " + solveState);
+                sendMessage("Something is fishy: check the code");
                 break;
         }
     }

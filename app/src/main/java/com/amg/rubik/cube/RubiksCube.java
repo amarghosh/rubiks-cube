@@ -48,6 +48,7 @@ public class RubiksCube extends Cube {
         IDLE,
         RANDOMIZE,
         SOLVING,
+        HELPING,
         TESTING
     }
 
@@ -147,7 +148,7 @@ public class RubiksCube extends Cube {
         for (int i = mRandomizedMoves.size() - 1; i >= 0; i--) {
             algorithm.addStep(mRandomizedMoves.get(i).getReverse());
         }
-        mState = CubeState.SOLVING;
+        mState = CubeState.HELPING;
         setAlgo(algorithm);
     }
 
@@ -439,7 +440,8 @@ public class RubiksCube extends Cube {
                 mCurrentAlgo.isDone() == false) {
             throw new IllegalStateException("There is already an algorithm running");
         }
-        if (mState != CubeState.SOLVING && mState != CubeState.TESTING) {
+        if (mState != CubeState.SOLVING && mState != CubeState.TESTING &&
+                mState != CubeState.HELPING) {
             throw new IllegalStateException("Invalid state for algos: " + mState);
         }
         mCurrentAlgo = algo;
