@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 public class Piece {
 
+    private static final String tag = "rubik-piece";
+
     public enum PieceType {
         CORNER,
         CENTER,
@@ -31,11 +33,14 @@ public class Piece {
     }
 
     void addSquare(Square sq) {
-        if (mType == PieceType.CENTER && mSquares.size() != 0 ||
-                mType == PieceType.EDGE && mSquares.size() >= 2 ||
-                mType == PieceType.CORNER && mSquares.size() >= 3) {
-            Log.w("piece", "Too many squares for PieceType " + mType +
-                    ", we have " + mSquares.size());
+        if (mSquares.contains(sq)) {
+            return;
+        }
+        if (mType == PieceType.CENTER && mSquares.size() >= 2 ||
+                mType == PieceType.EDGE && mSquares.size() >= 3 ||
+                mType == PieceType.CORNER && mSquares.size() >= 6) {
+            Log.e(tag, "Too many squares for PieceType " + mType +
+                    ", we already have " + mSquares.size());
         }
         mSquares.add(sq);
     }

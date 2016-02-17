@@ -75,6 +75,11 @@ public class Cube {
     ArrayList<Square> mRightSquares;
     ArrayList<Square>[] mAllFaces;
 
+    /**
+     * Pieces are used to draw squares during animation. We keep separate sets of layers for each
+     * axis and animate pieces from the selected layer of the appropriate set during rotation.
+     * */
+    private ArrayList<Piece> mAllPieces;
     ArrayList<ArrayList<Piece>> mXaxisFaceList;
     ArrayList<ArrayList<Piece>> mYaxisFaceList;
     ArrayList<ArrayList<Piece>> mZaxisFaceList;
@@ -115,6 +120,13 @@ public class Cube {
         }
     }
 
+    /**
+     * Create the squares and store them in their respective lists
+     *
+     * On each face array, (the respective m***Squares array), the squares are stored from the
+     * top-left to the bottom-right order assuming you're looking directly at that face.
+     * This order is used in various places and hence should not be changed.
+     * */
     private void createAllSquares() {
         createFrontSquares(COLOR_FRONT);
         createBackSquares(COLOR_BACK);
@@ -344,6 +356,42 @@ public class Cube {
         }
     }
 
+    /**
+     * Create a new piece or return an existing piece that contains one of the squares. A square
+     * can only be part of one piece. This ensures that there are no duplicate or partial pieces.
+     * */
+    private Piece createPieceWithSquares(ArrayList<Square> squares, Piece.PieceType type) {
+        Piece piece = null;
+        for (Piece p: mAllPieces) {
+            for (Square sq: squares) {
+                if (p.mSquares.contains(sq)) {
+                    piece = p;
+                    break;
+                }
+            }
+            if (piece != null) break;
+        }
+        if (piece == null) {
+            piece = new Piece(type);
+            mAllPieces.add(piece);
+        }
+        for (Square sq: squares) {
+            piece.addSquare(sq);
+        }
+        return piece;
+    }
+
+    /**
+     * Create pieces and store them as faces/layers. Three sets of layers are maintained
+     * corresponding to each dimension (m*axisFaceList). A piece can have anywhere from
+     * one to six squares (in a 1x1x1 cube).
+     *
+     * To avoid creating duplicate pieces, we store all pieces in a separate list and search it
+     * for any existing pieces with the given square before creating a new one.
+     *
+     * The order of pieces is used in solutions and should not be changed. The outer layers follow
+     * the same order as the corresponding face.
+     * */
     private void createFaces() {
         mAllFaces[FACE_FRONT] = mFrontSquares;
         mAllFaces[FACE_RIGHT] = mRightSquares;
@@ -351,6 +399,7 @@ public class Cube {
         mAllFaces[FACE_LEFT] = mLeftSquares;
         mAllFaces[FACE_TOP] = mTopSquares;
         mAllFaces[FACE_BOTTOM] = mBottomSquares;
+        mAllPieces = new ArrayList<>();
 
         mXaxisFaceList = new ArrayList<>(mSizeX);
         mYaxisFaceList = new ArrayList<>(mSizeY);
@@ -362,174 +411,133 @@ public class Cube {
         ArrayList<Piece> topFace = new ArrayList<>();
         ArrayList<Piece> bottomFace = new ArrayList<>();
         ArrayList<Piece> backFace = new ArrayList<>();
+        ArrayList<Square> squares = new ArrayList<>();
+
+        Piece.PieceType type;
 
         for (int i = 0; i < mSizeY; i++) {
             for (int j = 0; j < mSizeX; j++) {
-                Piece.PieceType type = getPieceType(i, j, mSizeY, mSizeX);
-                Piece piece = new Piece(type);
-                piece.addSquare(mFrontSquares.get(i * mSizeX + j));
+                squares.clear();
+                type = getPieceType(i, j, mSizeY, mSizeX);
+                squares.add(mFrontSquares.get(i * mSizeX + j));
                 if (i == 0) {
-                    piece.addSquare(mTopSquares.get(mSizeX * (mSizeZ - 1) + j));
+                    squares.add(mTopSquares.get(mSizeX * (mSizeZ - 1) + j));
                 }
                 if (i == mSizeY - 1) {
-                    piece.addSquare(mBottomSquares.get(j));
+                    squares.add(mBottomSquares.get(j));
                 }
                 if (j == 0) {
-                    piece.addSquare(mLeftSquares.get(mSizeZ * (i + 1) - 1));
+                    squares.add(mLeftSquares.get(mSizeZ * (i + 1) - 1));
                 }
                 if (j == mSizeX - 1) {
-                    piece.addSquare(mRightSquares.get(mSizeZ * i));
+                    squares.add(mRightSquares.get(mSizeZ * i));
                 }
-                frontFace.add(piece);
-            }
-        }
-
-        for (int i = 0; i < mSizeY; i++) {
-            for (int j = 0; j < mSizeZ; j++) {
-                if (j == 0) {
-                    rightFace.add(frontFace.get((i + 1) * mSizeX - 1));
-                    continue;
-                }
-                Piece.PieceType type = getPieceType(i, j, mSizeY, mSizeZ);
-                Piece piece = new Piece(type);
-                piece.addSquare(mRightSquares.get(i * mSizeZ + j));
-                if (i == 0) {
-                    piece.addSquare(mTopSquares.get((mSizeZ - j) * mSizeX - 1));
-                }
-                if (i == mSizeY - 1) {
-                    piece.addSquare(mBottomSquares.get((j + 1) * mSizeX - 1));
-                }
-                if (j == mSizeZ - 1) {
-                    piece.addSquare(mBackSquares.get(i * mSizeX));
-                }
-                rightFace.add(piece);
+                frontFace.add(createPieceWithSquares(squares, type));
             }
         }
 
         for (int i = 0; i < mSizeY; i++) {
             for (int j = 0; j < mSizeZ; j++) {
-                if (j == mSizeZ - 1) {
-                    leftFace.add(frontFace.get(i * mSizeX));
-                    continue;
+                squares.clear();
+                type = getPieceType(i, j, mSizeY, mSizeZ);
+                if (j == 0) {
+                    squares.add(mFrontSquares.get((i + 1) * mSizeX - 1));
                 }
-                Piece.PieceType type = getPieceType(i, j, mSizeY, mSizeZ);
-                Piece piece = new Piece(type);
-                piece.addSquare(mLeftSquares.get(i * mSizeZ + j));
+                squares.add(mRightSquares.get(i * mSizeZ + j));
                 if (i == 0) {
-                    piece.addSquare(mTopSquares.get(j * mSizeX));
+                    squares.add(mTopSquares.get((mSizeZ - j) * mSizeX - 1));
                 }
                 if (i == mSizeY - 1) {
-                    piece.addSquare(mBottomSquares.get(mSizeX * (mSizeZ - j - 1)));
+                    squares.add(mBottomSquares.get((j + 1) * mSizeX - 1));
+                }
+                if (j == mSizeZ - 1) {
+                    squares.add(mBackSquares.get(i * mSizeX));
+                }
+                rightFace.add(createPieceWithSquares(squares, type));
+            }
+        }
+
+        for (int i = 0; i < mSizeY; i++) {
+            for (int j = 0; j < mSizeZ; j++) {
+                squares.clear();
+                if (j == mSizeZ - 1) {
+                    squares.add(mFrontSquares.get(i * mSizeX));
+                }
+                type = getPieceType(i, j, mSizeY, mSizeZ);
+                squares.add(mLeftSquares.get(i * mSizeZ + j));
+                if (i == 0) {
+                    squares.add(mTopSquares.get(j * mSizeX));
+                }
+                if (i == mSizeY - 1) {
+                    squares.add(mBottomSquares.get(mSizeX * (mSizeZ - j - 1)));
                 }
                 if (j == 0) {
-                    piece.addSquare(mBackSquares.get(mSizeX * (i + 1) - 1));
+                    squares.add(mBackSquares.get(mSizeX * (i + 1) - 1));
                 }
-                leftFace.add(piece);
+                leftFace.add(createPieceWithSquares(squares, type));
             }
         }
 
         for (int i = 0; i < mSizeZ; i++) {
             for (int j = 0; j < mSizeX; j++) {
+                squares.clear();
                 if (j == 0) {
-                    topFace.add(leftFace.get(i));
-                    continue;
+                    squares.add(mLeftSquares.get(i));
                 }
                 if (j == mSizeX - 1) {
-                    topFace.add(rightFace.get(mSizeZ - 1 - i));
-                    continue;
+                    squares.add(mRightSquares.get(mSizeZ - 1 - i));
                 }
                 if (i == mSizeZ - 1) {
-                    topFace.add(frontFace.get(j));
-                    continue;
+                    squares.add(mFrontSquares.get(j));
                 }
-                Piece.PieceType type = getPieceType(i, j, mSizeZ, mSizeX);
-                Piece piece = new Piece(type);
-                piece.addSquare(mTopSquares.get(i * mSizeX + j));
+                type = getPieceType(i, j, mSizeZ, mSizeX);
+                squares.add(mTopSquares.get(i * mSizeX + j));
                 if (i == 0) {
-                    piece.addSquare(mBackSquares.get(mSizeX - 1 - j));
+                    squares.add(mBackSquares.get(mSizeX - 1 - j));
                 }
-                topFace.add(piece);
+                topFace.add(createPieceWithSquares(squares, type));
             }
         }
 
         for (int i = 0; i < mSizeZ; i++) {
             for (int j = 0; j < mSizeX; j++) {
+                squares.clear();
                 if (i == 0) {
-                    bottomFace.add(frontFace.get(mSizeX * (mSizeY - 1) + j));
-                    continue;
+                    squares.add(mFrontSquares.get(mSizeX * (mSizeY - 1) + j));
                 }
                 if (j == 0) {
-                    bottomFace.add(leftFace.get(mSizeZ * mSizeY - 1 - i));
-                    continue;
+                    squares.add(mLeftSquares.get(mSizeZ * mSizeY - 1 - i));
                 }
                 if (j == mSizeX - 1) {
-                    bottomFace.add(rightFace.get(mSizeZ * (mSizeY - 1) + i));
-                    continue;
+                    squares.add(mRightSquares.get(mSizeZ * (mSizeY - 1) + i));
                 }
-                Piece.PieceType type = getPieceType(i, j, mSizeZ, mSizeX);
-                Piece piece = new Piece(type);
-                piece.addSquare(mBottomSquares.get(i * mSizeX + j));
+                type = getPieceType(i, j, mSizeZ, mSizeX);
+                squares.add(mBottomSquares.get(i * mSizeX + j));
                 if (i == mSizeZ - 1) {
-                    piece.addSquare(
-                            mBackSquares.get(mSizeX * (mSizeY - 1) + mSizeX - 1 - j));
+                    squares.add(mBackSquares.get(mSizeX * (mSizeY - 1) + mSizeX - 1 - j));
                 }
-                bottomFace.add(piece);
+                bottomFace.add(createPieceWithSquares(squares, type));
             }
         }
 
         for (int i = 0; i < mSizeY; i++) {
             for (int j = 0; j < mSizeX; j++) {
+                squares.clear();
                 if (i == 0) {
-                    backFace.add(topFace.get(mSizeX - 1 - j));
-                    continue;
+                    squares.add(mTopSquares.get(mSizeX - 1 - j));
                 }
                 if (i == mSizeY - 1) {
-                    backFace.add(bottomFace.get(mSizeX * (mSizeZ - 1) + mSizeX - 1 - j));
-                    continue;
+                    squares.add(mBottomSquares.get(mSizeX * (mSizeZ - 1) + mSizeX - 1 - j));
                 }
                 if (j == 0) {
-                    backFace.add(rightFace.get(mSizeZ * (i + 1) - 1));
-                    continue;
+                    squares.add(mRightSquares.get(mSizeZ * (i + 1) - 1));
                 }
                 if (j == mSizeX - 1) {
-                    backFace.add(leftFace.get(i * mSizeZ));
-                    continue;
+                    squares.add(mLeftSquares.get(i * mSizeZ));
                 }
-                Piece.PieceType type = getPieceType(i, j, mSizeY, mSizeX);
-                Piece piece = new Piece(type);
-                piece.addSquare(mBackSquares.get(i * mSizeX + j));
-                backFace.add(piece);
-            }
-        }
-
-        /**
-         * If the cube height is one, then the squares on the bottom and top faces are
-         * part of the same Piece (and so on for other axes).
-         * */
-        if (mSizeX == 1) {
-            for (int i = 0; i < mSizeY; i++) {
-                for (int j = 0; j < mSizeZ; j++) {
-                    leftFace.get(i*mSizeZ + j)
-                            .addSquare(mRightSquares.get((i + 1) * mSizeZ - 1 - j));
-                }
-            }
-        }
-
-        if (mSizeY == 1) {
-            for (int i = 0; i < mSizeZ; i++) {
-                for (int j = 0; j < mSizeX; j++) {
-                    bottomFace.get(i*mSizeX + j)
-                            .addSquare(mTopSquares.get((mSizeZ - 1- i) * mSizeX + j));
-                }
-            }
-        }
-
-        if (mSizeZ == 1) {
-            for (int i = 0; i < mSizeY; i++) {
-                for (int j = 0; j < mSizeX; j++) {
-                    backFace.get(i*mSizeX + j)
-                            .addSquare(mFrontSquares.get((i+1) * mSizeX - 1 - j));
-                }
+                type = getPieceType(i, j, mSizeY, mSizeX);
+                squares.add(mBackSquares.get(i * mSizeX + j));
+                backFace.add(createPieceWithSquares(squares, type));
             }
         }
 
@@ -589,6 +597,8 @@ public class Cube {
             mZaxisFaceList.add(pieces);
         }
         mZaxisFaceList.add(frontFace);
+        Log.w(tag, String.format("sizes: %d %d %d: Pieces %d",
+                mSizeX, mSizeY, mSizeZ, mAllPieces.size()));
     }
 
     /**
