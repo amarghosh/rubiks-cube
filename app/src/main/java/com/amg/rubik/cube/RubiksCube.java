@@ -83,6 +83,11 @@ public class RubiksCube extends Cube {
     private ArrayList<Rotation> mUndoStack;
     private boolean mUndoingFlag = false;
 
+    /**
+     * Stores the moves performed during randomize(). This is used for revealing the solution.
+     * */
+    private ArrayList<Rotation> mRandomizedMoves;
+
     private CubeRenderer mRenderer;
 
     public RubiksCube(int size) {
@@ -90,6 +95,7 @@ public class RubiksCube extends Cube {
         mCurrentAlgo = null;
         mRotation = new Rotation();
         mUndoStack = new ArrayList<>();
+        mRandomizedMoves = new ArrayList<>();
         mMoveCount = 0;
     }
 
@@ -118,6 +124,24 @@ public class RubiksCube extends Cube {
         return mState;
     }
 
+    public void newGame(int count) {
+        reset();
+        randomize(count);
+    }
+
+    public void helpMe() {
+        reset();
+        for (Rotation r: mRandomizedMoves) {
+            rotate(r.axis, r.direction, r.startFace);
+        }
+        Algorithm algorithm = new Algorithm();
+        for (int i = mRandomizedMoves.size() - 1; i >= 0; i--) {
+            algorithm.addStep(mRandomizedMoves.get(i).getReverse());
+        }
+        mState = CubeState.SOLVING;
+        setAlgo(algorithm);
+    }
+
     /**
      * Rotate randomly for @count moves. This function just updates the state instantaneously
      * without animating the rotations
@@ -130,8 +154,10 @@ public class RubiksCube extends Cube {
      * @see public void randomize()
      * */
     public void randomize(int count) {
+        Rotation rotation;
         Random random = new Random();
         Axis[] axes = new Axis[] {Axis.X_AXIS, Axis.Y_AXIS, Axis.Z_AXIS};
+        mRandomizedMoves.clear();
 
         for (int i = 0; i < count; i++) {
             Axis axis = axes[Math.abs(random.nextInt(3))];
@@ -147,7 +173,17 @@ public class RubiksCube extends Cube {
             } else {
                 startFace = Math.abs(random.nextInt(mSize));
             }
+
+            rotation = new Rotation(axis, direction, startFace);
+
+            // Avoid undo-ing moves
+            if (i > 0 && rotation.axis == axis && rotation.startFace == startFace &&
+                    rotation.direction != direction) {
+                i--;
+                continue;
+            }
             rotate(axis, direction, startFace);
+            mRandomizedMoves.add(rotation);
         }
 
         mMoveCount = 0;

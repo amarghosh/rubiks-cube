@@ -118,26 +118,15 @@ public class CubeFragment extends BaseFragment
 
     private void solve() {
         ImageButton btn = (ImageButton)findViewById(R.id.solveButton);
-        if (mCube.getState() == RubiksCube.CubeState.IDLE) {
-            int solveRet = mCube.solve();
-            if (solveRet == 0) {
-                btn = (ImageButton)findViewById(R.id.randomizeButton);
-                btn.setEnabled(false);
-            }
-        } else if (mCube.getState() == RubiksCube.CubeState.SOLVING) {
-            mCube.cancelSolving();
-            showToast("Cancelled solving");
-            btn = (ImageButton)findViewById(R.id.randomizeButton);
-            btn.setEnabled(true);
-        }
+        mCube.helpMe();
+        mGameInProgress = false;
     }
 
     private void randomizeOnclick() {
         if (mCube.getState() != RubiksCube.CubeState.IDLE) {
             return;
         }
-        mCube.reset();
-        mCube.randomize(scrambleCount());
+        mCube.newGame(scrambleCount());
         updateCount();
         mGameInProgress = true;
     }
