@@ -103,7 +103,7 @@ public class CubeFragment extends BaseFragment
         } else {
             mCube = new RubiksCube(cubeSizeX(), cubeSizeY(), cubeSizeZ());
         }
-        mCube.setSpeed(0);
+        mCube.setSpeed(getSpeed());
         mCube.setListener(this);
         mRubikView.setCube(mCube);
         if (cubeState() != null)

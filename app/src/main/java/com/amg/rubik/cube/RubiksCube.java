@@ -35,7 +35,7 @@ import com.amg.rubik.graphics.Direction;
 
 public class RubiksCube extends Cube {
 
-    static final String tag = "rubik-cube";
+    private static final String tag = "rubik-cube";
 
     // Default value for incrementing angle during rotation
     static final float ANGLE_DELTA_SLOW = 2f;
@@ -490,7 +490,7 @@ public class RubiksCube extends Cube {
     private int mSpeed = MEDIUM;
     private float mAngleDelta = ANGLE_DELTA_NORMAL;
     public void setSpeed(int speed) {
-        mSpeed = MEDIUM;
+        mSpeed = speed;
         switch (speed) {
             case FAST:
                 mAngleDelta = ANGLE_DELTA_FAST; break;

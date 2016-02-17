@@ -18,6 +18,8 @@ import com.amg.rubik.graphics.Axis;
  * */
 public class RubiksCube3x3x3 extends RubiksCube {
 
+    private static final String tag = "rubik-3x3x3";
+
     enum SolveState {
         None,
         FirstFaceCross,

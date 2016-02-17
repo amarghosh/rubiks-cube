@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * rather than using it directly.
  */
 public class Cube {
-    private static final String tag = "rubik-abstract";
+    private static final String tag = "rubik-struct";
 
     // Do not change these values. They are used in many places.
     public static final int FACE_FRONT = 0;
