@@ -1,5 +1,5 @@
 # Rubiks Cube
-This is an android app for playing with Rubiks cube and its various derivatives like Rubiks revenge (4x4x4), Professor's cube (5x5x5), and other random permutations like 2x3x4. Main features are listed below. Not that all of these are implemented; some are work in progress and few others are wishlist.
+This is an android app for playing with Rubiks cube and its various derivatives like Rubiks revenge (4x4x4), Professor's cube (5x5x5), and other random permutations like 2x3x4. Main features are listed below. Not all of these are implemented; some are work in progress and few others are just wishlist.
   - Basic functionalities
     - [x] Control the cube by touching/swiping on its faces
     - [x] Rotate the cube as a whole, rotate individual faces
