@@ -97,10 +97,11 @@ public class CubeFragment extends BaseFragment
     }
 
     private void createCube() {
-        if (cubeSize() == 3) {
+        if (cubeSizeX() == cubeSizeY() && cubeSizeY() == cubeSizeZ() &&
+                cubeSizeZ() == 3) {
             mCube = new RubiksCube3x3x3();
         } else {
-            mCube = new RubiksCube(cubeSize());
+            mCube = new RubiksCube(cubeSizeX(), cubeSizeY(), cubeSizeZ());
         }
         mCube.setSpeed(getSpeed());
         mCube.setListener(this);

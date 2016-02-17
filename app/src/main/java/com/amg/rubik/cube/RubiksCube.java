@@ -1,6 +1,5 @@
 package com.amg.rubik.cube;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -36,7 +35,7 @@ import com.amg.rubik.graphics.Direction;
 
 public class RubiksCube extends Cube {
 
-    static final String tag = "rubik-cube";
+    private static final String tag = "rubik-cube";
 
     // Default value for incrementing angle during rotation
     static final float ANGLE_DELTA_SLOW = 2f;
@@ -90,8 +89,7 @@ public class RubiksCube extends Cube {
 
     private CubeRenderer mRenderer;
 
-    public RubiksCube(int size) {
-        super(size);
+    private void init() {
         mCurrentAlgo = null;
         mRotation = new Rotation();
         mUndoStack = new ArrayList<>();
@@ -99,17 +97,28 @@ public class RubiksCube extends Cube {
         mMoveCount = 0;
     }
 
+    public RubiksCube(int x, int y, int z) {
+        super(x, y, z);
+        init();
+    }
+
+    public RubiksCube(int size) {
+        super(size, size, size);
+        init();
+    }
+
     public void setRenderer(CubeRenderer renderer) {
         mRenderer = renderer;
     }
 
     public void restoreColors(String colors) {
-        int expectedLength = FACE_COUNT * mSize * mSize;
-        if (colors.length() != expectedLength) {
-            throw new InvalidParameterException(
-                    String.format("Squares: Expected %d for size %d, got %d",
-                            expectedLength, mSize, colors.length()));
-        }
+        // TODO:
+//        int expectedLength = FACE_COUNT * mCubeSize * mCubeSize;
+//        if (colors.length() != expectedLength) {
+//            throw new InvalidParameterException(
+//                    String.format("Squares: Expected %d for size %d, got %d",
+//                            expectedLength, mCubeSize, colors.length()));
+//        }
     }
 
     /**
@@ -146,15 +155,10 @@ public class RubiksCube extends Cube {
      * Rotate randomly for @count moves. This function just updates the state instantaneously
      * without animating the rotations
      *
-     * Even sized cubes do not have a fixed center piece per face as the center itself consists of
-     * multiple pieces. Odd cubes on the other hand, have a fixed center color for each face.
-     * Most algorithms on solving 3x3 cubes avoid rotating the middle piece as that changes the
-     * perceived orientation of the cube. So we also refrain from rotating such layers in odd cubes.
-     *
      * @see public void randomize()
      * */
     public void randomize(int count) {
-        Rotation rotation;
+        Rotation rotation = null;
         Random random = new Random();
         Axis[] axes = new Axis[] {Axis.X_AXIS, Axis.Y_AXIS, Axis.Z_AXIS};
         mRandomizedMoves.clear();
@@ -163,18 +167,8 @@ public class RubiksCube extends Cube {
             Axis axis = axes[Math.abs(random.nextInt(3))];
             Direction direction = random.nextBoolean() ?
                     Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
-            int startFace = 0;
-
-            if (mSize != 1 && mSize % 2 == 1) {
-                startFace = Math.abs(random.nextInt(mSize - 1));
-                if (startFace >= mSize / 2) {
-                    startFace++;
-                }
-            } else {
-                startFace = Math.abs(random.nextInt(mSize));
-            }
-
-            rotation = new Rotation(axis, direction, startFace);
+            int size = getAxisSize(axis);
+            int startFace = Math.abs(random.nextInt(size));
 
             // Avoid undo-ing moves
             if (i > 0 && rotation.axis == axis && rotation.startFace == startFace &&
@@ -182,6 +176,7 @@ public class RubiksCube extends Cube {
                 i--;
                 continue;
             }
+            rotation = new Rotation(axis, direction, startFace);
             rotate(axis, direction, startFace);
             mRandomizedMoves.add(rotation);
         }
@@ -231,11 +226,7 @@ public class RubiksCube extends Cube {
     }
 
     public int solve() {
-        if (mSize == 1) {
-            sendMessage("That was easy..!");
-        } else {
-            sendMessage("Robots can solve only 3x3 cubes right now");
-        }
+        sendMessage("Robots can solve only 3x3 cubes right now");
         return -1;
     }
 
@@ -248,20 +239,29 @@ public class RubiksCube extends Cube {
      * the colors of squares according to the Rotation in progress.
      * */
     private void finishRotation() {
-        for (int face = mRotation.startFace;
+        /**
+         * If 90' rotation of a single face is not possible along the given axis, and we are
+         * rotating all layers along that axis, just reorient the cube.
+         * */
+        boolean symmetryFlag = isSymmetricAroundAxis(mRotation.axis);
+        if (symmetryFlag == false && mRotation.faceCount == getAxisSize(mRotation.axis)) {
+            rotate(mRotation.axis, mRotation.direction);
+        } else {
+            for (int face = mRotation.startFace;
                  face < mRotation.startFace + mRotation.faceCount;
                  face++) {
-            rotate(mRotation.axis, mRotation.direction, face);
+                rotate(mRotation.axis, mRotation.direction, face);
+            }
         }
 
         /**
          * Exclude whole cube rotations from the count
          * */
-        if (mUndoingFlag == false && mRotation.faceCount != mSize) mMoveCount++;
+        if (mUndoingFlag == false && mRotation.faceCount != getAxisSize(mRotation.axis)) mMoveCount++;
 
         if (mUndoingFlag) {
             mUndoingFlag = false;
-            if (mRotation.faceCount != mSize) mMoveCount--;
+            if (mRotation.faceCount != getAxisSize(mRotation.axis)) mMoveCount--;
         }
 
         switch (rotateMode) {
@@ -324,16 +324,8 @@ public class RubiksCube extends Cube {
         mRotation.setAxis(axes[Math.abs(random.nextInt(3))]);
         mRotation.direction = random.nextBoolean() ?
                 Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
-
-        if (mSize != 1 && mSize % 2 == 1) {
-            int startFace = Math.abs(random.nextInt(mSize - 1));
-            if (startFace >= mSize / 2) {
-                startFace++;
-            }
-            mRotation.setStartFace(startFace);
-        } else {
-            mRotation.setStartFace(Math.abs(random.nextInt(mSize)));
-        }
+        int size = getAxisSize(mRotation.axis);
+        mRotation.setStartFace(Math.abs(random.nextInt(size)));
         mRotation.start();
     }
 
@@ -353,6 +345,7 @@ public class RubiksCube extends Cube {
         }
 
         ArrayList<ArrayList<Piece>> faceList;
+        int axisSize = getAxisSize(mRotation.axis);
 
         float angle = mRotation.angle;
         float angleX = 0;
@@ -379,7 +372,7 @@ public class RubiksCube extends Cube {
         mRenderer.setRotation(0, 0, 0, 0);
         for (int i = 0; i < mRotation.startFace; i++) {
             ArrayList<Piece> pieces = faceList.get(i);
-            for (Piece piece: pieces) {
+            for (Piece piece : pieces) {
                 for (Square square : piece.mSquares) {
                     mRenderer.drawSquare(square);
                 }
@@ -389,27 +382,37 @@ public class RubiksCube extends Cube {
         mRenderer.setRotation(angle, angleX, angleY, angleZ);
         for (int i = 0; i < mRotation.faceCount; i++) {
             ArrayList<Piece> pieces = faceList.get(mRotation.startFace + i);
-            for (Piece piece: pieces) {
-                for (Square square: piece.mSquares) {
+            for (Piece piece : pieces) {
+                for (Square square : piece.mSquares) {
                     mRenderer.drawSquare(square);
                 }
             }
         }
 
         mRenderer.setRotation(0, 0, 0, 0);
-        for (int i = mRotation.startFace + mRotation.faceCount; i < mSize; i++) {
+        for (int i = mRotation.startFace + mRotation.faceCount; i < axisSize; i++) {
             ArrayList<Piece> pieces = faceList.get(i);
-            for (Piece piece: pieces) {
-                for (Square square: piece.mSquares) {
+            for (Piece piece : pieces) {
+                for (Square square : piece.mSquares) {
                     mRenderer.drawSquare(square);
                 }
             }
         }
 
-        if (Math.abs(mRotation.angle) > 89.9f) {
+        boolean symmetric = isSymmetricAroundAxis(mRotation.axis);
+        float max_angle = symmetric ? 90f : 180f;
+        if (mRotation.faceCount == axisSize) {
+            /**
+             * Even if it isn't symmetric, we can do half rotations if
+             * we are rotating the whole cube. @finishRotation takes care of this.
+             * */
+            max_angle = 90f;
+        }
+
+        if (Math.abs(mRotation.angle) > max_angle - 0.01f) {
             finishRotation();
         } else {
-            mRotation.increment(mAngleDelta);
+            mRotation.increment(mAngleDelta, max_angle);
         }
     }
 
@@ -454,9 +457,17 @@ public class RubiksCube extends Cube {
             Log.w(tag, "Cannot rotate in mode " + rotateMode);
             return;
         }
-        if (rotation.startFace + rotation.faceCount > mSize) {
-            throw new InvalidParameterException(
-                    String.format("size %d, rotation %s", mSize, rotation.toString()));
+        int size = getAxisSize(rotation.axis);
+        if (rotation.startFace + rotation.faceCount > size) {
+            /**
+             * TODO: Throw exception instead of correcting the value
+             * */
+            rotation.faceCount = size - rotation.startFace;
+//            throw new InvalidParameterException(
+//                   String.format("size %d, rotation %s", size, rotation.toString()));
+        }
+        if (rotation.startFace >= size) {
+            return;
         }
         rotateMode = RotateMode.MANUAL;
         mRotation = rotation.duplicate();
@@ -514,7 +525,7 @@ public class RubiksCube extends Cube {
     private int mSpeed = MEDIUM;
     private float mAngleDelta = ANGLE_DELTA_NORMAL;
     public void setSpeed(int speed) {
-        mSpeed = MEDIUM;
+        mSpeed = speed;
         switch (speed) {
             case FAST:
                 mAngleDelta = ANGLE_DELTA_FAST; break;
@@ -546,10 +557,14 @@ public class RubiksCube extends Cube {
     }
 
     /**
+     * TODO: Fix these functions for skewed cubes
+     * */
+
+    /**
      * Sets the color of all pieces on given side (face squares + side squares)
      * */
     public void setColor(Axis axis, int layer, int color) {
-        if (!(layer >= 0 && layer < mSize)) throw new AssertionError();
+        // if (!(layer >= 0 && layer < mSize)) throw new AssertionError();
         ArrayList<Piece> pieces;
         switch (axis) {
             case X_AXIS: pieces = mXaxisFaceList.get(layer); break;
@@ -565,27 +580,27 @@ public class RubiksCube extends Cube {
     }
 
     public void setColor(int face, int row, int column, int color) {
-        if (!(face < FACE_COUNT && row < mSize && column < mSize))
-            throw new AssertionError(String.format("%d %d %d", face, row, column));
-        mAllFaces[face].get(row * mSize + column).setColor(color);
+//        if (!(face < FACE_COUNT && row < mSize && column < mSize))
+//            throw new AssertionError(String.format("%d %d %d", face, row, column));
+//        mAllFaces[face].get(row * mSize + column).setColor(color);
     }
 
     public void setRowColor(int face, int row, int color) {
-        if (!(face < FACE_COUNT && row < mSize))
-            throw new AssertionError(String.format("%d %d", face, row));
-        ArrayList<Square> squares = mAllFaces[face];
-        for (int i = row; i < row + mSize; i++) {
-            squares.get(i).setColor(color);
-        }
+//        if (!(face < FACE_COUNT && row < mSize))
+//            throw new AssertionError(String.format("%d %d", face, row));
+//        ArrayList<Square> squares = mAllFaces[face];
+//        for (int i = row; i < row + mSize; i++) {
+//            squares.get(i).setColor(color);
+//        }
     }
 
     public void setColumnColor(int face, int column, int color) {
-        if (!(face < FACE_COUNT && column < mSize))
-            throw new AssertionError(String.format("%d %d", face, column));
-        ArrayList<Square> squares = mAllFaces[face];
-        for (int i = 0; i < mSize; i++) {
-            squares.get(i * mSize + column).setColor(color);
-        }
+//        if (!(face < FACE_COUNT && column < mSize))
+//            throw new AssertionError(String.format("%d %d", face, column));
+//        ArrayList<Square> squares = mAllFaces[face];
+//        for (int i = 0; i < mSize; i++) {
+//            squares.get(i * mSize + column).setColor(color);
+//        }
     }
 
     public void reset() {

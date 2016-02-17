@@ -1,22 +1,28 @@
 package com.amg.rubik.cube;
 
 import android.graphics.Color;
+import android.opengl.Matrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import com.amg.rubik.graphics.Axis;
 import com.amg.rubik.graphics.Point3D;
 
 public class Square {
 
     private int mFace;
-    Point3D mCenter;
+    private Point3D mCenter;
 
     private int mColor;
 
     // Our vertex buffer.
     private FloatBuffer mVertexBuffer;
+
+    public void setFace(int face) {
+        this.mFace = face;
+    }
 
     public int getFace() {
         return mFace;
@@ -78,5 +84,36 @@ public class Square {
 
     public void setColor(int value) {
         mColor = value;
+    }
+
+    public void rotateCoordinates(float[] rotmatrix) {
+        float[] coords = new float[12];
+        mVertexBuffer.get(coords);
+        mVertexBuffer.clear();
+        float[] resmatrix = new float[4];
+        float[] input_matrix = new float[4];
+
+        for (int i = 0; i < 4; i++) {
+            input_matrix[0] = coords[i*3];
+            input_matrix[1] = coords[i*3 + 1];
+            input_matrix[2] = coords[i*3 + 2];
+            Matrix.multiplyMV(resmatrix, 0, rotmatrix, 0, input_matrix, 0);
+            mVertexBuffer.put(resmatrix[0]);
+            mVertexBuffer.put(resmatrix[1]);
+            mVertexBuffer.put(resmatrix[2]);
+        }
+        mVertexBuffer.position(0);
+    }
+
+    public void rotateCoordinates(Axis axis, int angle) {
+        int x = 0, y = 0, z = 0;
+        switch (axis) {
+            case X_AXIS: x = 1; break;
+            case Y_AXIS: y = 1; break;
+            case Z_AXIS: z = 1; break;
+        }
+        float[] rotmatrix = new float[16];
+        Matrix.setRotateM(rotmatrix, 0, angle, x, y, z);
+        rotateCoordinates(rotmatrix);
     }
 }

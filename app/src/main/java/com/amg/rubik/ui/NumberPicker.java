@@ -18,7 +18,7 @@ public class NumberPicker extends FrameLayout implements View.OnClickListener {
     private static final String tag = "rubik-numpicker";
 
     public interface ValueChangedListener {
-        void onValueChanged(int value);
+        void onValueChanged(int id, int value);
     }
 
     private int mIncrementColor = Color.BLUE;
@@ -144,7 +144,7 @@ public class NumberPicker extends FrameLayout implements View.OnClickListener {
         Log.w(tag, "value " + mValue);
         textView.setText(String.valueOf(mValue));
         if (mListener != null) {
-            mListener.onValueChanged(mValue);
+            mListener.onValueChanged(getId(), mValue);
         }
     }
 

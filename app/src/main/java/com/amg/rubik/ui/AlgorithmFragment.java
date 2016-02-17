@@ -46,11 +46,11 @@ public class AlgorithmFragment extends BaseFragment {
     }
 
     private void createCube() {
-        int size = cubeSize();
-        if (cubeSize() == 3) {
+        int size = cubeSizeX();
+        if (cubeSizeX() == 3) {
             mCube = new RubiksCube3x3x3();
         } else {
-            mCube = new RubiksCube(cubeSize());
+            mCube = new RubiksCube(cubeSizeX());
         }
         mCube.setColor(Color.GRAY);
         mCube.setColor(RubiksCube.FACE_TOP, Color.WHITE);

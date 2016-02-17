@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amg.rubik.Constants;
@@ -19,7 +18,9 @@ public class SettingsFragment extends BaseFragment {
     private static final int MIN_CUBE_SIZE = 1;
     private static final int MAX_CUBE_SIZE = 9;
 
-    private NumberPicker cubeSizePicker;
+    private NumberPicker cubeSizePickerX;
+    private NumberPicker cubeSizePickerY;
+    private NumberPicker cubeSizePickerZ;
     private NumberPicker scramblingCountPicker;
     private Spinner speedSpinner;
 
@@ -32,16 +33,37 @@ public class SettingsFragment extends BaseFragment {
         return mRootView;
     }
 
-    private void initUI() {
-        cubeSizePicker = (NumberPicker)findViewById(R.id.cube_size);
-        cubeSizePicker.setValue(cubeSize());
-        cubeSizePicker.setValueChangedListener(new NumberPicker.ValueChangedListener() {
+    private void initNP() {
+        cubeSizePickerX = (NumberPicker)findViewById(R.id.cube_size_x);
+        cubeSizePickerX.setValue(cubeSizeX());
+        cubeSizePickerX.setValueChangedListener(new NumberPicker.ValueChangedListener() {
             @Override
-            public void onValueChanged(int value) {
-                onCubeSizeChanged(value);
+            public void onValueChanged(int id, int value) {
+                onCubeSizeChanged(id, value);
             }
         });
 
+        cubeSizePickerY = (NumberPicker)findViewById(R.id.cube_size_y);
+        cubeSizePickerY.setValue(cubeSizeY());
+        cubeSizePickerY.setValueChangedListener(new NumberPicker.ValueChangedListener() {
+            @Override
+            public void onValueChanged(int id, int value) {
+                onCubeSizeChanged(id, value);
+            }
+        });
+
+        cubeSizePickerZ = (NumberPicker)findViewById(R.id.cube_size_z);
+        cubeSizePickerZ.setValue(cubeSizeZ());
+        cubeSizePickerZ.setValueChangedListener(new NumberPicker.ValueChangedListener() {
+            @Override
+            public void onValueChanged(int id, int value) {
+                onCubeSizeChanged(id, value);
+            }
+        });
+    }
+
+    private void initUI() {
+        initNP();
         speedSpinner = (Spinner)findViewById(R.id.speed_spinner);
         speedSpinner.setSelection(getSpeed());
         speedSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -60,7 +82,7 @@ public class SettingsFragment extends BaseFragment {
         scramblingCountPicker.setValue(scrambleCount());
         scramblingCountPicker.setValueChangedListener(new NumberPicker.ValueChangedListener() {
             @Override
-            public void onValueChanged(int value) {
+            public void onValueChanged(int id, int value) {
                 setScrambleCount(value);
             }
         });
@@ -71,12 +93,14 @@ public class SettingsFragment extends BaseFragment {
 
     private void reset() {
         // Reset values
-        setCubeSize(Constants.DEFAULT_CUBE_SIZE);
+        setCubeSizeX(Constants.DEFAULT_CUBE_SIZE);
         setScrambleCount(Constants.DEFAULT_SCRAMBLE_COUNT);
         setSpeed(Constants.DEFAULT_SPEED_INDEX);
 
         // Update UI
-        cubeSizePicker.setValue(cubeSize());
+        cubeSizePickerX.setValue(cubeSizeX());
+        cubeSizePickerY.setValue(cubeSizeY());
+        cubeSizePickerZ.setValue(cubeSizeZ());
         scramblingCountPicker.setValue(scrambleCount());
         speedSpinner.setSelection(getSpeed(), true);
     }
@@ -103,11 +127,16 @@ public class SettingsFragment extends BaseFragment {
         }
     }
 
-    private void onCubeSizeChanged(int size) {
+    private void onCubeSizeChanged(int id, int size) {
         if (size > MAX_CUBE_SIZE) {
             Toast.makeText(getActivity(),
                     "Big cubes may not be rendered properly", Toast.LENGTH_SHORT).show();
         }
-        setCubeSize(size);
+        if (id == R.id.cube_size_x)
+            setCubeSizeX(size);
+        else if (id == R.id.cube_size_y)
+            setCubeSizeY(size);
+        else
+            setCubeSizeZ(size);
     }
 }
