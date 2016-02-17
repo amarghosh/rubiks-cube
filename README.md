@@ -1,25 +1,22 @@
 # Rubiks Cube
-This is an android app for playing with Rubiks cube. It uses OpenGL for drawing and animating the cube. Planned features include:
+This is an android app for playing with Rubiks cube and its various derivatives like Rubiks revenge (4x4x4), Professor's cube (5x5x5), and other random permutations like 2x3x4. Main features are listed below. Not that all of these are implemented; some are work in progress and few others are wishlist.
   - Basic functionalities
-    - [x] Rotate the cube as a whole to see the overall state
-    - [x] Rotate individual faces (using dedicated buttons)
+    - [x] Control the cube by touching/swiping on its faces
+    - [x] Rotate the cube as a whole, rotate individual faces
+    - [x] Handle cuboid puzzles like 2x3x4, apart from the regular NxNxN cubes
+    - [x] Start a new game where cube is scrambled N times
     - [x] Undo moves
     - [x] Detect if the cube is solved yet
-    - [x] Control the cube by touching/swiping on its faces
+    - [x] If user gives up, reveal the solution (retraces the original moves in reverse order)
+        - Partially done. User should be able to go through the steps one by one.
     - [ ] Publish beta version on Play store
   - Algorithms
-    - Add a page to show basic algorithms
-    - Apply an algo on the current cube
-    - Support user defined algorithms
+    - [ ] Add a page to show basic algorithms
+    - [ ] Apply an algo on the current cube
+    - [ ] Support user defined algorithms
   - Solve cubes programmatically
-    - [x] Solve a scrambled 3x3 cube
     - [ ] Let the user specify the state of a scrambled cube
-    - [ ] Read cube colors using the camera
+    - [x] Solve a scrambled 3x3x3 cube (UI not available as of now)
+    - [ ] Read cube colors using the camera!
     - [ ] User should be able to trace through the steps
-    - [ ] Handle non-standard cubes (deviations from the default color scheme)
     - Higher order cubes use the logic of 3x3 cube. Current solution is not reusable.
-  - Bigger cubes like rubik's revenge etc
-    - The code support bigger cubes, but needs more testing
-    - And I am not familiar with cubes bigger than 4x4 in real life
-  - How about skewed puzzles like 3x3x2 etc?
-    - Current code does not support them
