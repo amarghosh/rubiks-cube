@@ -55,14 +55,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/abc_text_size_title_material"
-                    android:text="@string/auto_solve"/>
+                    android:text="@string/giveup"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/auto_solve_details"
+                    android:text="@string/giveup_details"
                     />
-
             </LinearLayout>
 
         </LinearLayout>
@@ -93,6 +92,39 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/rotate_mode_details"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/abc_text_size_title_material"
+            android:text="@string/help_title_mycube"
+            android:layout_marginTop="5dp"
+            />
+
+        <LinearLayout style="@style/help_row">
+
+            <ImageView
+                style="@style/help_left_col"
+                android:src="@mipmap/ic_solved_cube"
+                />
+
+            <LinearLayout style="@style/help_right_col">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/abc_text_size_title_material"
+                    android:text="@string/auto_solve"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/auto_solve_details"
                     />
 
             </LinearLayout>

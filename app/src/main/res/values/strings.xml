@@ -60,7 +60,13 @@
         Starts a new game. The number of initial rotations can be modified from the settings page
     </string>
 
-    <string name="auto_solve">Let the app solve it</string>
+    <string name="giveup">Some help, please!</string>
+    <string name="giveup_details">
+        Rolls back all moves made by the user so as to bring the cube back to its initial state, and
+        plays back the moves made during original scrambling to reveal the solution.
+    </string>
+
+    <string name="auto_solve">Solve it</string>
     <string name="auto_solve_details">The &quot;app&quot; uses a naive algorithm to solve the cube.
         It takes more steps than necessary. Currently only 3x3x3 is supported.
     </string>
@@ -69,4 +75,6 @@
     <string name="rotate_mode_details">
         Toggle between rotating the whole cube or the touched face
     </string>
+
+    <string name="help_title_mycube">My cube page</string>
 </resources>
