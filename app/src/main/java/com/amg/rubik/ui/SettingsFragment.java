@@ -94,6 +94,8 @@ public class SettingsFragment extends BaseFragment {
     private void reset() {
         // Reset values
         setCubeSizeX(Constants.DEFAULT_CUBE_SIZE);
+        setCubeSizeY(Constants.DEFAULT_CUBE_SIZE);
+        setCubeSizeZ(Constants.DEFAULT_CUBE_SIZE);
         setScrambleCount(Constants.DEFAULT_SCRAMBLE_COUNT);
         setSpeed(Constants.DEFAULT_SPEED_INDEX);
 

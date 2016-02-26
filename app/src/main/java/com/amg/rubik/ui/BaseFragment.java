@@ -118,6 +118,13 @@ public abstract class BaseFragment extends Fragment
         boolean isDirty = false;
         int size = mPref.getInt(Constants.CUBE_SIZEX, Constants.DEFAULT_CUBE_SIZE);
         isDirty = size != mCubeSize_X;
+
+        size = mPref.getInt(Constants.CUBE_SIZEY, Constants.DEFAULT_CUBE_SIZE);
+        isDirty |= size != mCubeSize_Y;
+
+        size = mPref.getInt(Constants.CUBE_SIZEZ, Constants.DEFAULT_CUBE_SIZE);
+        isDirty |= size != mCubeSize_Z;
+
         int scrCount = mPref.getInt(Constants.SCRAMBLE_COUNT, Constants.DEFAULT_SCRAMBLE_COUNT);
         isDirty |= scrCount != mScrambleCount;
 
@@ -135,7 +142,8 @@ public abstract class BaseFragment extends Fragment
     }
 
     private void updateParams() {
-        Log.w(tag, String.format("Saving cube size %d", mCubeSize_X));
+        Log.w(tag, String.format("Saving cube size %d %d %d",
+                mCubeSize_X, mCubeSize_Y, mCubeSize_Z));
         SharedPreferences.Editor editor = mPref.edit();
         editor.putInt(Constants.CUBE_SIZEX, mCubeSize_X);
         editor.putInt(Constants.CUBE_SIZEY, mCubeSize_Y);
