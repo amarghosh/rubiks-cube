@@ -907,6 +907,21 @@ public class Cube {
     }
 
     private static void skewedRotateFaceColors(ArrayList<Square> squares, int w, int h) {
+        /**
+         * If its a single row/column, just reverse the list.
+         * */
+        if (w == 1 || h == 1) {
+            int len = Math.max(w, h);
+            for (int i = 0; i < len / 2; i++) {
+                Square src = squares.get(i);
+                Square dst = squares.get(len - 1 - i);
+                int color = src.getColor();
+                src.setColor(dst.getColor());
+                dst.setColor(color);
+            }
+            return;
+        }
+
         for (int i = 0; i < w - 1; i++) {
             Square src = squares.get(i);
             Square dst = squares.get(w*h - 1 - i);
