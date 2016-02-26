@@ -474,6 +474,9 @@ public class Cube {
                 if (j == 0) {
                     squares.add(mBackSquares.get(mSizeX * (i + 1) - 1));
                 }
+                if (mSizeX == 1) {
+                    squares.add(mRightSquares.get((i + 1) * mSizeZ - 1 - j));
+                }
                 leftFace.add(createPieceWithSquares(squares, type));
             }
         }
@@ -516,6 +519,9 @@ public class Cube {
                 if (i == mSizeZ - 1) {
                     squares.add(mBackSquares.get(mSizeX * (mSizeY - 1) + mSizeX - 1 - j));
                 }
+                if (mSizeY == 1) {
+                    squares.add(mTopSquares.get((mSizeZ - 1 - i) * mSizeX + j));
+                }
                 bottomFace.add(createPieceWithSquares(squares, type));
             }
         }
@@ -537,6 +543,9 @@ public class Cube {
                 }
                 type = getPieceType(i, j, mSizeY, mSizeX);
                 squares.add(mBackSquares.get(i * mSizeX + j));
+                if (mSizeZ == 1) {
+                    squares.add(mFrontSquares.get((i + 1)  * mSizeX - 1 - j));
+                }
                 backFace.add(createPieceWithSquares(squares, type));
             }
         }
@@ -597,6 +606,7 @@ public class Cube {
             mZaxisFaceList.add(pieces);
         }
         mZaxisFaceList.add(frontFace);
+        Log.w(tag, "total pieces: " + mAllPieces.size());
     }
 
     /**
