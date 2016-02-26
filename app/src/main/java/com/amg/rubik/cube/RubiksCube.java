@@ -383,34 +383,40 @@ public class RubiksCube extends Cube {
                 throw new RuntimeException("What is " + mRotation.axis);
         }
 
-        mRenderer.setRotation(0, 0, 0, 0);
-        for (int i = 0; i < mRotation.startFace; i++) {
-            ArrayList<Piece> pieces = faceList.get(i);
-            for (Piece piece : pieces) {
-                for (Square square : piece.mSquares) {
-                    mRenderer.drawSquare(square);
+        try {
+            mRenderer.setRotation(0, 0, 0, 0);
+            for (int i = 0; i < mRotation.startFace; i++) {
+                ArrayList<Piece> pieces = faceList.get(i);
+                for (Piece piece : pieces) {
+                    for (Square square : piece.mSquares) {
+                        mRenderer.drawSquare(square);
+                    }
                 }
             }
-        }
 
-        mRenderer.setRotation(angle, angleX, angleY, angleZ);
-        for (int i = 0; i < mRotation.faceCount; i++) {
-            ArrayList<Piece> pieces = faceList.get(mRotation.startFace + i);
-            for (Piece piece : pieces) {
-                for (Square square : piece.mSquares) {
-                    mRenderer.drawSquare(square);
+            mRenderer.setRotation(angle, angleX, angleY, angleZ);
+            for (int i = 0; i < mRotation.faceCount; i++) {
+                ArrayList<Piece> pieces = faceList.get(mRotation.startFace + i);
+                for (Piece piece : pieces) {
+                    for (Square square : piece.mSquares) {
+                        mRenderer.drawSquare(square);
+                    }
                 }
             }
-        }
 
-        mRenderer.setRotation(0, 0, 0, 0);
-        for (int i = mRotation.startFace + mRotation.faceCount; i < axisSize; i++) {
-            ArrayList<Piece> pieces = faceList.get(i);
-            for (Piece piece : pieces) {
-                for (Square square : piece.mSquares) {
-                    mRenderer.drawSquare(square);
+            mRenderer.setRotation(0, 0, 0, 0);
+            for (int i = mRotation.startFace + mRotation.faceCount; i < axisSize; i++) {
+                ArrayList<Piece> pieces = faceList.get(i);
+                for (Piece piece : pieces) {
+                    for (Square square : piece.mSquares) {
+                        mRenderer.drawSquare(square);
+                    }
                 }
             }
+        } catch(Exception e) {
+            Log.e(tag, String.format("Exc in rot %s for sizes %d %d %d",
+                    mRotation.toString(), getSizeX(), getSizeY(), getSizeY()));
+            throw e;
         }
 
         boolean symmetric = isSymmetricAroundAxis(mRotation.axis);

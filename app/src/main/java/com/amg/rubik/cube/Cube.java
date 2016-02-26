@@ -777,7 +777,10 @@ public class Cube {
      * */
     protected void rotate(Axis axis, Direction direction, int face) {
         int maxSize = getAxisSize(axis);
-        if (face >= maxSize) throw new AssertionError();
+        if (face >= maxSize) {
+            throw new AssertionError(String.format("face mismsatch %d %d %d: axis %s, face %d",
+                    mSizeX, mSizeY, mSizeZ, axis.toString(), face));
+        }
 
         int w = 0, h = 0;
 
