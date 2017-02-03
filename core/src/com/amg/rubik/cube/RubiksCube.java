@@ -1,10 +1,11 @@
 package com.amg.rubik.cube;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.StringTokenizer;
 
-import android.util.Log;
-
+import com.amg.rubik.Log;
 import com.amg.rubik.graphics.Axis;
 import com.amg.rubik.graphics.CubeRenderer;
 import com.amg.rubik.graphics.Direction;
@@ -369,15 +370,15 @@ public class RubiksCube extends Cube {
         switch (mRotation.axis) {
             case X_AXIS:
                 angleX = 1;
-                faceList = mXaxisFaceList;
+                faceList = mXaxisLayers;
                 break;
             case Y_AXIS:
                 angleY = 1;
-                faceList = mYaxisFaceList;
+                faceList = mYaxisLayers;
                 break;
             case Z_AXIS:
                 angleZ = 1;
-                faceList = mZaxisFaceList;
+                faceList = mZaxisLayers;
                 break;
             default:
                 throw new RuntimeException("What is " + mRotation.axis);
@@ -588,9 +589,9 @@ public class RubiksCube extends Cube {
         // if (!(layer >= 0 && layer < mSize)) throw new AssertionError();
         ArrayList<Piece> pieces;
         switch (axis) {
-            case X_AXIS: pieces = mXaxisFaceList.get(layer); break;
-            case Y_AXIS: pieces = mYaxisFaceList.get(layer); break;
-            case Z_AXIS: pieces = mZaxisFaceList.get(layer); break;
+            case X_AXIS: pieces = mXaxisLayers.get(layer); break;
+            case Y_AXIS: pieces = mYaxisLayers.get(layer); break;
+            case Z_AXIS: pieces = mZaxisLayers.get(layer); break;
             default:throw new AssertionError();
         }
         for (Piece p: pieces) {
@@ -639,7 +640,101 @@ public class RubiksCube extends Cube {
         mMoveCount = 0;
     }
 
+    public ArrayList<Square> getSquares() {
+        return mAllSquares;
+    }
+
     public int getMoveCount() {
         return mMoveCount;
+    }
+
+    /***
+     * - User swipes across the cube for playing.
+     * - Only one layer is rotated at a time.
+     * - The layer is identified from the first and last squares touched by the user.
+     * - The direction is estimated from the order of these squares.
+     * - The indices correspond to the mAllSquares array, returned by getSquares()
+     * */
+    public void tryRotate(int startIndex, int endIndex) {
+        if (startIndex < 0 || startIndex >= mAllSquares.size() ||
+                endIndex < 0 || endIndex >= mAllSquares.size()) {
+            throw new InvalidParameterException(String.format("Index values: %d, %d (max %d)",
+                    startIndex, endIndex, mAllSquares.size()));
+        }
+        final Square firstSquare = mAllSquares.get(startIndex);
+        final Square lastSquare = mAllSquares.get(endIndex);
+        int firstFace = getFaceFromSquare(firstSquare);
+        int lastFace = getFaceFromSquare(lastSquare);
+        if (firstFace == lastFace) {
+            Log.w(tag, "drag started and ended in the same face");
+            return;
+        }
+        Axis axis;
+
+        // figure out the axis of rotation
+        if (firstFace != FACE_TOP && firstFace != FACE_BOTTOM &&
+                lastFace != FACE_TOP && lastFace != FACE_BOTTOM) {
+            axis = Axis.Y_AXIS;
+        } else if (firstFace != FACE_BACK && firstFace != FACE_FRONT &&
+                lastFace != FACE_BACK && lastFace != FACE_FRONT) {
+            axis = Axis.Z_AXIS;
+        } else {
+            axis = Axis.X_AXIS;
+        }
+
+        /***
+         * Find the direction.
+         * 1. Find the index of faces in a clockwise ordered list of faces along the current axis
+         * 2. If the indices are in ascending order, rotate clockwise except when they differ by 3
+         *    Three clockwise rotations = one ccw rotation
+         * */
+        int firstIndex = -1, lastIndex = -1;
+        int faces[] = Cube.getOrderedFaces(axis);
+        for (int i = 0; i < faces.length; i++) {
+            if (firstFace == faces[i]) firstIndex = i;
+            if (lastFace == faces[i]) lastIndex = i;
+        }
+
+        if (firstIndex < 0 || lastIndex < 0)
+            throw new InvalidParameterException(
+                    String.format("Indices: %d, %d (faces %d, %d, axis %d)",
+                    firstIndex, lastIndex, firstFace, lastFace, axis));
+
+        Direction direction = Direction.CLOCKWISE;
+        if ((lastIndex - firstIndex == CUBE_SIDES - 1) ||
+                (firstIndex > lastIndex && firstIndex - lastIndex != CUBE_SIDES - 1)) {
+            direction = Direction.COUNTER_CLOCKWISE;
+        }
+
+        // Select the layer
+        int layer = findLayerToRotate(axis, firstFace, firstSquare);
+        rotate(new Rotation(axis, direction, layer));
+    }
+
+    private int findLayerToRotate(Axis axis, int face, Square key) {
+        int index = 0;
+        ArrayList<ArrayList<Piece>> layers;
+        switch (axis) {
+            case X_AXIS: layers = mXaxisLayers; break;
+            case Y_AXIS: layers = mYaxisLayers; break;
+            default: layers = mZaxisLayers;
+        }
+        for (int i = 0; i < layers.size(); i++) {
+            ArrayList<Piece> layer = layers.get(i);
+            for (int j = 0; j < layer.size(); j++) {
+                Piece piece = layer.get(j);
+                index = piece.mSquares.indexOf(key);
+                if (index != -1) return i;
+            }
+        }
+        throw new InvalidParameterException(
+                String.format("Unreachable: Axis %s, face %d", axis.name(), face));
+    }
+
+    private int getFaceFromSquare(Square square) {
+        for (int i = 0; i < mAllFaces.length; i++) {
+            if (mAllFaces[i].contains(square)) return i;
+        }
+        throw new InvalidParameterException("Square not found");
     }
 }

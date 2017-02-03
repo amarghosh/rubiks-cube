@@ -1,24 +1,27 @@
 package com.amg.rubik.cube;
 
-import android.graphics.Color;
-import android.opengl.Matrix;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 
 import com.amg.rubik.graphics.Axis;
 import com.amg.rubik.graphics.Point3D;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 
 public class Square {
+    private static final String tag = "rubik-square";
 
     private int mFace;
     private Point3D mCenter;
-
     private int mColor;
+    ModelInstance instance;
+    Model model;
 
-    // Our vertex buffer.
-    private FloatBuffer mVertexBuffer;
 
     public void setFace(int face) {
         this.mFace = face;
@@ -40,25 +43,44 @@ public class Square {
         return mCenter;
     }
 
+    private Vector3 centerVector = new Vector3();
+    private float _radius;
+
     public Square(float[] vertices) {
-        this(vertices, Color.GRAY);
+        this(vertices, Cube.Color_GRAY);
     }
 
     private void init(float[] vertices, int color, int face) {
-        // a float is 4 bytes, therefore we multiply the number if
-        // vertices with 4.
-        ByteBuffer vbb = ByteBuffer.allocateDirect(vertices.length * 4);
-        vbb.order(ByteOrder.nativeOrder());
-        mVertexBuffer = vbb.asFloatBuffer();
-        mVertexBuffer.put(vertices);
-        mVertexBuffer.position(0);
+        ModelBuilder builder = new ModelBuilder();
+        Material material = new Material(ColorAttribute.createDiffuse(new Color(color)));
+        model = builder.createRect(
+                vertices[0], vertices[1], vertices[2],
+                vertices[3], vertices[4], vertices[5],
+                vertices[6], vertices[7], vertices[8],
+                vertices[9], vertices[10], vertices[11],
+                0, 0, 0, material, VertexAttributes.Usage.Position
+        );
+        instance = new ModelInstance(model);
         mColor = color;
         mFace = face;
         mCenter = new Point3D();
         mCenter.setX((vertices[0] + vertices[3] + vertices[6] + vertices[9]) / 4);
         mCenter.setY((vertices[1] + vertices[4] + vertices[7] + vertices[10]) / 4);
         mCenter.setZ((vertices[2] + vertices[5] + vertices[8] + vertices[11]) / 4);
+
+        BoundingBox box = new BoundingBox();
+        Vector3 dimensions = new Vector3();
+        instance.calculateBoundingBox(box);
+        box.getCenter(centerVector);
+        box.getDimensions(dimensions);
+        _radius = dimensions.len() / 2f;
     }
+
+    public Vector3 center() {
+        return centerVector;
+    }
+
+    public float radius() { return _radius; }
 
     public Square(Point3D[] points, int color) {
         float[] vertices = new float[points.length * 3]; // x, y, z
@@ -70,8 +92,8 @@ public class Square {
         init(vertices, color, -1);
     }
 
-    public FloatBuffer vertexBuffer() {
-        return mVertexBuffer;
+    public ModelInstance getModelInstance() {
+        return instance;
     }
 
     public String colorName() {
@@ -83,26 +105,13 @@ public class Square {
     }
 
     public void setColor(int value) {
+        if (value == mColor) return;
         mColor = value;
+        instance.materials.get(0).set(ColorAttribute.createDiffuse(new Color(value)));
     }
 
-    public void rotateCoordinates(float[] rotmatrix) {
-        float[] coords = new float[12];
-        mVertexBuffer.get(coords);
-        mVertexBuffer.clear();
-        float[] resmatrix = new float[4];
-        float[] input_matrix = new float[4];
-
-        for (int i = 0; i < 4; i++) {
-            input_matrix[0] = coords[i*3];
-            input_matrix[1] = coords[i*3 + 1];
-            input_matrix[2] = coords[i*3 + 2];
-            Matrix.multiplyMV(resmatrix, 0, rotmatrix, 0, input_matrix, 0);
-            mVertexBuffer.put(resmatrix[0]);
-            mVertexBuffer.put(resmatrix[1]);
-            mVertexBuffer.put(resmatrix[2]);
-        }
-        mVertexBuffer.position(0);
+    public void rotateCoordinates(float x, float y, float z, int degrees) {
+        instance.transform.setToRotation(x, y, z, degrees);
     }
 
     public void rotateCoordinates(Axis axis, int angle) {
@@ -112,8 +121,6 @@ public class Square {
             case Y_AXIS: y = 1; break;
             case Z_AXIS: z = 1; break;
         }
-        float[] rotmatrix = new float[16];
-        Matrix.setRotateM(rotmatrix, 0, angle, x, y, z);
-        rotateCoordinates(rotmatrix);
+        rotateCoordinates(x, y, z, angle);
     }
 }

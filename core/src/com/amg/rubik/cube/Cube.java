@@ -1,9 +1,6 @@
 package com.amg.rubik.cube;
 
-import android.graphics.Color;
-import android.opengl.Matrix;
-import android.util.Log;
-
+import com.amg.rubik.Log;
 import com.amg.rubik.graphics.Axis;
 import com.amg.rubik.graphics.Direction;
 
@@ -29,16 +26,21 @@ public class Cube {
 
     /**
      * Default colors don't look nice on cube.
+     * Note: Colors are in RBGA (for libgdx)
      * */
-    public static final int Color_RED = 0xFFDD2211;
-    public static final int Color_GREEN = 0xFF22DD11;
-    public static final int Color_ORANGE = 0xFFFF7F10;
+    public static final int Color_RED = 0xDD2211FF;
+    public static final int Color_GREEN = 0x22DD11FF;
+    public static final int Color_ORANGE = 0xFF7F10FF;
+    public static final int Color_WHITE = 0xFFFFFFFF;
+    public static final int Color_YELLOW = 0xFFFF00FF;
+    public static final int Color_BLUE = 0x0000FFFF;
+    public static final int Color_GRAY = 0x7F7F7FFF;
 
-    public static int COLOR_TOP = Color.WHITE;
-    public static int COLOR_BOTTOM = Color.YELLOW;
+    public static int COLOR_TOP = Color_WHITE;
+    public static int COLOR_BOTTOM = Color_YELLOW;
     public static int COLOR_LEFT = Color_ORANGE;
     public static int COLOR_RIGHT = Color_RED;
-    public static int COLOR_FRONT = Color.BLUE;
+    public static int COLOR_FRONT = Color_BLUE;
     public static int COLOR_BACK = Color_GREEN;
 
 
@@ -56,10 +58,10 @@ public class Cube {
      * OpenGl won't draw things close to the frustrum border, hence we add padding and use
      * 1.2f instead of 2.0f as the total size
      * */
-    private static final float TOTAL_SIZE = 2.0f;
+    private static final float TOTAL_SIZE = 8.0f;
     private static final float PADDING = 0.8f;
 
-    private static final float GAP = 0.01f;
+    private static final float GAP = 0.1f;
 
     private int mSizeX;
     private int mSizeY;
@@ -80,9 +82,14 @@ public class Cube {
      * axis and animate pieces from the selected layer of the appropriate set during rotation.
      * */
     private ArrayList<Piece> mAllPieces;
-    ArrayList<ArrayList<Piece>> mXaxisFaceList;
-    ArrayList<ArrayList<Piece>> mYaxisFaceList;
-    ArrayList<ArrayList<Piece>> mZaxisFaceList;
+    ArrayList<ArrayList<Piece>> mXaxisLayers;
+    ArrayList<ArrayList<Piece>> mYaxisLayers;
+    ArrayList<ArrayList<Piece>> mZaxisLayers;
+
+    // Clockwise list of faces along each axes
+    public static final int[] orderedFacesXaxis = {FACE_FRONT, FACE_TOP, FACE_BACK, FACE_BOTTOM};
+    public static final int[] orderedFacesYaxis = {FACE_FRONT, FACE_LEFT, FACE_BACK, FACE_RIGHT};
+    public static final int[] orderedFacesZaxis = {FACE_TOP, FACE_RIGHT, FACE_BOTTOM, FACE_LEFT};
 
     public Cube(int sizeX, int sizeY, int sizeZ) {
         mSizeX = sizeX;
@@ -401,9 +408,9 @@ public class Cube {
         mAllFaces[FACE_BOTTOM] = mBottomSquares;
         mAllPieces = new ArrayList<>();
 
-        mXaxisFaceList = new ArrayList<>(mSizeX);
-        mYaxisFaceList = new ArrayList<>(mSizeY);
-        mZaxisFaceList = new ArrayList<>(mSizeZ);
+        mXaxisLayers = new ArrayList<>(mSizeX);
+        mYaxisLayers = new ArrayList<>(mSizeY);
+        mZaxisLayers = new ArrayList<>(mSizeZ);
 
         ArrayList<Piece> frontFace = new ArrayList<>();
         ArrayList<Piece> rightFace = new ArrayList<>();
@@ -550,7 +557,7 @@ public class Cube {
             }
         }
 
-        mXaxisFaceList.add(leftFace);
+        mXaxisLayers.add(leftFace);
         for (int i = 1; i < mSizeX - 1; i++) {
             ArrayList<Piece> pieces = new ArrayList<>();
             for (int j = 0; j < mSizeZ - 1; j++) {
@@ -565,11 +572,11 @@ public class Cube {
             for (int j = 0; j < mSizeY - 1; j++) {
                 pieces.add(backFace.get(mSizeX * (mSizeY - 1 - j) + mSizeX - 1 - i));
             }
-            mXaxisFaceList.add(pieces);
+            mXaxisLayers.add(pieces);
         }
-        mXaxisFaceList.add(rightFace);
+        mXaxisLayers.add(rightFace);
 
-        mYaxisFaceList.add(bottomFace);
+        mYaxisLayers.add(bottomFace);
         for (int i = 1; i < mSizeY - 1; i++) {
             ArrayList<Piece> pieces = new ArrayList<>();
             for (int j = 0; j < mSizeX - 1; j++) {
@@ -584,11 +591,11 @@ public class Cube {
             for (int j = 0; j < mSizeZ - 1; j++) {
                 pieces.add(leftFace.get((mSizeY - 1 - i) * mSizeZ + j));
             }
-            mYaxisFaceList.add(pieces);
+            mYaxisLayers.add(pieces);
         }
-        mYaxisFaceList.add(topFace);
+        mYaxisLayers.add(topFace);
 
-        mZaxisFaceList.add(backFace);
+        mZaxisLayers.add(backFace);
         for (int i = 1; i < mSizeZ - 1; i++) {
             ArrayList<Piece> pieces = new ArrayList<>();
             for (int j = 0; j < mSizeX - 1; j++) {
@@ -603,9 +610,9 @@ public class Cube {
             for (int j = 0; j < mSizeY - 1; j++) {
                 pieces.add(leftFace.get((mSizeY - 1 - j) * mSizeZ + i));
             }
-            mZaxisFaceList.add(pieces);
+            mZaxisLayers.add(pieces);
         }
-        mZaxisFaceList.add(frontFace);
+        mZaxisLayers.add(frontFace);
         Log.w(tag, "total pieces: " + mAllPieces.size());
     }
 
@@ -1037,14 +1044,8 @@ public class Cube {
         createFaces();
         updateSquareFaces();
 
-        /**
-         * Rotate the coordinates of squares
-         * */
-        float[] rotmatrix = new float[16];
-        Matrix.setRotateM(rotmatrix, 0, angle, x, y, z);
-
         for (Square sq: mAllSquares) {
-            sq.rotateCoordinates(rotmatrix);
+            sq.rotateCoordinates(x, y, z, angle);
         }
     }
 
@@ -1142,5 +1143,10 @@ public class Cube {
             }
         }
     }
-}
 
+    public static int[] getOrderedFaces(Axis axis) {
+        if (axis == Axis.X_AXIS) return orderedFacesXaxis;
+        else if (axis == Axis.Y_AXIS) return orderedFacesYaxis;
+        return orderedFacesZaxis;
+    }
+}

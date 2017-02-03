@@ -1,6 +1,6 @@
 package com.amg.rubik.cube;
 
-import android.util.Log;
+import com.amg.rubik.Log;
 
 import java.util.ArrayList;
 

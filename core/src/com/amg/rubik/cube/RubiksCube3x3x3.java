@@ -1,11 +1,10 @@
 package com.amg.rubik.cube;
 
-import android.util.Log;
-
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.amg.rubik.Log;
 import com.amg.rubik.graphics.Direction;
 import com.amg.rubik.graphics.Axis;
 
@@ -81,7 +80,13 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
     protected void ut() {
         mState = CubeState.TESTING;
-        ut_final_steps();
+        ut_test();
+    }
+
+    private void ut_test() {
+        Algorithm algorithm = new Algorithm();
+        algorithm.addStep(Axis.Y_AXIS, Direction.CLOCKWISE, 0, SIZE);
+        setAlgo(algorithm);
     }
 
     private void ut_final_steps() {
@@ -245,7 +250,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         int[] colors = new int[]{topColor, sideColor};
         int row = 0, pos = -1;
         for (row = 0; row < SIZE; row++) {
-            pos = findPieceOnFace(mYaxisFaceList.get(row), colors);
+            pos = findPieceOnFace(mYaxisLayers.get(row), colors);
             if (pos >= 0) {
                 break;
             }
@@ -272,7 +277,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         Algorithm algo = new Algorithm();
         ArrayList<Rotation> middleRotations;
         Rotation rot = null;
-        Square topColoredSquare = getSquareByColor(mYaxisFaceList, OUTER, pos, mTopColor);
+        Square topColoredSquare = getSquareByColor(mYaxisLayers, OUTER, pos, mTopColor);
 
 
         if (pos == EDGE_TOP_FAR || pos == EDGE_TOP_NEAR) {
@@ -381,7 +386,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
     private void firstFaceEdge_fromMiddleLayer(int pos) {
         Log.d(tag, "Edge piece from middle layer");
-        Square topColorSquare = getSquareByColor(mYaxisFaceList, MIDDLE, pos, mTopColor);
+        Square topColorSquare = getSquareByColor(mYaxisLayers, MIDDLE, pos, mTopColor);
         int faceIndex = topColorSquare.getFace();
 
         ArrayList<Rotation> rotations = middleEdgeToTopEdge(pos, faceIndex);
@@ -472,7 +477,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
          * Look for any corners in the lower layer with white facing sideways (not bottom).
          * */
         for (int i = 0; i < corners.length; i++) {
-            Piece cornerPiece = mYaxisFaceList.get(INNER).get(corners[i]);
+            Piece cornerPiece = mYaxisLayers.get(INNER).get(corners[i]);
             Square topColoredSquare = cornerPiece.getSquare(mTopColor);
             if (topColoredSquare == null) continue;
             if (topColoredSquare.getFace() == FACE_BOTTOM) continue;
@@ -484,7 +489,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         // No whites in the lower layer. Bring up whites from bottom face
 
         for (int i = 0; i < corners.length; i++) {
-            Piece cornerPiece = mYaxisFaceList.get(INNER).get(corners[i]);
+            Piece cornerPiece = mYaxisLayers.get(INNER).get(corners[i]);
             Square topColoredSquare = cornerPiece.getSquare(mTopColor);
             if (topColoredSquare == null) continue;
             if (topColoredSquare.getFace() != FACE_BOTTOM) {
@@ -498,7 +503,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
         // Look for whites in top layer
         for (int i = 0; i < corners.length; i++) {
-            Piece cornerPiece = mYaxisFaceList.get(OUTER).get(corners[i]);
+            Piece cornerPiece = mYaxisLayers.get(OUTER).get(corners[i]);
             if (isCornerAligned(cornerPiece)) {
                 continue;
             }
@@ -545,7 +550,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
 
     private void firstFaceCornerFromTopLayer(int corner) {
         Algorithm algorithm = new Algorithm();
-        Piece piece = mYaxisFaceList.get(OUTER).get(corner);
+        Piece piece = mYaxisLayers.get(OUTER).get(corner);
         if (piece.getType() != Piece.PieceType.CORNER) throw new AssertionError();
         final int topColor = mTopSquares.get(CENTER).getColor();
         int topColorFace = -1;
@@ -597,7 +602,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
     private void firstFaceCornerWhiteOnBottom(int corner) {
         Algorithm algorithm = new Algorithm();
         Direction direction;
-        Piece piece = mYaxisFaceList.get(INNER).get(corner);
+        Piece piece = mYaxisLayers.get(INNER).get(corner);
         if (piece.getType() != Piece.PieceType.CORNER) throw new AssertionError();
         final int topColor = mTopSquares.get(CENTER).getColor();
         int sideColor1 = -1;
@@ -660,7 +665,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
     }
 
     private void firstFaceCorner(int corner) {
-        Piece piece = mYaxisFaceList.get(INNER).get(corner);
+        Piece piece = mYaxisLayers.get(INNER).get(corner);
         if (piece.getType() != Piece.PieceType.CORNER) throw new AssertionError();
         int topColor = mTopSquares.get(CENTER).getColor();
         int topColorFace = -1;
@@ -822,7 +827,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
                 LAST_ROW_MIDDLE, MID_ROW_RIGHT, FIRST_ROW_CENTER, MID_ROW_LEFT
         };
         for (int i = 0; i < edges.length; i++) {
-            Piece piece = mYaxisFaceList.get(OUTER).get(edges[i]);
+            Piece piece = mYaxisLayers.get(OUTER).get(edges[i]);
             if (piece.hasColor(mBottomColor)) continue;
             Log.d(tag, "Found Edge " + piece + " at " + edges[i]);
             fixMiddleLayer(edges[i]);
@@ -836,7 +841,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         };
 
         for (int i = 0; i < edges.length; i++) {
-            Piece piece = mYaxisFaceList.get(MIDDLE).get(edges[i]);
+            Piece piece = mYaxisLayers.get(MIDDLE).get(edges[i]);
             if (isEdgeAligned(piece)) {
                 continue;
             }
@@ -891,7 +896,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
     }
 
     private void fixMiddleLayer(int edge) {
-        Piece piece = mYaxisFaceList.get(OUTER).get(edge);
+        Piece piece = mYaxisLayers.get(OUTER).get(edge);
         Algorithm alignPiece = null;
         Direction direction;
         Algorithm algo = new Algorithm();
@@ -1125,7 +1130,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         };
         String dbg = "offsets:";
         for (int i = 0; i < edges.length; i++) {
-            Piece piece = mYaxisFaceList.get(OUTER).get(edges[i]);
+            Piece piece = mYaxisLayers.get(OUTER).get(edges[i]);
             Square sideSquare = null;
             for (Square sq: piece.mSquares) {
                 if (sq.getFace() == FACE_TOP) {
@@ -1258,7 +1263,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
         int positionedCorners = 0;
         int firstPositionedCorner = -1;
         for (int i = 0; i < corners.length; i++) {
-            Piece piece = mYaxisFaceList.get(OUTER).get(corners[i]);
+            Piece piece = mYaxisLayers.get(OUTER).get(corners[i]);
             if (isCornerPositioned(piece)) {
                 positionedCorners++;
                 if (firstPositionedCorner == -1) {
@@ -1352,7 +1357,7 @@ public class RubiksCube3x3x3 extends RubiksCube {
                 LAST_ROW_RIGHT, FIRST_ROW_RIGHT, FIRST_ROW_LEFT, LAST_ROW_LEFT
         };
         for (int i = 0; i < corners.length; i++) {
-            Piece piece = mYaxisFaceList.get(OUTER).get(corners[i]);
+            Piece piece = mYaxisLayers.get(OUTER).get(corners[i]);
             if (!isCornerAligned(piece)) {
                 Log.w(tag, piece + " is not aligned");
                 return false;

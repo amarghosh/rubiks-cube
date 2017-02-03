@@ -1,7 +1,6 @@
 package com.amg.rubik.cube;
 
-import android.util.Log;
-
+import com.amg.rubik.Log;
 import com.amg.rubik.graphics.Axis;
 import com.amg.rubik.graphics.Direction;
 
