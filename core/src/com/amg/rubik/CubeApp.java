@@ -67,24 +67,16 @@ public class CubeApp extends ApplicationAdapter {
     }
 
     class Renderer implements CubeRenderer {
-        float angle;
-        float x, y, z;
-        Renderer() {
-            angle = 0;
-            x = y= z = 0;
-        }
+
         @Override
         public void drawSquare(Square square) {
-            square.getModelInstance().transform.setToRotation(x, y, z, angle);
-            batch.render(square.getModelInstance(), env);
+            drawSquare(square, 0, 0, 0, 0);
         }
 
         @Override
-        public void setRotation(float angle, float x, float y, float z) {
-            this.angle = angle;
-            this.x = x;
-            this.y = y;
-            this.z = z;
+        public void drawSquare(Square square, float angle, float x, float y, float z) {
+            square.getModelInstance().transform.setToRotation(x, y, z, angle);
+            batch.render(square.getModelInstance(), env);
         }
     }
 }
