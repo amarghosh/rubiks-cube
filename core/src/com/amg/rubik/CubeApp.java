@@ -59,6 +59,8 @@ public class CubeApp extends ApplicationAdapter {
         batch.begin(camera);
         cube.draw();
         batch.end();
+
+        cube.onNextFrame();
     }
 
     @Override

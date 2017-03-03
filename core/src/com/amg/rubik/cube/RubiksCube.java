@@ -415,7 +415,16 @@ public class RubiksCube extends Cube {
                     mRotation.toString(), getSizeX(), getSizeY(), getSizeY()));
             throw e;
         }
+    }
 
+    public void onNextFrame()
+    {
+        if (rotateMode == RotateMode.NONE ||
+                mRotation.getStatus() == false) {
+            return;
+        }
+
+        int axisSize = getAxisSize(mRotation.axis);
         boolean symmetric = isSymmetricAroundAxis(mRotation.axis);
         float max_angle = symmetric ? 90f : 180f;
         if (mRotation.faceCount == axisSize) {
