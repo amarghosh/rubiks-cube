@@ -1,7 +1,6 @@
 package com.amg.rubik;
 
 import com.amg.rubik.cube.RubiksCube;
-import com.amg.rubik.cube.RubiksCube3x3x3;
 import com.amg.rubik.cube.Square;
 import com.amg.rubik.graphics.CubeRenderer;
 import com.badlogic.gdx.Application;
@@ -44,9 +43,8 @@ public class CubeApp extends ApplicationAdapter {
         camera.update();
         cameraController = new CameraInputController(camera);
         cube = new RubiksCube(3);
-        cube.setSpeed(0);
+        cube.setSpeed(1);
         cube.setRenderer(new Renderer());
-        cube.randomize(4);
         Gdx.input.setInputProcessor(
                 new InputMultiplexer(new InputHandler(cube, camera), cameraController));
     }
