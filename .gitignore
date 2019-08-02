@@ -1,6 +1,9 @@
 # Built application files
 *.apk
 *.ap_
+*.iml
+.gradle
+/local.properties
 
 # Files for the Dalvik VM
 *.dex
@@ -27,7 +30,11 @@ proguard/
 *.log
 
 /.idea/workspace.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/gradle.xml
 /.idea/libraries
+/.idea/caches
 .DS_Store
 /build
 /captures

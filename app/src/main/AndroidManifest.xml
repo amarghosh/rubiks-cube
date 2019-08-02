@@ -2,10 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.amg.rubik">
 
-    <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="2121" />
-
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
