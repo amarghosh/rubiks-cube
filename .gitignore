@@ -1,4 +1,5 @@
 # Built application files
+*.iml
 *.apk
 *.ap_
 
@@ -27,7 +28,11 @@ proguard/
 *.log
 
 /.idea/workspace.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/gradle.xml
 /.idea/libraries
+/.idea/caches
 .DS_Store
 /build
 /captures
